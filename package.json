@@ -1,0 +1,23 @@
+{
+  "name": "loopback-boot",
+  "version": "1.0.0",
+  "description": "Convention-based bootstrapper for LoopBack applications",
+  "keywords": [
+    "StrongLoop",
+    "LoopBack",
+    "Configuration",
+    "Bootstrap"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/loobpack/loopback-boot"
+  },
+  "main": "index.js",
+  "scripts": {
+    "pretest": "jshint ."
+  },
+  "license": {
+    "name": "Dual MIT/StrongLoop",
+    "url": "https://github.com/strongloop/loopback-boot/blob/master/LICENSE"
+  }
+}

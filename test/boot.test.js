@@ -1,12 +1,30 @@
 var boot = require('../');
+var fs = require('fs-extra');
+var extend = require('util')._extend;
 var path = require('path');
 var loopback = require('loopback');
 var assert = require('assert');
 var expect = require('must');
+var sandbox = require('./helpers/sandbox');
 
 var SIMPLE_APP = path.join(__dirname, 'fixtures', 'simple-app');
 
+var appDir;
+
 describe('bootLoopBackApp', function() {
+  beforeEach(sandbox.reset);
+
+  beforeEach(function makeUniqueAppDir(done) {
+    // Node's module loader has a very aggressive caching, therefore
+    // we can't reuse the same path for multiple tests
+    // The code here is used to generate a random string
+    require('crypto').randomBytes(5, function(ex, buf) {
+      var randomStr = buf.toString('hex');
+      appDir = sandbox.resolve(randomStr);
+      done();
+    });
+  });
+
   describe('from options', function () {
     var app;
     beforeEach(function () {
@@ -186,6 +204,102 @@ describe('bootLoopBackApp', function() {
       assert.isFunc(app.models.Foo, 'find');
       assert.isFunc(app.models.Foo, 'create');
     });
+
+    it('merges datasource configs from multiple files', function() {
+      givenAppInSandbox();
+
+      writeAppConfigFile('datasources.local.json', {
+        db: { local: 'applied' }
+      });
+
+      var env = process.env.NODE_ENV || 'development';
+      writeAppConfigFile('datasources.' + env + '.json', {
+        db: { env: 'applied' }
+      });
+
+      var app = loopback();
+      boot(app, appDir);
+
+      var db = app.datasources.db.settings;
+      expect(db).to.have.property('local', 'applied');
+      expect(db).to.have.property('env', 'applied');
+
+      var expectedLoadOrder = ['local', 'env'];
+      var actualLoadOrder = Object.keys(db).filter(function(k) {
+        return expectedLoadOrder.indexOf(k) !== -1;
+      });
+
+      expect(actualLoadOrder, 'load order').to.eql(expectedLoadOrder);
+    });
+
+    it('supports .js for custom datasource config files', function() {
+      givenAppInSandbox();
+      fs.writeFileSync(
+        path.resolve(appDir, 'datasources.local.js'),
+        'module.exports = { db: { fromJs: true } };');
+
+      var app = loopback();
+      boot(app, appDir);
+
+      var db = app.datasources.db.settings;
+      expect(db).to.have.property('fromJs', true);
+    });
+
+    it('refuses to merge Object properties', function() {
+      givenAppInSandbox();
+      writeAppConfigFile('datasources.local.json', {
+        db: { nested: { key: 'value' } }
+      });
+
+      var app = loopback();
+      expect(function() { boot(app, appDir); })
+        .to.throw(/`nested` is not a value type/);
+    });
+
+    it('refuses to merge Array properties', function() {
+      givenAppInSandbox();
+      writeAppConfigFile('datasources.local.json', {
+        db: { nested: ['value'] }
+      });
+
+      var app = loopback();
+      expect(function() { boot(app, appDir); })
+        .to.throw(/`nested` is not a value type/);
+    });
+
+    it('merges app configs from multiple files', function() {
+      givenAppInSandbox();
+
+      writeAppConfigFile('app.local.json', { cfgLocal: 'applied' });
+
+      var env = process.env.NODE_ENV || 'development';
+      writeAppConfigFile('app.' + env + '.json', { cfgEnv: 'applied' });
+
+      var app = loopback();
+      boot(app, appDir);
+
+      expect(app.settings).to.have.property('cfgLocal', 'applied');
+      expect(app.settings).to.have.property('cfgEnv', 'applied');
+
+      var expectedLoadOrder = ['cfgLocal', 'cfgEnv'];
+      var actualLoadOrder = Object.keys(app.settings).filter(function(k) {
+        return expectedLoadOrder.indexOf(k) !== -1;
+      });
+
+      expect(actualLoadOrder, 'load order').to.eql(expectedLoadOrder);
+    });
+
+    it('supports .js for custom app config files', function() {
+      givenAppInSandbox();
+      fs.writeFileSync(
+        path.resolve(appDir, 'app.local.js'),
+        'module.exports = { fromJs: true };');
+
+      var app = loopback();
+      boot(app, appDir);
+
+      expect(app.settings).to.have.property('fromJs', true);
+    });
   });
 });
 
@@ -206,3 +320,27 @@ assert.isFunc = function (obj, name) {
     ' on object that does not exist');
   assert(typeof obj[name] === 'function', name + ' is not a function');
 };
+
+function givenAppInSandbox(appConfig, dataSources, models) {
+  fs.mkdirsSync(appDir);
+
+  appConfig = extend({
+  }, appConfig);
+  writeAppConfigFile('app.json', appConfig);
+
+  dataSources = extend({
+    db: {
+      connector: 'memory',
+      defaultForType: 'db'
+    }
+  }, dataSources);
+  writeAppConfigFile('datasources.json', dataSources);
+
+  models = extend({
+  }, models);
+  writeAppConfigFile('models.json', models);
+}
+
+function writeAppConfigFile(name, json) {
+  fs.writeJsonFileSync(path.resolve(appDir, name), json);
+}

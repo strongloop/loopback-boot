@@ -2,6 +2,7 @@ var assert = require('assert');
 var fs = require('fs');
 var path = require('path');
 var _ = require('underscore');
+var ConfigLoader = require('./lib/config-loader');
 
 /**
  * Initialize an application from an options object or
@@ -103,7 +104,7 @@ var _ = require('underscore');
  * @header boot(app, [options])
  */
 
-module.exports = function bootLoopBackApp(app, options) {
+exports = module.exports = function bootLoopBackApp(app, options) {
   /*jshint camelcase:false */
   options = options || {};
 
@@ -111,19 +112,12 @@ module.exports = function bootLoopBackApp(app, options) {
     options = { appRootDir: options };
   }
   var appRootDir = options.appRootDir = options.appRootDir || process.cwd();
-  var appConfig = options.app;
-  var modelConfig = options.models;
-  var dataSourceConfig = options.dataSources;
+  var env = app.get('env');
 
-  if(!appConfig) {
-    appConfig = tryReadConfig(appRootDir, 'app') || {};
-  }
-  if(!modelConfig) {
-    modelConfig = tryReadConfig(appRootDir, 'models') || {};
-  }
-  if(!dataSourceConfig) {
-    dataSourceConfig = tryReadConfig(appRootDir, 'datasources') || {};
-  }
+  var appConfig = options.app || ConfigLoader.loadAppConfig(appRootDir, env);
+  var modelConfig = options.models || ConfigLoader.loadModels(appRootDir, env);
+  var dataSourceConfig = options.dataSources ||
+    ConfigLoader.loadDataSources(appRootDir, env);
 
   assertIsValidConfig('app', appConfig);
   assertIsValidConfig('model', modelConfig);
@@ -298,12 +292,4 @@ function tryReadDir() {
   }
 }
 
-function tryReadConfig(cwd, fileName) {
-  try {
-    return require(path.join(cwd, fileName + '.json'));
-  } catch(e) {
-    if(e.code !== 'MODULE_NOT_FOUND') {
-      throw e;
-    }
-  }
-}
+exports.ConfigLoader = ConfigLoader;

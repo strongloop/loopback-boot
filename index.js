@@ -4,6 +4,7 @@ var path = require('path');
 var _ = require('underscore');
 var loopback = require('loopback');
 var ConfigLoader = require('./lib/config-loader');
+var debug = require('debug')('loopback-boot');
 
 /**
  * Initialize an application from an options object or
@@ -287,6 +288,10 @@ function tryRequire(modulePath) {
   try {
     return require.apply(this, arguments);
   } catch(e) {
+    if(e.code === 'MODULE_NOT_FOUND') {
+      debug('Warning: cannot require %s - module not found.', modulePath);
+      return undefined;
+    }
     console.error('failed to require "%s"', modulePath);
     throw e;
   }

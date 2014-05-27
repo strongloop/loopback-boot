@@ -379,6 +379,17 @@ describe('bootLoopBackApp', function() {
       boot(app, appDir);
       expect(global.fnCalled, 'exported fn was called').to.be.undefined();
     });
+
+    it('supports models/ subdirectires that are not require()able', function() {
+      givenAppInSandbox();
+      writeAppFile('models/test/model.test.js',
+        'throw new Error("should not been called");');
+
+      var app = loopback();
+      boot(app, appDir);
+
+      // no assert, the test passed when we got here
+    });
   });
 });
 

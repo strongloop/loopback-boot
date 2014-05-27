@@ -300,6 +300,48 @@ describe('bootLoopBackApp', function() {
 
       expect(app.settings).to.have.property('fromJs', true);
     });
+
+    it('supports `dsRootDir` option', function() {
+      givenAppInSandbox();
+
+      var customDir = path.resolve(appDir, 'custom');
+      fs.mkdirsSync(customDir);
+      fs.renameSync(
+        path.resolve(appDir, 'datasources.json'),
+        path.resolve(customDir, 'datasources.json'));
+
+      var app = loopback();
+
+      // workaround for https://github.com/strongloop/loopback/pull/283
+      app.datasources = app.dataSources = {};
+
+      boot(app, {
+        appRootDir: appDir,
+        dsRootDir: path.resolve(appDir, 'custom')
+      });
+
+      expect(app.datasources).to.have.property('db');
+    });
+
+    it('supports `modelsRootDir` option', function() {
+      givenAppInSandbox();
+
+      writeAppConfigFile('custom/models.json', {
+        foo: { dataSource: 'db' }
+      });
+
+      global.testData = {};
+      writeAppFile('custom/models/foo.js', 'global.testData.foo = "loaded";');
+
+      var app = loopback();
+      boot(app, {
+        appRootDir: appDir,
+        modelsRootDir: path.resolve(appDir, 'custom')
+      });
+
+      expect(app.models).to.have.property('foo');
+      expect(global.testData).to.have.property('foo', 'loaded');
+    });
   });
 });
 
@@ -342,5 +384,11 @@ function givenAppInSandbox(appConfig, dataSources, models) {
 }
 
 function writeAppConfigFile(name, json) {
-  fs.writeJsonFileSync(path.resolve(appDir, name), json);
+  writeAppFile(name, JSON.stringify(json, null, 2));
+}
+
+function writeAppFile(name, content) {
+  var filePath = path.resolve(appDir, name);
+  fs.mkdirsSync(path.dirname(filePath));
+  fs.writeFileSync(filePath, content, 'utf-8');
 }

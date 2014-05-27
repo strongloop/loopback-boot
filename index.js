@@ -99,6 +99,10 @@ var ConfigLoader = require('./lib/config-loader');
  * @property {Object} models Object containing `Model` definitions (optional).
  * @property {Object} dataSources Object containing `DataSource`
  * definitions (optional).
+ * @property {String} modelsRootDir Directory to use when loading `models.json`
+ * and `models/*.js`. Defaults to `appRootDir`.
+ * @property {String} datasourcesRootDir Directory to use when loading
+ * `datasources.json`. Defaults to `appRootDir`.
  * @end
  *
  * @header boot(app, [options])
@@ -115,9 +119,14 @@ exports = module.exports = function bootLoopBackApp(app, options) {
   var env = app.get('env');
 
   var appConfig = options.app || ConfigLoader.loadAppConfig(appRootDir, env);
-  var modelConfig = options.models || ConfigLoader.loadModels(appRootDir, env);
+
+  var modelsRootDir = options.modelsRootDir || appRootDir;
+  var modelConfig = options.models ||
+    ConfigLoader.loadModels(modelsRootDir, env);
+
+  var dsRootDir = options.dsRootDir || appRootDir;
   var dataSourceConfig = options.dataSources ||
-    ConfigLoader.loadDataSources(appRootDir, env);
+    ConfigLoader.loadDataSources(dsRootDir, env);
 
   assertIsValidConfig('app', appConfig);
   assertIsValidConfig('model', modelConfig);
@@ -204,7 +213,7 @@ exports = module.exports = function bootLoopBackApp(app, options) {
   }
 
   // require directories
-  requireDir(path.join(appRootDir, 'models'));
+  requireDir(path.join(modelsRootDir, 'models'));
   requireDir(path.join(appRootDir, 'boot'));
 };
 

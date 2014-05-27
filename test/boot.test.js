@@ -342,6 +342,43 @@ describe('bootLoopBackApp', function() {
       expect(app.models).to.have.property('foo');
       expect(global.testData).to.have.property('foo', 'loaded');
     });
+
+    it('calls function exported by models/model.js', function() {
+      givenAppInSandbox();
+      writeAppFile('models/model.js',
+        'module.exports = function(app) { app.fnCalled = true; };');
+
+      var app = loopback();
+      delete app.fnCalled;
+      boot(app, appDir);
+      expect(app.fnCalled, 'exported fn was called').to.be.true();
+    });
+
+    it('calls function exported by boot/init.js', function() {
+      givenAppInSandbox();
+      writeAppFile('boot/init.js',
+        'module.exports = function(app) { app.fnCalled = true; };');
+
+      var app = loopback();
+      delete app.fnCalled;
+      boot(app, appDir);
+      expect(app.fnCalled, 'exported fn was called').to.be.true();
+    });
+
+    it('does not call Model ctor exported by models/model.json', function() {
+      givenAppInSandbox();
+      writeAppFile('models/model.js',
+        'var loopback = require("loopback");\n' +
+          'module.exports = loopback.Model.extend("foo");\n' +
+          'module.exports.prototype._initProperties = function() {\n' +
+          '  global.fnCalled = true;\n' +
+          '};');
+
+      var app = loopback();
+      delete global.fnCalled;
+      boot(app, appDir);
+      expect(global.fnCalled, 'exported fn was called').to.be.undefined();
+    });
   });
 });
 

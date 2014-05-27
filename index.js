@@ -2,6 +2,7 @@ var assert = require('assert');
 var fs = require('fs');
 var path = require('path');
 var _ = require('underscore');
+var loopback = require('loopback');
 var ConfigLoader = require('./lib/config-loader');
 
 /**
@@ -195,7 +196,7 @@ exports = module.exports = function bootLoopBackApp(app, options) {
 
   // try to attach models to dataSources by type
   try {
-    require('loopback').autoAttach();
+    loopback.autoAttach();
   } catch(e) {
     if(e.name === 'AssertionError') {
       console.warn(e);
@@ -213,8 +214,8 @@ exports = module.exports = function bootLoopBackApp(app, options) {
   }
 
   // require directories
-  requireDir(path.join(modelsRootDir, 'models'));
-  requireDir(path.join(appRootDir, 'boot'));
+  requireDir(path.join(modelsRootDir, 'models'), app);
+  requireDir(path.join(appRootDir, 'boot'), app);
 };
 
 function assertIsValidConfig(name, config) {
@@ -232,7 +233,7 @@ function forEachKeyedObject(obj, fn) {
   });
 }
 
-function requireDir(dir) {
+function requireDir(dir, app) {
   assert(dir, 'cannot require directory contents without directory name');
 
   var requires = {};
@@ -271,9 +272,12 @@ function requireDir(dir) {
       return;
     }
 
-    var basename = path.basename(filename, ext);
+    var exports = tryRequire(filepath);
+    if (isFunctionNotModelCtor(exports))
+      exports(app);
 
-    requires[basename] = tryRequire(filepath);
+    var basename = path.basename(filename, ext);
+    requires[basename] = exports;
   });
 
   return requires;
@@ -294,6 +298,11 @@ function tryReadDir() {
   } catch(e) {
     return [];
   }
+}
+
+function isFunctionNotModelCtor(fn) {
+ return typeof fn === 'function' &&
+   !(fn.prototype instanceof loopback.Model);
 }
 
 exports.ConfigLoader = ConfigLoader;

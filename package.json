@@ -14,10 +14,25 @@
   },
   "main": "index.js",
   "scripts": {
-    "pretest": "jshint ."
+    "pretest": "jshint .",
+    "test": "mocha"
   },
   "license": {
     "name": "Dual MIT/StrongLoop",
     "url": "https://github.com/strongloop/loopback-boot/blob/master/LICENSE"
+  },
+  "dependencies": {
+    "underscore": "^1.6.0",
+    "debug": "^0.8.1"
+  },
+  "devDependencies": {
+    "loopback": "^1.5.0",
+    "mocha": "^1.19.0",
+    "must": "^0.11.0",
+    "supertest": "^0.13.0",
+    "fs-extra": "^0.9.1"
+  },
+  "peerDependencies": {
+    "loopback": "1.x"
   }
 }

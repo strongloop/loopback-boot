@@ -33,6 +33,6 @@
     "fs-extra": "^0.9.1"
   },
   "peerDependencies": {
-    "loopback": "1.x"
+    "loopback": "1.x || 2.x"
   }
 }

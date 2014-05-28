@@ -4,7 +4,7 @@ var path = require('path');
 var _ = require('underscore');
 var loopback = require('loopback');
 var ConfigLoader = require('./lib/config-loader');
-var debug = require('debug')('loopback-boot');
+var debug = require('debug')('loopback:boot');
 
 /**
  * Initialize an application from an options object or

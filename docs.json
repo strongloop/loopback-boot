@@ -1,0 +1,10 @@
+{
+  "content": [
+    {
+      "title": "Bootstrap API",
+      "depth": 2
+    },
+    "index.js",
+    "docs/configuration.md"
+  ]
+}

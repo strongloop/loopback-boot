@@ -5,6 +5,9 @@
       "depth": 2
     },
     "index.js",
-    "docs/configuration.md"
+    "lib/compiler.js",
+    "lib/executor.js",
+    "docs/configuration.md",
+    "docs/instructions.md"
   ]
 }

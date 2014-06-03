@@ -1,6 +1,7 @@
 var ConfigLoader = require('./lib/config-loader');
 var compile = require('./lib/compiler');
 var execute = require('./lib/executor');
+var addInstructionsToBrowserify = require('./lib/bundler');
 
 /**
  * Initialize an application from an options object or
@@ -67,6 +68,20 @@ exports = module.exports = function bootLoopBackApp(app, options) {
   execute(app, instructions);
 };
 
+/**
+ * Compile boot instructions and add them to a browserify bundler.
+ * @param {Object|String} options as described in `bootLoopBackApp` above.
+ * @param {Object} bundler A browserify bundler created by `browserify()`.
+ *
+ * @header boot.compileToBrowserify(options, bundler)
+ */
+exports.compileToBrowserify = function(options, bundler) {
+  addInstructionsToBrowserify(compile(options), bundler);
+};
+
+//-- undocumented low-level API --//
+
 exports.ConfigLoader = ConfigLoader;
 exports.compile = compile;
 exports.execute = execute;
+exports.addInstructionsToBrowserify = addInstructionsToBrowserify;

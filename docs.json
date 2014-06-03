@@ -1,0 +1,13 @@
+{
+  "content": [
+    {
+      "title": "Bootstrap API",
+      "depth": 2
+    },
+    "index.js",
+    "lib/compiler.js",
+    "lib/executor.js",
+    "docs/configuration.md",
+    "docs/instructions.md"
+  ]
+}

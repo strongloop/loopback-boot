@@ -1,10 +1,6 @@
-var assert = require('assert');
-var fs = require('fs');
-var path = require('path');
-var _ = require('underscore');
-var loopback = require('loopback');
 var ConfigLoader = require('./lib/config-loader');
-var debug = require('debug')('loopback:boot');
+var compile = require('./lib/compiler');
+var execute = require('./lib/executor');
 
 /**
  * Initialize an application from an options object or
@@ -42,56 +38,6 @@ var debug = require('debug')('loopback:boot');
  *
  * Throws an error if the config object is not valid or if boot fails.
  *
- * <a name="model-definition"></a>
- * **Model Definitions**
- *
- * The following is example JSON for two `Model` definitions:
- * "dealership" and "location".
- *
- * ```js
- * {
- *   "dealership": {
- *     // a reference, by name, to a dataSource definition
- *     "dataSource": "my-db",
- *     // the options passed to Model.extend(name, properties, options)
- *     "options": {
- *       "relations": {
- *         "cars": {
- *           "type": "hasMany",
- *           "model": "Car",
- *           "foreignKey": "dealerId"
- *         }
- *       }
- *     },
- *     // the properties passed to Model.extend(name, properties, options)
- *     "properties": {
- *       "id": {"id": true},
- *       "name": "String",
- *       "zip": "Number",
- *       "address": "String"
- *     }
- *   },
- *   "car": {
- *     "dataSource": "my-db"
- *     "properties": {
- *       "id": {
- *         "type": "String",
- *         "required": true,
- *         "id": true
- *       },
- *       "make": {
- *         "type": "String",
- *         "required": true
- *       },
- *       "model": {
- *         "type": "String",
- *         "required": true
- *       }
- *     }
- *   }
- * }
- * ```
- *
  * @param app LoopBack application created by `loopback()`.
  * @options {String|Object} options Boot options; If String, this is
  * the application root directory; if object, has below properties.
@@ -105,209 +51,22 @@ var debug = require('debug')('loopback:boot');
  * and `models/*.js`. Defaults to `appRootDir`.
  * @property {String} datasourcesRootDir Directory to use when loading
  * `datasources.json`. Defaults to `appRootDir`.
+ * @property {String} env Environment type, defaults to `process.env.NODE_ENV`
+ * or `development`. Common values are `development`, `staging` and
+ * `production`; however the applications are free to use any names.
  * @end
  *
- * @header boot(app, [options])
+ * @header bootLoopBackApp(app, [options])
  */
 
 exports = module.exports = function bootLoopBackApp(app, options) {
-  /*jshint camelcase:false */
-  options = options || {};
+  // backwards compatibility with loopback's app.boot
+  options.env = options.env || app.get('env');
 
-  if(typeof options === 'string') {
-    options = { appRootDir: options };
-  }
-  var appRootDir = options.appRootDir = options.appRootDir || process.cwd();
-  var env = app.get('env');
-
-  var appConfig = options.app || ConfigLoader.loadAppConfig(appRootDir, env);
-
-  var modelsRootDir = options.modelsRootDir || appRootDir;
-  var modelConfig = options.models ||
-    ConfigLoader.loadModels(modelsRootDir, env);
-
-  var dsRootDir = options.dsRootDir || appRootDir;
-  var dataSourceConfig = options.dataSources ||
-    ConfigLoader.loadDataSources(dsRootDir, env);
-
-  assertIsValidConfig('app', appConfig);
-  assertIsValidConfig('model', modelConfig);
-  assertIsValidConfig('data source', dataSourceConfig);
-
-  appConfig.host =
-    process.env.npm_config_host ||
-    process.env.OPENSHIFT_SLS_IP ||
-    process.env.OPENSHIFT_NODEJS_IP ||
-    process.env.HOST ||
-    appConfig.host ||
-    process.env.npm_package_config_host ||
-    app.get('host');
-
-  appConfig.port = _.find([
-    process.env.npm_config_port,
-    process.env.OPENSHIFT_SLS_PORT,
-    process.env.OPENSHIFT_NODEJS_PORT,
-    process.env.PORT,
-    appConfig.port,
-    process.env.npm_package_config_port,
-    app.get('port'),
-    3000
-  ], _.isFinite);
-
-  appConfig.restApiRoot =
-    appConfig.restApiRoot ||
-    app.get('restApiRoot') ||
-    '/api';
-
-  if(appConfig.host !== undefined) {
-    assert(typeof appConfig.host === 'string', 'app.host must be a string');
-    app.set('host', appConfig.host);
-  }
-
-  if(appConfig.port !== undefined) {
-    var portType = typeof appConfig.port;
-    assert(portType === 'string' || portType === 'number',
-      'app.port must be a string or number');
-    app.set('port', appConfig.port);
-  }
-
-  assert(appConfig.restApiRoot !== undefined, 'app.restBasePath is required');
-  assert(typeof appConfig.restApiRoot === 'string',
-    'app.restBasePath must be a string');
-  assert(/^\//.test(appConfig.restApiRoot),
-    'app.restBasePath must start with "/"');
-  app.set('restApiRoot', appConfig.restBasePath);
-
-  for(var configKey in appConfig) {
-    var cur = app.get(configKey);
-    if(cur === undefined || cur === null) {
-      app.set(configKey, appConfig[configKey]);
-    }
-  }
-
-  // instantiate data sources
-  forEachKeyedObject(dataSourceConfig, function(key, obj) {
-    app.dataSource(key, obj);
-  });
-
-  // instantiate models
-  forEachKeyedObject(modelConfig, function(key, obj) {
-    app.model(key, obj);
-  });
-
-  // try to attach models to dataSources by type
-  try {
-    loopback.autoAttach();
-  } catch(e) {
-    if(e.name === 'AssertionError') {
-      console.warn(e);
-    } else {
-      throw e;
-    }
-  }
-
-  // disable token requirement for swagger, if available
-  var swagger = app.remotes().exports.swagger;
-  var requireTokenForSwagger = appConfig.swagger &&
-    appConfig.swagger.requireToken;
-  if(swagger) {
-    swagger.requireToken = requireTokenForSwagger || false;
-  }
-
-  // require directories
-  requireDir(path.join(modelsRootDir, 'models'), app);
-  requireDir(path.join(appRootDir, 'boot'), app);
+  var instructions = compile(options);
+  execute(app, instructions);
 };
 
-function assertIsValidConfig(name, config) {
-  if(config) {
-    assert(typeof config === 'object',
-        name + ' config must be a valid JSON object');
-  }
-}
-
-function forEachKeyedObject(obj, fn) {
-  if(typeof obj !== 'object') return;
-
-  Object.keys(obj).forEach(function(key) {
-    fn(key, obj[key]);
-  });
-}
-
-function requireDir(dir, app) {
-  assert(dir, 'cannot require directory contents without directory name');
-
-  var requires = {};
-
-  // require all javascript files (except for those prefixed with _)
-  // and all directories
-
-  var files = tryReadDir(dir);
-
-  // sort files in lowercase alpha for linux
-  files.sort(function(a, b) {
-    a = a.toLowerCase();
-    b = b.toLowerCase();
-
-    if (a < b) {
-      return -1;
-    } else if (b < a) {
-      return 1;
-    } else {
-      return 0;
-    }
-  });
-
-  files.forEach(function(filename) {
-    // ignore index.js and files prefixed with underscore
-    if ((filename === 'index.js') || (filename[0] === '_')) {
-      return;
-    }
-
-    var filepath = path.resolve(path.join(dir, filename));
-    var ext = path.extname(filename);
-    var stats = fs.statSync(filepath);
-
-    // only require files supported by require.extensions (.txt .md etc.)
-    if (stats.isFile() && !(ext in require.extensions)) {
-      return;
-    }
-
-    var exports = tryRequire(filepath);
-    if (isFunctionNotModelCtor(exports))
-      exports(app);
-
-    var basename = path.basename(filename, ext);
-    requires[basename] = exports;
-  });
-
-  return requires;
-}
-
-function tryRequire(modulePath) {
-  try {
-    return require.apply(this, arguments);
-  } catch(e) {
-    if(e.code === 'MODULE_NOT_FOUND') {
-      debug('Warning: cannot require %s - module not found.', modulePath);
-      return undefined;
-    }
-    console.error('failed to require "%s"', modulePath);
-    throw e;
-  }
-}
-
-function tryReadDir() {
-  try {
-    return fs.readdirSync.apply(fs, arguments);
-  } catch(e) {
-    return [];
-  }
-}
-
-function isFunctionNotModelCtor(fn) {
- return typeof fn === 'function' &&
-   !(fn.prototype instanceof loopback.Model);
-}
-
 exports.ConfigLoader = ConfigLoader;
+exports.compile = compile;
+exports.execute = execute;

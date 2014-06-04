@@ -5,9 +5,8 @@
       "depth": 2
     },
     "index.js",
-    "lib/compiler.js",
-    "lib/executor.js",
+    "browser.js",
     "docs/configuration.md",
-    "docs/instructions.md"
+    "docs/browserify.md"
   ]
 }

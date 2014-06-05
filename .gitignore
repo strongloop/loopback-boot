@@ -13,3 +13,4 @@
 node_modules
 checkstyle.xml
 loopback-boot-*.tgz
+/test/sandbox/

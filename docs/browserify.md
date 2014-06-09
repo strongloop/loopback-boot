@@ -46,6 +46,7 @@ contained in the browser bundle:
 /*-- app.js --*/
 var loopback = require('loopback');
 var boot = require('loopback-boot');
+require('./models');
 
 var app = module.exports = loopback();
 boot(app);

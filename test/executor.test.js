@@ -8,6 +8,9 @@ var appdir = require('./helpers/appdir');
 
 var SIMPLE_APP = path.join(__dirname, 'fixtures', 'simple-app');
 
+// ensure simple-app's models are known by loopback
+require(path.join(SIMPLE_APP, '/models'));
+
 var app;
 
 
@@ -29,10 +32,7 @@ describe('executor', function() {
       baz: true
     },
     models: {
-      'foo-bar-bat-baz': {
-        options: {
-          plural: 'foo-bar-bat-bazzies'
-        },
+      'User': {
         dataSource: 'the-db'
       }
     },
@@ -47,16 +47,17 @@ describe('executor', function() {
   it('instantiates models', function() {
     boot.execute(app, dummyInstructions);
     assert(app.models);
-    assert(app.models.FooBarBatBaz);
-    assert(app.models.fooBarBatBaz);
-    assertValidDataSource(app.models.FooBarBatBaz.dataSource);
-    assert.isFunc(app.models.FooBarBatBaz, 'find');
-    assert.isFunc(app.models.FooBarBatBaz, 'create');
+    assert(app.models.User);
+    assert.equal(app.models.User, loopback.User,
+      'Boot should not have extended loopback.User model');
+    assertValidDataSource(app.models.User.dataSource);
+    assert.isFunc(app.models.User, 'find');
+    assert.isFunc(app.models.User, 'create');
   });
 
   it('attaches models to data sources', function() {
     boot.execute(app, dummyInstructions);
-    assert.equal(app.models.FooBarBatBaz.dataSource, app.dataSources.theDb);
+    assert.equal(app.models.User.dataSource, app.dataSources.theDb);
   });
 
   it('instantiates data sources', function() {
@@ -75,11 +76,6 @@ describe('executor', function() {
     it('should run `boot/*` files', function() {
       assert(process.loadedFooJS);
       delete process.loadedFooJS;
-    });
-
-    it('should run `models/*` files', function() {
-      assert(process.loadedBarJS);
-      delete process.loadedBarJS;
     });
   });
 
@@ -165,15 +161,6 @@ describe('executor', function() {
     });
   });
 
-  it('calls function exported by models/model.js', function() {
-    var file = appdir.writeFileSync('models/model.js',
-      'module.exports = function(app) { app.fnCalled = true; };');
-
-    delete app.fnCalled;
-    boot.execute(app, someInstructions({ files: { models: [ file ] } }));
-    expect(app.fnCalled, 'exported fn was called').to.be.true();
-  });
-
   it('calls function exported by boot/init.js', function() {
     var file = appdir.writeFileSync('boot/init.js',
       'module.exports = function(app) { app.fnCalled = true; };');
@@ -181,19 +168,6 @@ describe('executor', function() {
     delete app.fnCalled;
     boot.execute(app, someInstructions({ files: { boot: [ file ] } }));
     expect(app.fnCalled, 'exported fn was called').to.be.true();
-  });
-
-  it('does not call Model ctor exported by models/model.json', function() {
-    var file = appdir.writeFileSync('models/model.js',
-        'var loopback = require("loopback");\n' +
-        'module.exports = loopback.Model.extend("foo");\n' +
-        'module.exports.prototype._initProperties = function() {\n' +
-        '  global.fnCalled = true;\n' +
-        '};');
-
-    delete global.fnCalled;
-    boot.execute(app, someInstructions({ files: { models: [ file ] } }));
-    expect(global.fnCalled, 'exported fn was called').to.be.undefined();
   });
 });
 
@@ -221,7 +195,6 @@ function someInstructions(values) {
     models: values.models || {},
     dataSources: values.dataSources || {},
     files: {
-      models: [],
       boot: []
     }
   };

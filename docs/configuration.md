@@ -154,3 +154,18 @@ All code samples are referring to the sample project described above.
     var app = loopback();
     boot(app, __dirname);
   ```
+
+#### Attaching built-in models
+
+Models provided by LoopBack, such as `User` or `Role`, are no longer
+automatically attached to default data-sources. The data-source configuration
+entry `defaultForType` is silently ignored.
+
+You have to explicitly configure all built-in models used by your application
+in the `models.json` file.
+
+```
+{
+  "Role": { "dataSource": "db" }
+}
+```

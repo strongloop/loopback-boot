@@ -68,6 +68,17 @@ describe('executor', function() {
     assert(app.dataSources.TheDb);
   });
 
+  it('does not call autoAttach', function() {
+    boot.execute(app, dummyInstructions);
+
+    // loopback-datasource-juggler quirk:
+    // Model.dataSources has modelBuilder as the default value,
+    // therefore it's not enough to assert a false-y value
+    var actual = loopback.Email.dataSource instanceof loopback.DataSource ?
+      'attached' : 'not attached';
+    expect(actual).to.equal('not attached');
+  });
+
   describe('with boot and models files', function() {
     beforeEach(function() {
       boot.execute(app, simpleAppInstructions());

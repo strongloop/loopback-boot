@@ -25,3 +25,12 @@ app.listen();
 
 See [API docs](http://apidocs.strongloop.com/loopback-boot/) for
 complete API reference.
+
+## Versions
+
+The version range `1.x` is backwards compatible with `app.boot` provided
+by LoopBack 1.x versions and the project layout scaffolded by `slc lb project`
+up to version 2.5.
+
+The version range `2.x` supports the new project layout as scaffolded by
+`yo loopback`.

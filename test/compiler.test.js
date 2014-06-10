@@ -25,9 +25,6 @@ describe('compiler', function() {
         },
         models: {
           'foo-bar-bat-baz': {
-            options: {
-              plural: 'foo-bar-bat-bazzies'
-            },
             dataSource: 'the-db'
           }
         },
@@ -73,8 +70,8 @@ describe('compiler', function() {
   describe('from directory', function() {
     it('loads config files', function() {
       var instructions = boot.compile(SIMPLE_APP);
-      assert(instructions.models.foo);
-      assert(instructions.models.foo.dataSource);
+      assert(instructions.models.User);
+      assert(instructions.models.User.dataSource);
     });
 
     it('merges datasource configs from multiple files', function() {
@@ -189,15 +186,12 @@ describe('compiler', function() {
         foo: { dataSource: 'db' }
       });
 
-      var fooJs = appdir.writeFileSync('custom/models/foo.js', '');
-
       var instructions = boot.compile({
         appRootDir: appdir.PATH,
         modelsRootDir: path.resolve(appdir.PATH, 'custom')
       });
 
       expect(instructions.models).to.have.property('foo');
-      expect(instructions.files.models).to.eql([fooJs]);
     });
 
     it('includes boot/*.js scripts', function() {
@@ -208,13 +202,32 @@ describe('compiler', function() {
       expect(instructions.files.boot).to.eql([initJs]);
     });
 
-    it('supports models/ subdirectires that are not require()able', function() {
+    it('ignores models/ subdirectory', function() {
       appdir.createConfigFilesSync();
-      appdir.writeFileSync('models/test/model.test.js',
-        'throw new Error("should not been called");');
+      appdir.writeFileSync('models/my-model.js', '');
+
       var instructions = boot.compile(appdir.PATH);
 
-      expect(instructions.files.models).to.eql([]);
+      expect(instructions.files).to.not.have.property('models');
     });
+
+    it('throws when models.json contains `properties` from 1.x', function() {
+      appdir.createConfigFilesSync({}, {}, {
+        foo: { properties: { name: 'string' } }
+      });
+
+      expect(function() { boot.compile(appdir.PATH); })
+        .to.throw(/unsupported 1\.x format/);
+    });
+
+    it('throws when models.json contains `options.base` from 1.x', function() {
+      appdir.createConfigFilesSync({}, {}, {
+        Customer: { options: { base: 'User' } }
+      });
+
+      expect(function() { boot.compile(appdir.PATH); })
+        .to.throw(/unsupported 1\.x format/);
+    });
+
   });
 });

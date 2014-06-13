@@ -33,9 +33,9 @@ var addInstructionsToBrowserify = require('./lib/bundler');
  * `/boot` subdirectory of the application root directory with `require()`.
  *
  *  **NOTE:** The version 2.0 of loopback-boot changed the way how models
- *  are created. loopback-boot no longer creates the models for you,
- *  the `models.json` file contains only configuration options like
- *  dataSource and extra relations.
+ *  are created. The `models.json` file contains only configuration options like
+ *  dataSource and extra relations. To define a model, create a per-model
+ *  JSON file in `models/` directory.
  *
  *  **NOTE:** mixing `app.boot()` and `app.model(name, config)` in multiple
  *  files may result in models being **undefined** due to race conditions.
@@ -60,6 +60,8 @@ var addInstructionsToBrowserify = require('./lib/bundler');
  * @property {String} [env] Environment type, defaults to `process.env.NODE_ENV`
  * or `development`. Common values are `development`, `staging` and
  * `production`; however the applications are free to use any names.
+ * @property {Array.<String>} [modelSources] List of directories where to look
+ * for files containing model definitions.
  * @end
  *
  * @header bootLoopBackApp(app, [options])

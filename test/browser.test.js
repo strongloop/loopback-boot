@@ -17,6 +17,9 @@ describe('browser support', function() {
 
       // configured in fixtures/browser-app/boot/configure.js
       expect(app.settings).to.have.property('custom-key', 'custom-value');
+      expect(Object.keys(app.models)).to.include('Customer');
+      expect(app.models.Customer.settings)
+        .to.have.property('_customized', 'Customer');
 
       done();
     });
@@ -53,12 +56,17 @@ function executeBundledApp(bundlePath) {
 }
 
 function createBrowserLikeContext() {
-  return vm.createContext({
+  var context = {
     // required by browserify
     XMLHttpRequest: function() { throw new Error('not implemented'); },
 
-    // used by loopback to detect browser runtime
-    window: {},
+    localStorage: {
+      // used by `debug` module
+      debug: process.env.DEBUG
+    },
+
+    // used by `debug` module
+    document: { documentElement: { style: {} } },
 
     // allow the browserified code to log messages
     // call `printContextLogs(context)` to print the accumulated messages
@@ -78,7 +86,12 @@ function createBrowserLikeContext() {
         error: []
       },
     }
-  });
+  };
+
+  // `window` is used by loopback to detect browser runtime
+  context.window = context;
+
+  return vm.createContext(context);
 }
 
 function printContextLogs(context) {

@@ -8,11 +8,7 @@ var appdir = require('./helpers/appdir');
 
 var SIMPLE_APP = path.join(__dirname, 'fixtures', 'simple-app');
 
-// ensure simple-app's models are known by loopback
-require(path.join(SIMPLE_APP, '/models'));
-
 var app;
-
 
 describe('executor', function() {
   beforeEach(sandbox.reset);
@@ -31,11 +27,14 @@ describe('executor', function() {
       foo: { bar: 'bat' },
       baz: true
     },
-    models: {
-      'User': {
-        dataSource: 'the-db'
+    models: [
+      {
+        name: 'User',
+        config: {
+          dataSource: 'the-db'
+        }
       }
-    },
+    ],
     dataSources: {
       'the-db': {
         connector: 'memory',
@@ -44,7 +43,7 @@ describe('executor', function() {
     }
   });
 
-  it('instantiates models', function() {
+  it('configures models', function() {
     boot.execute(app, dummyInstructions);
     assert(app.models);
     assert(app.models.User);
@@ -53,6 +52,60 @@ describe('executor', function() {
     assertValidDataSource(app.models.User.dataSource);
     assert.isFunc(app.models.User, 'find');
     assert.isFunc(app.models.User, 'create');
+  });
+
+  it('defines and customizes models', function() {
+    appdir.writeFileSync('models/Customer.js', 'module.exports = ' +
+      function(Customer, Base) {
+        Customer.settings._customized = 'Customer';
+        Base.settings._customized = 'Base';
+      }.toString());
+
+    boot.execute(app, someInstructions({
+      dataSources: { db: { connector: 'memory' } },
+      models: [
+        {
+          name: 'Customer',
+          config: { dataSource: 'db' },
+          definition: {
+            name: 'Customer',
+            base: 'User',
+          },
+          sourceFile: path.resolve(appdir.PATH, 'models', 'Customer.js')
+        }
+      ]
+    }));
+
+    expect(app.models.Customer).to.exist();
+    expect(app.models.Customer.settings._customized).to.be.equal('Customer');
+    expect(loopback.User.settings._customized).to.equal('Base');
+  });
+
+  it('defines model without attaching it', function() {
+    boot.execute(app, someInstructions({
+      dataSources: { db: { connector: 'memory' } },
+      models: [
+        {
+          name: 'Vehicle',
+          config: undefined,
+          definition: {
+            name: 'Vehicle'
+          },
+          sourceFile: undefined
+        },
+        {
+          name: 'Car',
+          config: { dataSource: 'db' },
+          definition: {
+            name: 'Car',
+            base: 'Vehicle',
+          },
+          sourceFile: undefined
+        },
+      ]
+    }));
+
+    expect(Object.keys(app.models)).to.eql(['Car']);
   });
 
   it('attaches models to data sources', function() {
@@ -203,7 +256,7 @@ assert.isFunc = function (obj, name) {
 function someInstructions(values) {
   var result = {
     app: values.app || {},
-    models: values.models || {},
+    models: values.models || [],
     dataSources: values.dataSources || {},
     files: {
       boot: []

@@ -2,49 +2,99 @@
 
 ### Model Definitions
 
-The following is example JSON for two `Model` definitions:
-"dealership" and "location".
+The following two examples demonstrate how to define models.
+
+*models/dealership.json*
+
+```json
+{
+  "name": "dealership",
+  "relations": {
+    "cars": {
+      "type": "hasMany",
+      "model": "Car",
+      "foreignKey": "dealerId"
+    }
+  },
+  "properties": {
+    "id": {"id": true},
+    "name": "String",
+    "zip": "Number",
+    "address": "String"
+  }
+}
+```
+
+*models/car.json*
+
+```json
+{
+  "name": "car",
+  "properties": {
+    "id": {
+      "type": "String",
+      "required": true,
+      "id": true
+    },
+    "make": {
+      "type": "String",
+      "required": true
+    },
+    "model": {
+      "type": "String",
+      "required": true
+    }
+  }
+}
+```
+
+To add custom methods to your models, create a `.js` file with the same name
+as the `.json` file:
+
+*models/car.js*
 
 ```js
+module.exports = function(Car, Base) {
+  // Car is the model constructor
+  // Base is the parent model (e.g. loopback.PersistedModel)
+
+  // Define a static method
+  Car.customMethod = function(cb) {
+    // do some work
+    cb();
+  };
+
+  Car.prototype.honk = function(duration, cb) {
+    // make some noise for `duration` seconds
+    cb();
+  };
+
+  Car.setup = function() {
+    Base.setup.call(this);
+
+    // configure validations,
+    // configure remoting for methods, etc.
+  };
+}
+```
+
+### Model Configuration
+
+The following is an example JSON configuring the models defined above
+for use in an loopback application.
+
+`dataSource` options is a reference, by name, to a data-source defined
+in `datasources.json`.
+
+*models.json*
+
+```json
 {
   "dealership": {
-    // a reference, by name, to a dataSource definition
     "dataSource": "my-db",
-    // the options passed to Model.extend(name, properties, options)
-    "options": {
-      "relations": {
-        "cars": {
-          "type": "hasMany",
-          "model": "Car",
-          "foreignKey": "dealerId"
-        }
-      }
-    },
-    // the properties passed to Model.extend(name, properties, options)
-    "properties": {
-      "id": {"id": true},
-      "name": "String",
-      "zip": "Number",
-      "address": "String"
-    }
   },
   "car": {
     "dataSource": "my-db"
-    "properties": {
-      "id": {
-        "type": "String",
-        "required": true,
-        "id": true
-      },
-      "make": {
-        "type": "String",
-        "required": true
-      },
-      "model": {
-        "type": "String",
-        "required": true
-      }
-    }
   }
 }
 ```
@@ -72,8 +122,9 @@ The following is example JSON for two `Model` definitions:
 var app = require('../app');
 var Car = app.models.Car;
 
-Car.prototype.honk = function() {
-  // make some noise
+Car.prototype.honk = function(duration, cb) {
+  // make some noise for `duration` seconds
+  cb();
 };
 ```
 
@@ -92,7 +143,7 @@ developer to create them before booting the app.**
 
 The folder `models/` has a different semantincs in 2.x than in 1.x. Instead
 of extending Models already defined by `app.boot` and `models.json`,
-it is an encapsulated component that defines all Models independently of
+it provides a set of Model definitions that do not depend on
 any application that may use them.
 
 Perform the following steps to update a 1.x project for loopback-boot 2.x.
@@ -122,37 +173,33 @@ All code samples are referring to the sample project described above.
     }
   ```
 
- 2. Change per-model javascript files to build and export the Model class:
+ 2. Change per-model javascript files to export a function that adds
+ custom methods to the model class.
+
 
   *models/car.js*
 
   ```js
-    var loopback = require('loopback');
-    var Car = module.exports = loopback.createModel(require('./car.json'));
-
-    Car.prototype.honk = function() {
-      // make some noise
+    module.exports = function(Car, Base) {
+      Car.prototype.honk = function(duration, cb) {
+        // make some noise for `duration` seconds
+        cb();
+      };
     };
   ```
 
- 3. Add a new file `models/index.js` to build all models:
-
- *models/index.js*
-
- ```js
-   exports.Car = require('./car');
- ```
-
- 4. Modify the main application file to load model definitions before booting
- the application.
+ 4. Modify the boot configuration to list the directory containing
+  model definitions.
 
  ```js
     var loopback = require('loopback');
     var boot = require('loopback-boot');
-    require('./models');
 
     var app = loopback();
-    boot(app, __dirname);
+    boot(app, {
+     appRootDir: __dirname,
+     modelSources: ['./models']
+   });
   ```
 
 #### Attaching built-in models

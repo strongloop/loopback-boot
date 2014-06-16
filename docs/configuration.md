@@ -165,7 +165,7 @@ All code samples are referring to the sample project described above.
 
   *models.json*
 
-  ```js
+  ```json
     {
       "car": {
         "dataSource": "db"
@@ -175,7 +175,6 @@ All code samples are referring to the sample project described above.
 
  2. Change per-model javascript files to export a function that adds
  custom methods to the model class.
-
 
   *models/car.js*
 
@@ -188,18 +187,20 @@ All code samples are referring to the sample project described above.
     };
   ```
 
- 4. Modify the boot configuration to list the directory containing
-  model definitions.
+ 3. If your model definitions are not in `./models`, then add an entry
+  to `models.json` to specify the paths where to look for model definitions.
 
- ```js
-    var loopback = require('loopback');
-    var boot = require('loopback-boot');
+  *models.json*
 
-    var app = loopback();
-    boot(app, {
-     appRootDir: __dirname,
-     modelSources: ['./models']
-   });
+  ```json
+  {
+      "_meta": {
+        "sources": ["./custom/path/to/models"]
+      },
+      "Car": {
+        "dataSource": "db"
+      }
+  }
   ```
 
 #### Attaching built-in models

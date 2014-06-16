@@ -7,6 +7,10 @@ var addInstructionsToBrowserify = require('./lib/bundler');
  * Initialize an application from an options object or
  * a set of JSON and JavaScript files.
  *
+ * > **NOTE**: This module is primarily intended for use with LoopBack 2.0.
+ * It _does_ work with LoopBack 1.x applications, but
+ * none of the LoopBack 1.x examples or generated code (scaffolding) use it.
+ *
  * This function takes an optional argument that is either a string
  * or an object.
  *
@@ -37,11 +41,11 @@ var addInstructionsToBrowserify = require('./lib/bundler');
  *  dataSource and extra relations. To define a model, create a per-model
  *  JSON file in `models/` directory.
  *
- *  **NOTE:** mixing `app.boot()` and `app.model(name, config)` in multiple
- *  files may result in models being **undefined** due to race conditions.
- *  To avoid this when using `app.boot()` make sure all models are passed
- *  as part of the `models` configuration.
- *
+ *  **NOTE:** Mixing `bootLoopBackApp(app, bootConfig)` and
+ *  `app.model(name, modelConfig)` in multiple
+ *  files may result in models being undefined due to race conditions.
+ *  To avoid this when using `bootLoopBackApp()` make sure all models are passed
+ *  as part of the `models` definition.
  *
  * Throws an error if the config object is not valid or if boot fails.
  *

@@ -23,9 +23,10 @@
     "url": "https://github.com/strongloop/loopback-boot/blob/master/LICENSE"
   },
   "dependencies": {
-    "underscore": "^1.6.0",
+    "commondir": "0.0.1",
     "debug": "^0.8.1",
-    "commondir": "0.0.1"
+    "semver": "^2.3.0",
+    "underscore": "^1.6.0"
   },
   "devDependencies": {
     "loopback": "^1.5.0",
@@ -34,8 +35,5 @@
     "supertest": "^0.13.0",
     "fs-extra": "^0.9.1",
     "browserify": "^4.1.8"
-  },
-  "peerDependencies": {
-    "loopback": "1.x || 2.x"
   }
 }

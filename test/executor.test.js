@@ -62,7 +62,6 @@ describe('executor', function() {
       }.toString());
 
     boot.execute(app, someInstructions({
-      dataSources: { db: { connector: 'memory' } },
       models: [
         {
           name: 'Customer',
@@ -83,7 +82,6 @@ describe('executor', function() {
 
   it('defines model without attaching it', function() {
     boot.execute(app, someInstructions({
-      dataSources: { db: { connector: 'memory' } },
       models: [
         {
           name: 'Vehicle',
@@ -111,6 +109,35 @@ describe('executor', function() {
   it('attaches models to data sources', function() {
     boot.execute(app, dummyInstructions);
     assert.equal(app.models.User.dataSource, app.dataSources.theDb);
+  });
+
+  it('defines all models first before running the config phase', function() {
+    appdir.writeFileSync('models/Customer.js', 'module.exports = ' +
+      function(Customer/*, Base*/) {
+        Customer.on('attached', function() {
+          Customer._modelsWhenAttached =
+            Object.keys(Customer.modelBuilder.models);
+        });
+      }.toString());
+
+    boot.execute(app, someInstructions({
+      models: [
+        {
+          name: 'Customer',
+          config: { dataSource: 'db' },
+          definition: { name: 'Customer' },
+          sourceFile: path.resolve(appdir.PATH, 'models', 'Customer.js')
+        },
+        {
+          name: 'UniqueName',
+          config: { dataSource: 'db' },
+          definition: { name: 'UniqueName' },
+          sourceFile: undefined
+        }
+      ]
+    }));
+
+    expect(app.models.Customer._modelsWhenAttached).to.include('UniqueName');
   });
 
   it('instantiates data sources', function() {
@@ -257,7 +284,7 @@ function someInstructions(values) {
   var result = {
     app: values.app || {},
     models: values.models || [],
-    dataSources: values.dataSources || {},
+    dataSources: values.dataSources || { db: { connector: 'memory' } },
     files: {
       boot: []
     }

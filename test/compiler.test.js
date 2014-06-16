@@ -359,6 +359,48 @@ describe('compiler', function() {
       var modelNames = instructions.models.map(getNameProperty);
       expect(modelNames).to.eql(['Car']);
     });
+
+    it('sorts models, base models first', function() {
+      appdir.createConfigFilesSync({}, {}, {
+        Vehicle: { dataSource: 'db' },
+        FlyingCar: { dataSource: 'db' },
+        Car: { dataSource: 'db' }
+      });
+      appdir.writeConfigFileSync('models/car.json', {
+        name: 'Car',
+        base: 'Vehicle'
+      });
+      appdir.writeConfigFileSync('models/vehicle.json', {
+        name: 'Vehicle'
+      });
+      appdir.writeConfigFileSync('models/flying-car.json', {
+        name: 'FlyingCar',
+        base: 'Car'
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      var modelNames = instructions.models.map(getNameProperty);
+      expect(modelNames).to.eql(['Vehicle', 'Car', 'FlyingCar']);
+    });
+
+    it('detects circular Model dependencies', function() {
+      appdir.createConfigFilesSync({}, {}, {
+        Vehicle: { dataSource: 'db' },
+        Car: { dataSource: 'db' }
+      });
+      appdir.writeConfigFileSync('models/car.json', {
+        name: 'Car',
+        base: 'Vehicle'
+      });
+      appdir.writeConfigFileSync('models/vehicle.json', {
+        name: 'Vehicle',
+        base: 'Car'
+      });
+
+      expect(function() { boot.compile(appdir.PATH); })
+        .to.throw(/cyclic dependency/i);
+    });
   });
 });
 

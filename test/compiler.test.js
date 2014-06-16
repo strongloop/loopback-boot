@@ -267,17 +267,17 @@ describe('compiler', function() {
       });
     });
 
-    it('supports `modelSources` option', function() {
+    it('supports `sources` option in `models.json`', function() {
       appdir.createConfigFilesSync({}, {}, {
+        _meta: {
+          sources: ['./custom-models']
+        },
         Car: { dataSource: 'db' }
       });
       appdir.writeConfigFileSync('custom-models/car.json', { name: 'Car' });
       appdir.writeFileSync('custom-models/car.js', '');
 
-      var instructions = boot.compile({
-        appRootDir: appdir.PATH,
-        modelSources: ['./custom-models']
-      });
+      var instructions = boot.compile(appdir.PATH);
 
       expect(instructions.models).to.have.length(1);
       expect(instructions.models[0]).to.eql({

@@ -15,7 +15,7 @@ describe('compiler', function() {
     var options, instructions, appConfig;
     beforeEach(function() {
       options = {
-        app: {
+        config: {
           port: 3000,
           host: '127.0.0.1',
           restApiRoot: '/rest-api',
@@ -35,7 +35,7 @@ describe('compiler', function() {
         }
       };
       instructions = boot.compile(options);
-      appConfig = instructions.app;
+      appConfig = instructions.config;
     });
 
     it('has port setting', function() {
@@ -148,13 +148,13 @@ describe('compiler', function() {
     it('merges app configs from multiple files', function() {
       appdir.createConfigFilesSync();
 
-      appdir.writeConfigFileSync('app.local.json', { cfgLocal: 'applied' });
+      appdir.writeConfigFileSync('config.local.json', { cfgLocal: 'applied' });
 
       var env = process.env.NODE_ENV || 'development';
-      appdir.writeConfigFileSync('app.' + env + '.json', { cfgEnv: 'applied' });
+      appdir.writeConfigFileSync('config.' + env + '.json', { cfgEnv: 'applied' });
 
       var instructions = boot.compile(appdir.PATH);
-      var appConfig = instructions.app;
+      var appConfig = instructions.config;
 
       expect(appConfig).to.have.property('cfgLocal', 'applied');
       expect(appConfig).to.have.property('cfgEnv', 'applied');
@@ -169,11 +169,11 @@ describe('compiler', function() {
 
     it('supports .js for custom app config files', function() {
       appdir.createConfigFilesSync();
-      appdir.writeFileSync('app.local.js',
+      appdir.writeFileSync('config.local.js',
         'module.exports = { fromJs: true };');
 
       var instructions = boot.compile(appdir.PATH);
-      var appConfig = instructions.app;
+      var appConfig = instructions.config;
 
       expect(appConfig).to.have.property('fromJs', true);
     });

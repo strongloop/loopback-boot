@@ -151,7 +151,8 @@ describe('compiler', function() {
       appdir.writeConfigFileSync('config.local.json', { cfgLocal: 'applied' });
 
       var env = process.env.NODE_ENV || 'development';
-      appdir.writeConfigFileSync('config.' + env + '.json', { cfgEnv: 'applied' });
+      appdir.writeConfigFileSync('config.' + env + '.json',
+        { cfgEnv: 'applied' });
 
       var instructions = boot.compile(appdir.PATH);
       var appConfig = instructions.config;

@@ -1,105 +1,4 @@
-## Configuration and conventions
-
-### Model Definitions
-
-The following two examples demonstrate how to define models.
-
-*models/dealership.json*
-
-```json
-{
-  "name": "dealership",
-  "relations": {
-    "cars": {
-      "type": "hasMany",
-      "model": "Car",
-      "foreignKey": "dealerId"
-    }
-  },
-  "properties": {
-    "id": {"id": true},
-    "name": "String",
-    "zip": "Number",
-    "address": "String"
-  }
-}
-```
-
-*models/car.json*
-
-```json
-{
-  "name": "car",
-  "properties": {
-    "id": {
-      "type": "String",
-      "required": true,
-      "id": true
-    },
-    "make": {
-      "type": "String",
-      "required": true
-    },
-    "model": {
-      "type": "String",
-      "required": true
-    }
-  }
-}
-```
-
-To add custom methods to your models, create a `.js` file with the same name
-as the `.json` file:
-
-*models/car.js*
-
-```js
-module.exports = function(Car, Base) {
-  // Car is the model constructor
-  // Base is the parent model (e.g. loopback.PersistedModel)
-
-  // Define a static method
-  Car.customMethod = function(cb) {
-    // do some work
-    cb();
-  };
-
-  Car.prototype.honk = function(duration, cb) {
-    // make some noise for `duration` seconds
-    cb();
-  };
-
-  Car.setup = function() {
-    Base.setup.call(this);
-
-    // configure validations,
-    // configure remoting for methods, etc.
-  };
-}
-```
-
-### Model Configuration
-
-The following is an example JSON configuring the models defined above
-for use in an loopback application.
-
-`dataSource` options is a reference, by name, to a data-source defined
-in `datasources.json`.
-
-*models.json*
-
-```json
-{
-  "dealership": {
-    "dataSource": "my-db",
-  },
-  "car": {
-    "dataSource": "my-db"
-  }
-}
-```
-
-### Migrating from 1.x to 2.x
+## Migrating from 1.x to 2.x
 
 **Starting point: a sample 1.x project**
 
@@ -136,7 +35,22 @@ var app = loopback();
 boot(app, __dirname);
 ```
 
-#### Model definitions &amp; configurations
+### App settings
+
+The files with applications settings were renamed from `app.*` to `config.*`.
+Rename the following files to upgrade a 1.x project for loopback-boot 2.x:
+
+  - `app.json` to `config.json`
+  - `app.local.json` to `config.local.json`
+  - `app.local.js` to `config.local.js`
+  - etc.
+
+### Data sources
+
+The configuration of data sources remains the same in both 1.x and 2.x
+versions.
+
+### Models
 
 **The 2.x version of loopback-boot no longer creates Models, it's up to the
 developer to create them before booting the app.**
@@ -203,7 +117,7 @@ All code samples are referring to the sample project described above.
   }
   ```
 
-#### Attaching built-in models
+### Attaching built-in models
 
 Models provided by LoopBack, such as `User` or `Role`, are no longer
 automatically attached to default data-sources. The data-source configuration

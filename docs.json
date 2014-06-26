@@ -1,12 +1,12 @@
 {
   "content": [
+    "README.md",
     {
-      "title": "Bootstrap API",
+      "title": "API",
       "depth": 2
     },
     "index.js",
     "browser.js",
-    "docs/configuration.md",
-    "docs/browserify.md"
+    "docs/migrating-from-1x-to-2x.md"
   ]
 }

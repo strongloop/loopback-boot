@@ -20,7 +20,7 @@ describe('executor', function() {
   });
 
   var dummyInstructions = someInstructions({
-    app: {
+    config: {
       port: 3000,
       host: '127.0.0.1',
       restApiRoot: '/rest-api',
@@ -174,7 +174,7 @@ describe('executor', function() {
     function bootWithDefaults() {
       app = loopback();
       boot.execute(app, someInstructions({
-        app: {
+        config: {
           port: undefined,
           host: undefined
         }
@@ -242,12 +242,12 @@ describe('executor', function() {
     }
 
     it('should honor 0 for free port', function() {
-      boot.execute(app, someInstructions({ app: { port: 0 } }));
+      boot.execute(app, someInstructions({ config: { port: 0 } }));
       assert.equal(app.get('port'), 0);
     });
 
     it('should default to port 3000', function() {
-      boot.execute(app, someInstructions({ app: { port: undefined } }));
+      boot.execute(app, someInstructions({ config: { port: undefined } }));
       assert.equal(app.get('port'), 3000);
     });
   });
@@ -282,7 +282,7 @@ assert.isFunc = function (obj, name) {
 
 function someInstructions(values) {
   var result = {
-    app: values.app || {},
+    config: values.config || {},
     models: values.models || [],
     dataSources: values.dataSources || { db: { connector: 'memory' } },
     files: {

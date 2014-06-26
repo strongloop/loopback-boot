@@ -1,7 +1,6 @@
 var boot = require('../');
 var fs = require('fs-extra');
 var path = require('path');
-var assert = require('assert');
 var expect = require('must');
 var sandbox = require('./helpers/sandbox');
 var appdir = require('./helpers/appdir');
@@ -16,7 +15,7 @@ describe('compiler', function() {
     var options, instructions, appConfig;
     beforeEach(function() {
       options = {
-        app: {
+        config: {
           port: 3000,
           host: '127.0.0.1',
           restApiRoot: '/rest-api',
@@ -25,9 +24,6 @@ describe('compiler', function() {
         },
         models: {
           'foo-bar-bat-baz': {
-            options: {
-              plural: 'foo-bar-bat-bazzies'
-            },
             dataSource: 'the-db'
           }
         },
@@ -39,7 +35,7 @@ describe('compiler', function() {
         }
       };
       instructions = boot.compile(options);
-      appConfig = instructions.app;
+      appConfig = instructions.config;
     });
 
     it('has port setting', function() {
@@ -62,7 +58,15 @@ describe('compiler', function() {
     });
 
     it('has models definition', function() {
-      expect(instructions.models).to.eql(options.models);
+      expect(instructions.models).to.have.length(1);
+      expect(instructions.models[0]).to.eql({
+        name: 'foo-bar-bat-baz',
+        config: {
+          dataSource: 'the-db'
+        },
+        definition: undefined,
+        sourceFile: undefined
+      });
     });
 
     it('has datasources definition', function() {
@@ -73,8 +77,16 @@ describe('compiler', function() {
   describe('from directory', function() {
     it('loads config files', function() {
       var instructions = boot.compile(SIMPLE_APP);
-      assert(instructions.models.foo);
-      assert(instructions.models.foo.dataSource);
+
+      expect(instructions.models).to.have.length(1);
+      expect(instructions.models[0]).to.eql({
+        name: 'User',
+        config: {
+          dataSource: 'db'
+        },
+        definition: undefined,
+        sourceFile: undefined
+      });
     });
 
     it('merges datasource configs from multiple files', function() {
@@ -136,13 +148,14 @@ describe('compiler', function() {
     it('merges app configs from multiple files', function() {
       appdir.createConfigFilesSync();
 
-      appdir.writeConfigFileSync('app.local.json', { cfgLocal: 'applied' });
+      appdir.writeConfigFileSync('config.local.json', { cfgLocal: 'applied' });
 
       var env = process.env.NODE_ENV || 'development';
-      appdir.writeConfigFileSync('app.' + env + '.json', { cfgEnv: 'applied' });
+      appdir.writeConfigFileSync('config.' + env + '.json',
+        { cfgEnv: 'applied' });
 
       var instructions = boot.compile(appdir.PATH);
-      var appConfig = instructions.app;
+      var appConfig = instructions.config;
 
       expect(appConfig).to.have.property('cfgLocal', 'applied');
       expect(appConfig).to.have.property('cfgEnv', 'applied');
@@ -157,11 +170,11 @@ describe('compiler', function() {
 
     it('supports .js for custom app config files', function() {
       appdir.createConfigFilesSync();
-      appdir.writeFileSync('app.local.js',
+      appdir.writeFileSync('config.local.js',
         'module.exports = { fromJs: true };');
 
       var instructions = boot.compile(appdir.PATH);
-      var appConfig = instructions.app;
+      var appConfig = instructions.config;
 
       expect(appConfig).to.have.property('fromJs', true);
     });
@@ -189,15 +202,13 @@ describe('compiler', function() {
         foo: { dataSource: 'db' }
       });
 
-      var fooJs = appdir.writeFileSync('custom/models/foo.js', '');
-
       var instructions = boot.compile({
         appRootDir: appdir.PATH,
         modelsRootDir: path.resolve(appdir.PATH, 'custom')
       });
 
-      expect(instructions.models).to.have.property('foo');
-      expect(instructions.files.models).to.eql([fooJs]);
+      expect(instructions.models).to.have.length(1);
+      expect(instructions.models[0]).to.have.property('name', 'foo');
     });
 
     it('includes boot/*.js scripts', function() {
@@ -208,13 +219,192 @@ describe('compiler', function() {
       expect(instructions.files.boot).to.eql([initJs]);
     });
 
-    it('supports models/ subdirectires that are not require()able', function() {
+    it('ignores models/ subdirectory', function() {
       appdir.createConfigFilesSync();
-      appdir.writeFileSync('models/test/model.test.js',
-        'throw new Error("should not been called");');
+      appdir.writeFileSync('models/my-model.js', '');
+
       var instructions = boot.compile(appdir.PATH);
 
-      expect(instructions.files.models).to.eql([]);
+      expect(instructions.files).to.not.have.property('models');
+    });
+
+    it('throws when models.json contains `properties` from 1.x', function() {
+      appdir.createConfigFilesSync({}, {}, {
+        foo: { properties: { name: 'string' } }
+      });
+
+      expect(function() { boot.compile(appdir.PATH); })
+        .to.throw(/unsupported 1\.x format/);
+    });
+
+    it('throws when models.json contains `options.base` from 1.x', function() {
+      appdir.createConfigFilesSync({}, {}, {
+        Customer: { options: { base: 'User' } }
+      });
+
+      expect(function() { boot.compile(appdir.PATH); })
+        .to.throw(/unsupported 1\.x format/);
+    });
+
+    it('loads models from `./models`', function() {
+      appdir.createConfigFilesSync({}, {}, {
+        Car: { dataSource: 'db' }
+      });
+      appdir.writeConfigFileSync('models/car.json', { name: 'Car' });
+      appdir.writeFileSync('models/car.js', '');
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.models).to.have.length(1);
+      expect(instructions.models[0]).to.eql({
+        name: 'Car',
+        config: {
+          dataSource: 'db'
+        },
+        definition: {
+          name: 'Car'
+        },
+        sourceFile: path.resolve(appdir.PATH, 'models', 'car.js')
+      });
+    });
+
+    it('supports `sources` option in `models.json`', function() {
+      appdir.createConfigFilesSync({}, {}, {
+        _meta: {
+          sources: ['./custom-models']
+        },
+        Car: { dataSource: 'db' }
+      });
+      appdir.writeConfigFileSync('custom-models/car.json', { name: 'Car' });
+      appdir.writeFileSync('custom-models/car.js', '');
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.models).to.have.length(1);
+      expect(instructions.models[0]).to.eql({
+        name: 'Car',
+        config: {
+          dataSource: 'db'
+        },
+        definition: {
+          name: 'Car'
+        },
+        sourceFile: path.resolve(appdir.PATH, 'custom-models', 'car.js')
+      });
+    });
+
+    it('handles model definitions with no code', function() {
+      appdir.createConfigFilesSync({}, {}, {
+        Car: { dataSource: 'db' }
+      });
+      appdir.writeConfigFileSync('models/car.json', { name: 'Car' });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.models).to.eql([{
+        name: 'Car',
+        config: {
+          dataSource: 'db'
+        },
+        definition: {
+          name: 'Car'
+        },
+        sourceFile: undefined
+      }]);
+    });
+
+    it('excludes models not listed in `models.json`', function() {
+      appdir.createConfigFilesSync({}, {}, {
+        Car: { dataSource: 'db' }
+      });
+      appdir.writeConfigFileSync('models/car.json', { name: 'Car' });
+      appdir.writeConfigFileSync('models/bar.json', { name: 'Bar' });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      var models = instructions.models.map(getNameProperty);
+      expect(models).to.eql(['Car']);
+    });
+
+    it('includes models used as Base models', function() {
+      appdir.createConfigFilesSync({}, {}, {
+        Car: { dataSource: 'db' }
+      });
+      appdir.writeConfigFileSync('models/car.json', {
+        name: 'Car',
+        base: 'Vehicle'
+      });
+      appdir.writeConfigFileSync('models/vehicle.json', {
+        name: 'Vehicle'
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+      var models = instructions.models;
+      var modelNames = models.map(getNameProperty);
+
+      expect(modelNames).to.eql(['Vehicle', 'Car']);
+      expect(models[0].config).to.equal(undefined);
+    });
+
+    it('excludes pre-built base models', function() {
+      appdir.createConfigFilesSync({}, {}, {
+        Car: { dataSource: 'db' }
+      });
+      appdir.writeConfigFileSync('models/car.json', {
+        name: 'Car',
+        base: 'Model'
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      var modelNames = instructions.models.map(getNameProperty);
+      expect(modelNames).to.eql(['Car']);
+    });
+
+    it('sorts models, base models first', function() {
+      appdir.createConfigFilesSync({}, {}, {
+        Vehicle: { dataSource: 'db' },
+        FlyingCar: { dataSource: 'db' },
+        Car: { dataSource: 'db' }
+      });
+      appdir.writeConfigFileSync('models/car.json', {
+        name: 'Car',
+        base: 'Vehicle'
+      });
+      appdir.writeConfigFileSync('models/vehicle.json', {
+        name: 'Vehicle'
+      });
+      appdir.writeConfigFileSync('models/flying-car.json', {
+        name: 'FlyingCar',
+        base: 'Car'
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      var modelNames = instructions.models.map(getNameProperty);
+      expect(modelNames).to.eql(['Vehicle', 'Car', 'FlyingCar']);
+    });
+
+    it('detects circular Model dependencies', function() {
+      appdir.createConfigFilesSync({}, {}, {
+        Vehicle: { dataSource: 'db' },
+        Car: { dataSource: 'db' }
+      });
+      appdir.writeConfigFileSync('models/car.json', {
+        name: 'Car',
+        base: 'Vehicle'
+      });
+      appdir.writeConfigFileSync('models/vehicle.json', {
+        name: 'Vehicle',
+        base: 'Car'
+      });
+
+      expect(function() { boot.compile(appdir.PATH); })
+        .to.throw(/cyclic dependency/i);
     });
   });
 });
+
+function getNameProperty(obj) {
+  return obj.name;
+}

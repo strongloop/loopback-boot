@@ -22,7 +22,7 @@ appdir.init = function(cb) {
 appdir.createConfigFilesSync = function(appConfig, dataSources, models) {
   appConfig = extend({
   }, appConfig);
-  appdir.writeConfigFileSync ('app.json', appConfig);
+  appdir.writeConfigFileSync ('config.json', appConfig);
 
   dataSources = extend({
     db: {

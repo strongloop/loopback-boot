@@ -10,7 +10,6 @@ var SIMPLE_APP = path.join(__dirname, 'fixtures', 'simple-app');
 
 var app;
 
-
 describe('executor', function() {
   beforeEach(sandbox.reset);
 
@@ -21,21 +20,21 @@ describe('executor', function() {
   });
 
   var dummyInstructions = someInstructions({
-    app: {
+    config: {
       port: 3000,
       host: '127.0.0.1',
       restApiRoot: '/rest-api',
       foo: { bar: 'bat' },
       baz: true
     },
-    models: {
-      'foo-bar-bat-baz': {
-        options: {
-          plural: 'foo-bar-bat-bazzies'
-        },
-        dataSource: 'the-db'
+    models: [
+      {
+        name: 'User',
+        config: {
+          dataSource: 'the-db'
+        }
       }
-    },
+    ],
     dataSources: {
       'the-db': {
         connector: 'memory',
@@ -44,19 +43,101 @@ describe('executor', function() {
     }
   });
 
-  it('instantiates models', function() {
+  it('configures models', function() {
     boot.execute(app, dummyInstructions);
     assert(app.models);
-    assert(app.models.FooBarBatBaz);
-    assert(app.models.fooBarBatBaz);
-    assertValidDataSource(app.models.FooBarBatBaz.dataSource);
-    assert.isFunc(app.models.FooBarBatBaz, 'find');
-    assert.isFunc(app.models.FooBarBatBaz, 'create');
+    assert(app.models.User);
+    assert.equal(app.models.User, loopback.User,
+      'Boot should not have extended loopback.User model');
+    assertValidDataSource(app.models.User.dataSource);
+    assert.isFunc(app.models.User, 'find');
+    assert.isFunc(app.models.User, 'create');
+  });
+
+  it('defines and customizes models', function() {
+    appdir.writeFileSync('models/Customer.js', 'module.exports = ' +
+      function(Customer, Base) {
+        Customer.settings._customized = 'Customer';
+        Base.settings._customized = 'Base';
+      }.toString());
+
+    boot.execute(app, someInstructions({
+      models: [
+        {
+          name: 'Customer',
+          config: { dataSource: 'db' },
+          definition: {
+            name: 'Customer',
+            base: 'User',
+          },
+          sourceFile: path.resolve(appdir.PATH, 'models', 'Customer.js')
+        }
+      ]
+    }));
+
+    expect(app.models.Customer).to.exist();
+    expect(app.models.Customer.settings._customized).to.be.equal('Customer');
+    expect(loopback.User.settings._customized).to.equal('Base');
+  });
+
+  it('defines model without attaching it', function() {
+    boot.execute(app, someInstructions({
+      models: [
+        {
+          name: 'Vehicle',
+          config: undefined,
+          definition: {
+            name: 'Vehicle'
+          },
+          sourceFile: undefined
+        },
+        {
+          name: 'Car',
+          config: { dataSource: 'db' },
+          definition: {
+            name: 'Car',
+            base: 'Vehicle',
+          },
+          sourceFile: undefined
+        },
+      ]
+    }));
+
+    expect(Object.keys(app.models)).to.eql(['Car']);
   });
 
   it('attaches models to data sources', function() {
     boot.execute(app, dummyInstructions);
-    assert.equal(app.models.FooBarBatBaz.dataSource, app.dataSources.theDb);
+    assert.equal(app.models.User.dataSource, app.dataSources.theDb);
+  });
+
+  it('defines all models first before running the config phase', function() {
+    appdir.writeFileSync('models/Customer.js', 'module.exports = ' +
+      function(Customer/*, Base*/) {
+        Customer.on('attached', function() {
+          Customer._modelsWhenAttached =
+            Object.keys(Customer.modelBuilder.models);
+        });
+      }.toString());
+
+    boot.execute(app, someInstructions({
+      models: [
+        {
+          name: 'Customer',
+          config: { dataSource: 'db' },
+          definition: { name: 'Customer' },
+          sourceFile: path.resolve(appdir.PATH, 'models', 'Customer.js')
+        },
+        {
+          name: 'UniqueName',
+          config: { dataSource: 'db' },
+          definition: { name: 'UniqueName' },
+          sourceFile: undefined
+        }
+      ]
+    }));
+
+    expect(app.models.Customer._modelsWhenAttached).to.include('UniqueName');
   });
 
   it('instantiates data sources', function() {
@@ -65,6 +146,17 @@ describe('executor', function() {
     assert(app.dataSources.theDb);
     assertValidDataSource(app.dataSources.theDb);
     assert(app.dataSources.TheDb);
+  });
+
+  it('does not call autoAttach', function() {
+    boot.execute(app, dummyInstructions);
+
+    // loopback-datasource-juggler quirk:
+    // Model.dataSources has modelBuilder as the default value,
+    // therefore it's not enough to assert a false-y value
+    var actual = loopback.Email.dataSource instanceof loopback.DataSource ?
+      'attached' : 'not attached';
+    expect(actual).to.equal('not attached');
   });
 
   describe('with boot and models files', function() {
@@ -76,18 +168,13 @@ describe('executor', function() {
       assert(process.loadedFooJS);
       delete process.loadedFooJS;
     });
-
-    it('should run `models/*` files', function() {
-      assert(process.loadedBarJS);
-      delete process.loadedBarJS;
-    });
   });
 
   describe('with PaaS and npm env variables', function() {
     function bootWithDefaults() {
       app = loopback();
       boot.execute(app, someInstructions({
-        app: {
+        config: {
           port: undefined,
           host: undefined
         }
@@ -155,23 +242,14 @@ describe('executor', function() {
     }
 
     it('should honor 0 for free port', function() {
-      boot.execute(app, someInstructions({ app: { port: 0 } }));
+      boot.execute(app, someInstructions({ config: { port: 0 } }));
       assert.equal(app.get('port'), 0);
     });
 
     it('should default to port 3000', function() {
-      boot.execute(app, someInstructions({ app: { port: undefined } }));
+      boot.execute(app, someInstructions({ config: { port: undefined } }));
       assert.equal(app.get('port'), 3000);
     });
-  });
-
-  it('calls function exported by models/model.js', function() {
-    var file = appdir.writeFileSync('models/model.js',
-      'module.exports = function(app) { app.fnCalled = true; };');
-
-    delete app.fnCalled;
-    boot.execute(app, someInstructions({ files: { models: [ file ] } }));
-    expect(app.fnCalled, 'exported fn was called').to.be.true();
   });
 
   it('calls function exported by boot/init.js', function() {
@@ -181,19 +259,6 @@ describe('executor', function() {
     delete app.fnCalled;
     boot.execute(app, someInstructions({ files: { boot: [ file ] } }));
     expect(app.fnCalled, 'exported fn was called').to.be.true();
-  });
-
-  it('does not call Model ctor exported by models/model.json', function() {
-    var file = appdir.writeFileSync('models/model.js',
-        'var loopback = require("loopback");\n' +
-        'module.exports = loopback.Model.extend("foo");\n' +
-        'module.exports.prototype._initProperties = function() {\n' +
-        '  global.fnCalled = true;\n' +
-        '};');
-
-    delete global.fnCalled;
-    boot.execute(app, someInstructions({ files: { models: [ file ] } }));
-    expect(global.fnCalled, 'exported fn was called').to.be.undefined();
   });
 });
 
@@ -217,11 +282,10 @@ assert.isFunc = function (obj, name) {
 
 function someInstructions(values) {
   var result = {
-    app: values.app || {},
-    models: values.models || {},
-    dataSources: values.dataSources || {},
+    config: values.config || {},
+    models: values.models || [],
+    dataSources: values.dataSources || { db: { connector: 'memory' } },
     files: {
-      models: [],
       boot: []
     }
   };

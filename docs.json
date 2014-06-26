@@ -6,6 +6,7 @@
       "depth": 2
     },
     "index.js",
-    "browser.js"
+    "browser.js",
+    "docs/migrating-from-1x-to-2x.md"
   ]
 }

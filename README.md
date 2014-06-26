@@ -26,16 +26,29 @@ app.listen();
 See [API docs](http://apidocs.strongloop.com/loopback-boot/#api) for
 complete API reference.
 
+## Versions
+
+The version range `1.x` is backwards compatible with `app.boot` provided
+by LoopBack 1.x versions and the project layout scaffolded by `slc lb project`
+up to slc version 2.5.
+
+The version range `2.x` supports the new project layout as scaffolded by
+`yo loopback`.
+
+This document describes the configuration conventions of the `2.x` versions.
+See [Migrating from 1.x to 2.x](http://apidocs.strongloop.com/loopback-boot/#migrating-from-1x-to-2x)
+for step-by-step instructions on how to upgrade existing projects.
+
 ## Configurations and conventions
 
 The bootstrapping process takes care of the following tasks:
 
  - Configuration of data-sources.
- - Definition and configuration of custom Models, attaching models to
-   data-sources.
+ - Definition of custom Models
+ - Configuration of models, attaching models to data-sources.
  - Configuration of app settings like `host`, `port` or `restApiRoot`.
- - Running additional boot scripts to keep the custom setup code in multiple
-   small files as opposed to keeping everything in the main app file.
+ - Running additional boot scripts, so that the custom setup code can be kept
+  in multiple small files as opposed to keeping everything in the main app file.
 
 Below is the typical project layout. See the following sections for description
 of the project files.
@@ -43,7 +56,7 @@ of the project files.
 ```
 project/
   app.js
-  app.json
+  config.json
   datasources.json
   models.json
   models/
@@ -52,13 +65,13 @@ project/
 
 ### App settings
 
-The settings are loaded from the file `app.json` in the project root directory
+The settings are loaded from the file `config.json` in the project root directory
 and can be accessed via `app.get('option-name')` from the code.
 
-Additionally, the following files can provide values to override `app.json`:
+Additionally, the following files can provide values to override `config.json`:
 
- - `app.local.js` or `app.local.json`
- - `app.{env}.js` or `app.{env}.json`, where `{env}` is the value of `NODE_ENV`
+ - `config.local.js` or `config.local.json`
+ - `config.{env}.js` or `config.{env}.json`, where `{env}` is the value of `NODE_ENV`
    (typically `development` or `production`)
 
 **NOTE:** The additional files can override the top-level keys with
@@ -67,7 +80,7 @@ not supported at the moment.
 
 #### Example settings
 
-*app.json*
+*config.json*
 
 ```json
 {
@@ -77,7 +90,7 @@ not supported at the moment.
 }
 ```
 
-*app.production.js*
+*config.production.js*
 
 ```js
 module.exports = {
@@ -132,63 +145,67 @@ not supported at the moment.
 }
 ```
 
-### Models
+### Models: definition
 
-App models are loaded from the file `models.json`.
+Custom models are defined using JSON files in `models/` directory,
+one JSON file per model.
 
 #### Example models
 
-The following is example JSON for two `Model` definitions:
+The following are example JSON files for two `Model` definitions:
 `Dealership` and `Location`.
+
+*models/dealership.json*
 
 ```js
 {
-  // the key is the model name
-  "Dealership": {
-    // a reference, by name, to a dataSource definition
-    "dataSource": "my-db",
-    // the options passed to Model.extend(name, properties, options)
-    "options": {
-      "relations": {
-        "cars": {
-          "type": "hasMany",
-          "model": "Car",
-          "foreignKey": "dealerId"
-        }
+  // the model name
+  "name": "Dealership",
+  // the options passed to Model.extend(name, properties, options)
+  "options": {
+    "relations": {
+      "cars": {
+        "type": "hasMany",
+        "model": "Car",
+        "foreignKey": "dealerId"
       }
-    },
-    // the properties passed to Model.extend(name, properties, options)
-    "properties": {
-      "id": {"id": true},
-      "name": "String",
-      "zip": "Number",
-      "address": "String"
     }
   },
-  "Car": {
-    "dataSource": "my-db"
-    // options can be specified at the top level too
-    "relations": {
-      "dealer": {
-        "type": "belongsTo",
-        "model": "Dealership",
-        "foreignKey": "dealerId"
-      },
-    }
-    "properties": {
-      "id": {
-        "type": "String",
-        "required": true,
-        "id": true
-      },
-      "make": {
-        "type": "String",
-        "required": true
-      },
-      "model": {
-        "type": "String",
-        "required": true
-      }
+  // the properties passed to Model.extend(name, properties, options)
+  "properties": {
+    "id": {"id": true},
+    "name": "String",
+    "zip": "Number",
+    "address": "String"
+  }
+}
+```
+
+*models/car.json*
+```js
+{
+  "name": "Car",
+  // options can be specified at the top level too
+  "relations": {
+    "dealer": {
+      "type": "belongsTo",
+      "model": "Dealership",
+      "foreignKey": "dealerId"
+    },
+  }
+  "properties": {
+    "id": {
+      "type": "String",
+      "required": true,
+      "id": true
+    },
+    "make": {
+      "type": "String",
+      "required": true
+    },
+    "model": {
+      "type": "String",
+      "required": true
     }
   }
 }
@@ -196,24 +213,83 @@ The following is example JSON for two `Model` definitions:
 
 #### Adding custom methods to models
 
-The models created from `models.json` come with the set of built-in methods
+The models created from JSON files come with the set of built-in methods
 like `find` and `create`. To implement your custom methods, you should
-create a javascript file in `models/` directory named after the model
-and define the methods there.
+create a javascript file in `models/` directory with the same base-name
+as the JSON file containing model definition (e.g. `models/car.js` for
+`models/car.json`) and define the methods there.
 
 Example:
 
 *models/car.js*
 
 ```js
-module.exports = function(app) {
-  var Car = app.models.Car;
+// Car is the model constructor
+// Base is the parent model (e.g. loopback.PersistedModel)
+module.exports = function(Car, Base) {
+  // Define a static method
+  Car.customMethod = function(cb) {
+    // do some work
+    cb();
+  };
 
+  // Define an instance (prototype) method
   Car.prototype.honk = function(duration, cb) {
     // make some noise for `duration` seconds
     cb();
   };
+
+  // Provide a custom setup method
+  Car.setup = function() {
+    Base.setup.call(this);
+
+    // configure validations,
+    // configure remoting for methods, etc.
+  };
 };
+```
+
+### Models: configuration
+
+Before the models can be used in a loopback application, they have to be
+configured - attached to a data-source, exposed via the REST API, and so on.
+
+The configuration is described in the file `models.json`:
+
+```js
+{
+  // the key is the model name
+  "Dealership": {
+    // a reference, by name, to a dataSource definition
+    "dataSource": "my-db"
+  },
+  "Car": {
+    "dataSource": "my-db",
+    // do not expose Car over the REST API
+    "public": false
+  }
+}
+```
+
+The bootstrapper will automatically load definition of every custom model
+configured in `models.json`. By default, the definition files are loaded from
+`models/` subdirectory. However, it is possible to specify a different location
+(or even multiple locations) via `_meta.sources`:
+
+```js
+{
+  "_meta": {
+    "sources": [
+      // all paths are relative to models.json
+      "./models"
+      "./node_modules/foobar/models"
+    ]
+  },
+  // use the `FooBar` model from the `foobar` module
+  "FooBar": {
+    "dataSource": "db"
+  }
+}
 ```
 
 ### Boot scripts

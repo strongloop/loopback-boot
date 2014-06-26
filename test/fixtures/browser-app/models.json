@@ -1,5 +1,5 @@
 {
-  "User": {
+  "Customer": {
     "dataSource": "db"
   }
 }

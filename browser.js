@@ -11,7 +11,7 @@ var execute = require('./lib/executor');
  *
  * @param {Object} app The loopback app to boot, as returned by `loopback()`.
  *
- * @header bootBrowserApp(app)
+ * @header boot(app)
  */
 
 exports = module.exports = function bootBrowserApp(app) {

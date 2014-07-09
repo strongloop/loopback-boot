@@ -1,12 +1,8 @@
 {
   "content": [
-    "README.md",
-    {
-      "title": "API",
-      "depth": 2
-    },
+    "docs/header-node.md",
     "index.js",
-    "browser.js",
-    "docs/migrating-from-1x-to-2x.md"
+    "docs/header-browser.md",
+    "browser.js"
   ]
 }

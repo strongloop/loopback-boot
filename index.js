@@ -68,7 +68,7 @@ var addInstructionsToBrowserify = require('./lib/bundler');
  * for files containing model definitions.
  * @end
  *
- * @header bootLoopBackApp(app, [options])
+ * @header boot(app, [options])
  */
 
 exports = module.exports = function bootLoopBackApp(app, options) {

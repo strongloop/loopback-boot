@@ -20,7 +20,7 @@ var addInstructionsToBrowserify = require('./lib/bundler');
  *  1. Creates DataSources from the `datasources.json` file in the application
  *   root directory.
  *
- *  2. Configures Models from the `models.json` file in the application
+ *  2. Configures Models from the `model-config.json` file in the application
  *    root directory.
  *
  * If the argument is an object, then it looks for `models`, `dataSources`,
@@ -37,9 +37,9 @@ var addInstructionsToBrowserify = require('./lib/bundler');
  * `/boot` subdirectory of the application root directory with `require()`.
  *
  *  **NOTE:** The version 2.0 of loopback-boot changed the way how models
- *  are created. The `models.json` file contains only configuration options like
- *  dataSource and extra relations. To define a model, create a per-model
- *  JSON file in `models/` directory.
+ *  are created. The `model-config.json` file contains only configuration
+ *  options like dataSource and extra relations. To define a model,
+ *  create a per-model JSON file in `models/` directory.
  *
  *  **NOTE:** Mixing `bootLoopBackApp(app, bootConfig)` and
  *  `app.model(name, modelConfig)` in multiple
@@ -58,7 +58,7 @@ var addInstructionsToBrowserify = require('./lib/bundler');
  * @property {Object} [models] Object containing `Model` configurations.
  * @property {Object} [dataSources] Object containing `DataSource` definitions.
  * @property {String} [modelsRootDir] Directory to use when loading
- * `models.json`. Defaults to `appRootDir`.
+ * `model-config.json`. Defaults to `appRootDir`.
  * @property {String} [dsRootDir] Directory to use when loading
  * `datasources.json`. Defaults to `appRootDir`.
  * @property {String} [env] Environment type, defaults to `process.env.NODE_ENV`

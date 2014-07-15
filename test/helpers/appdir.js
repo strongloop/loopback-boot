@@ -34,7 +34,7 @@ appdir.createConfigFilesSync = function(appConfig, dataSources, models) {
 
   models = extend({
   }, models);
-  appdir.writeConfigFileSync ('models.json', models);
+  appdir.writeConfigFileSync ('model-config.json', models);
 };
 
 appdir.writeConfigFileSync = function(name, json) {

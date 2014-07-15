@@ -198,7 +198,7 @@ describe('compiler', function() {
 
     it('supports `modelsRootDir` option', function() {
       appdir.createConfigFilesSync();
-      appdir.writeConfigFileSync('custom/models.json', {
+      appdir.writeConfigFileSync('custom/model-config.json', {
         foo: { dataSource: 'db' }
       });
 
@@ -228,7 +228,7 @@ describe('compiler', function() {
       expect(instructions.files).to.not.have.property('models');
     });
 
-    it('throws when models.json contains `properties` from 1.x', function() {
+    it('throws when models-config.json contains 1.x `properties`', function() {
       appdir.createConfigFilesSync({}, {}, {
         foo: { properties: { name: 'string' } }
       });
@@ -237,7 +237,7 @@ describe('compiler', function() {
         .to.throw(/unsupported 1\.x format/);
     });
 
-    it('throws when models.json contains `options.base` from 1.x', function() {
+    it('throws when model-config.json contains 1.x `options.base`', function() {
       appdir.createConfigFilesSync({}, {}, {
         Customer: { options: { base: 'User' } }
       });
@@ -268,7 +268,7 @@ describe('compiler', function() {
       });
     });
 
-    it('supports `sources` option in `models.json`', function() {
+    it('supports `sources` option in `model-config.json`', function() {
       appdir.createConfigFilesSync({}, {}, {
         _meta: {
           sources: ['./custom-models']
@@ -313,7 +313,7 @@ describe('compiler', function() {
       }]);
     });
 
-    it('excludes models not listed in `models.json`', function() {
+    it('excludes models not listed in `model-config.json`', function() {
       appdir.createConfigFilesSync({}, {}, {
         Car: { dataSource: 'db' }
       });

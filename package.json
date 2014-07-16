@@ -25,6 +25,7 @@
   "dependencies": {
     "commondir": "0.0.1",
     "debug": "^0.8.1",
+    "lodash.clonedeep": "^2.4.1",
     "semver": "^2.3.0",
     "toposort": "^0.2.10",
     "underscore": "^1.6.0"

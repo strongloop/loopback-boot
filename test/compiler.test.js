@@ -402,6 +402,16 @@ describe('compiler', function() {
       expect(function() { boot.compile(appdir.PATH); })
         .to.throw(/cyclic dependency/i);
     });
+
+    it('returns a new copy of JSON data', function() {
+      appdir.createConfigFilesSync();
+
+      var instructions = boot.compile(appdir.PATH);
+      instructions.config.modified = true;
+
+      instructions = boot.compile(appdir.PATH);
+      expect(instructions.config).to.not.have.property('modified');
+    });
   });
 });
 

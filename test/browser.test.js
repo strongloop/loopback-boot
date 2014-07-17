@@ -60,6 +60,10 @@ function createBrowserLikeContext() {
     // used by loopback to detect browser runtime
     window: {},
 
+    // used by crypto-browserify & friends
+    Int32Array: Int32Array,
+    DataView: DataView,
+
     // allow the browserified code to log messages
     // call `printContextLogs(context)` to print the accumulated messages
     console: {

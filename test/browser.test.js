@@ -68,6 +68,10 @@ function createBrowserLikeContext() {
     // used by `debug` module
     document: { documentElement: { style: {} } },
 
+    // used by crypto-browserify & friends
+    Int32Array: Int32Array,
+    DataView: DataView,
+
     // allow the browserified code to log messages
     // call `printContextLogs(context)` to print the accumulated messages
     console: {

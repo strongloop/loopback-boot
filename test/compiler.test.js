@@ -216,5 +216,15 @@ describe('compiler', function() {
 
       expect(instructions.files.models).to.eql([]);
     });
+
+    it('returns a new copy of JSON data', function() {
+      appdir.createConfigFilesSync();
+
+      var instructions = boot.compile(appdir.PATH);
+      instructions.app.modified = true;
+
+      instructions = boot.compile(appdir.PATH);
+      expect(instructions.app).to.not.have.property('modified');
+    });
   });
 });

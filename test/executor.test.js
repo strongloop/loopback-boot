@@ -67,6 +67,11 @@ describe('executor', function() {
     assert(app.dataSources.TheDb);
   });
 
+  it('performs auto-attach', function() {
+    boot.execute(app, dummyInstructions);
+    assertValidDataSource(loopback.getModel('Email').dataSource);
+  });
+
   describe('with boot and models files', function() {
     beforeEach(function() {
       boot.execute(app, simpleAppInstructions());

@@ -64,6 +64,9 @@ function createBrowserLikeContext() {
     Int32Array: Int32Array,
     DataView: DataView,
 
+    // used by Memory connector
+    setTimeout: setTimeout,
+
     // allow the browserified code to log messages
     // call `printContextLogs(context)` to print the accumulated messages
     console: {

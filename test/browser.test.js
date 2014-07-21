@@ -7,6 +7,8 @@ var sandbox = require('./helpers/sandbox');
 var vm = require('vm');
 
 describe('browser support', function() {
+  this.timeout(10000); // 10s for Jenkins
+
   it('has API for bundling and executing boot instructions', function(done) {
     var appDir = path.resolve(__dirname, './fixtures/browser-app');
 

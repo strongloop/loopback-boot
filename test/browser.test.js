@@ -7,6 +7,8 @@ var sandbox = require('./helpers/sandbox');
 var vm = require('vm');
 
 describe('browser support', function() {
+  this.timeout(10000); // 10s for Jenkins
+
   it('has API for bundling and executing boot instructions', function(done) {
     var appDir = path.resolve(__dirname, './fixtures/browser-app');
 
@@ -63,6 +65,9 @@ function createBrowserLikeContext() {
     // used by crypto-browserify & friends
     Int32Array: Int32Array,
     DataView: DataView,
+
+    // used by Memory connector
+    setTimeout: setTimeout,
 
     // allow the browserified code to log messages
     // call `printContextLogs(context)` to print the accumulated messages

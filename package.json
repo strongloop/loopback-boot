@@ -1,6 +1,6 @@
 {
   "name": "loopback-boot",
-  "version": "2.0.0-beta3",
+  "version": "2.0.0",
   "description": "Convention-based bootstrapper for LoopBack applications",
   "keywords": [
     "StrongLoop",
@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "commondir": "0.0.1",
-    "debug": "^0.8.1",
+    "debug": "^1.0.4",
     "lodash.clonedeep": "^2.4.1",
     "semver": "^2.3.0",
     "toposort": "^0.2.10",
@@ -33,9 +33,9 @@
   "devDependencies": {
     "loopback": "^1.5.0",
     "mocha": "^1.19.0",
-    "must": "^0.11.0",
+    "must": "^0.12.0",
     "supertest": "^0.13.0",
-    "fs-extra": "^0.9.1",
+    "fs-extra": "^0.10.0",
     "browserify": "^4.1.8"
   }
 }

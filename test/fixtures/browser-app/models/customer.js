@@ -1,4 +1,4 @@
-module.exports = function(Customer, Base) {
+module.exports = function(Customer) {
   Customer.settings._customized = 'Customer';
-  Base.settings._customized = 'Base';
+  Customer.base.settings._customized = 'Base';
 };

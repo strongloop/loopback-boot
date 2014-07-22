@@ -56,9 +56,9 @@ describe('executor', function() {
 
   it('defines and customizes models', function() {
     appdir.writeFileSync('models/Customer.js', 'module.exports = ' +
-      function(Customer, Base) {
+      function(Customer) {
         Customer.settings._customized = 'Customer';
-        Base.settings._customized = 'Base';
+        Customer.base.settings._customized = 'Base';
       }.toString());
 
     boot.execute(app, someInstructions({

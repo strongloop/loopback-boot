@@ -290,7 +290,7 @@ describe('compiler', function() {
       });
     });
     
-    it('supports `sources` option', function() {
+    it('supports `modelSources` option', function() {
       appdir.createConfigFilesSync({}, {}, {
         Car: { dataSource: 'db' }
       });

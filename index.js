@@ -66,6 +66,9 @@ var addInstructionsToBrowserify = require('./lib/bundler');
  * `production`; however the applications are free to use any names.
  * @property {Array.<String>} [modelSources] List of directories where to look
  * for files containing model definitions.
+ * @property {Array.<String>} [bootDirs] List of directories where to look
+ * for boot scripts.
+ * @property {Array.<String>} [bootScripts] List of script files to execute on boot.
  * @end
  *
  * @header boot(app, [options])

@@ -37,7 +37,7 @@ function browserifyTestApp(appDir, next) {
   var bundlePath = sandbox.resolve('browser-app-bundle.js');
   var out = fs.createWriteStream(bundlePath);
   b.bundle({ debug: true }).pipe(out);
-
+  
   out.on('error', function(err) { return next(err); });
   out.on('close', function() {
     next(null, bundlePath);

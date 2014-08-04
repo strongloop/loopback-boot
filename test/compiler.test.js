@@ -218,6 +218,28 @@ describe('compiler', function() {
       var instructions = boot.compile(appdir.PATH);
       expect(instructions.files.boot).to.eql([initJs]);
     });
+    
+    it('supports `bootDirs` option', function() {
+      appdir.createConfigFilesSync();
+      var initJs = appdir.writeFileSync('custom-boot/init.js',
+        'module.exports = function(app) { app.fnCalled = true; };');
+      var instructions = boot.compile({
+        appRootDir: appdir.PATH,
+        bootDirs: [path.dirname(initJs)]
+      });
+      expect(instructions.files.boot).to.eql([initJs]);
+    });
+    
+    it('supports `bootScripts` option', function() {
+      appdir.createConfigFilesSync();
+      var initJs = appdir.writeFileSync('custom-boot/init.js',
+        'module.exports = function(app) { app.fnCalled = true; };');
+      var instructions = boot.compile({
+        appRootDir: appdir.PATH,
+        bootScripts: [initJs]
+      });
+      expect(instructions.files.boot).to.eql([initJs]);
+    });
 
     it('ignores models/ subdirectory', function() {
       appdir.createConfigFilesSync();
@@ -265,6 +287,31 @@ describe('compiler', function() {
           name: 'Car'
         },
         sourceFile: path.resolve(appdir.PATH, 'models', 'car.js')
+      });
+    });
+    
+    it('supports `modelSources` option', function() {
+      appdir.createConfigFilesSync({}, {}, {
+        Car: { dataSource: 'db' }
+      });
+      appdir.writeConfigFileSync('custom-models/car.json', { name: 'Car' });
+      appdir.writeFileSync('custom-models/car.js', '');
+      
+      var instructions = boot.compile({
+        appRootDir: appdir.PATH,
+        modelSources: ['./custom-models']
+      });
+      
+      expect(instructions.models).to.have.length(1);
+      expect(instructions.models[0]).to.eql({
+        name: 'Car',
+        config: {
+          dataSource: 'db'
+        },
+        definition: {
+          name: 'Car'
+        },
+        sourceFile: path.resolve(appdir.PATH, 'custom-models', 'car.js')
       });
     });
 

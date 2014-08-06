@@ -168,6 +168,14 @@ describe('executor', function() {
       assert(process.loadedFooJS);
       delete process.loadedFooJS;
     });
+    
+    it('should define `mixins/*` files', function() {
+      if (app.loopback.datasourceJuggler && app.loopback.datasourceJuggler.mixins) {
+        var mixins = app.loopback.datasourceJuggler.mixins;
+        expect(mixins.registry).to.have.property('Example');
+      }
+    });
+    
   });
 
   describe('with PaaS and npm env variables', function() {

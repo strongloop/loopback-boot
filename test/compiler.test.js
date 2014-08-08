@@ -380,13 +380,13 @@ describe('compiler', function() {
       expect(instructions.files.boot).to.eql([initJs]);
     });
     
-    it('supports `bootDirs` option', function() {
+    it('supports `bootSources` option', function() {
       appdir.createConfigFilesSync();
       var initJs = appdir.writeFileSync('custom-boot/init.js',
         'module.exports = function(app) { app.fnCalled = true; };');
       var instructions = boot.compile({
         appRootDir: appdir.PATH,
-        bootDirs: [path.dirname(initJs)]
+        bootSources: [path.dirname(initJs)]
       });
       expect(instructions.files.boot).to.eql([initJs]);
     });

@@ -226,9 +226,10 @@ describe('executor', function() {
     });
     
     it('should define `mixins/*` files', function() {
-      if (app.loopback.datasourceJuggler && app.loopback.datasourceJuggler.mixins) {
-        var mixins = app.loopback.datasourceJuggler.mixins;
-        expect(mixins.registry).to.have.property('Example');
+      if (app.loopback.modelBuilder.mixins) {
+        var modelBuilder = app.loopback.modelBuilder;
+        var registry = modelBuilder.mixins.mixins;
+        expect(registry).to.have.property('Example');
       }
     });
     

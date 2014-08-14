@@ -68,7 +68,7 @@ var addInstructionsToBrowserify = require('./lib/bundler');
  * for files containing model definitions.
  * @property {Array.<String>} [bootDirs] List of directories where to look
  * for boot scripts.
- * @property {Array.<String>} [bootScripts] List of script files to execute on boot.
+ * @property {Array.<String>} [bootScripts] List of script files to execute
  * @end
  *
  * @header boot(app, [options])

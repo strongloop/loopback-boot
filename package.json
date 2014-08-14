@@ -15,7 +15,7 @@
   "main": "index.js",
   "browser": "browser.js",
   "scripts": {
-    "pretest": "jshint .",
+    "pretest": "node_modules/.bin/jshint .",
     "test": "mocha"
   },
   "license": {
@@ -31,6 +31,7 @@
     "underscore": "^1.6.0"
   },
   "devDependencies": {
+    "jshint": "^2.5.2",
     "loopback": "^1.5.0",
     "mocha": "^1.19.0",
     "must": "^0.12.0",

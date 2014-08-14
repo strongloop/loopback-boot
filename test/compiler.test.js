@@ -125,24 +125,82 @@ describe('compiler', function() {
       expect(db).to.have.property('fromJs', true);
     });
 
-    it('refuses to merge Object properties', function() {
+    it('merges Object properties', function() {
+      var nestedValue = { key: 'value' };
       appdir.createConfigFilesSync();
       appdir.writeConfigFileSync('datasources.local.json', {
-        db: { nested: { key: 'value' } }
+        db: { nested: nestedValue }
       });
 
-      expect(function() { boot.compile(appdir.PATH); })
-        .to.throw(/`nested` is not a value type/);
+      var instructions = boot.compile(appdir.PATH);
+
+      var db = instructions.dataSources.db;
+      expect(db).to.have.property('nested');
+      expect(db.nested).to.eql(nestedValue);
     });
 
-    it('refuses to merge Array properties', function() {
+    it('merges nested Object properties', function() {
+      var nestedValue = 'http://api.test.com';
       appdir.createConfigFilesSync();
       appdir.writeConfigFileSync('datasources.local.json', {
-        db: { nested: ['value'] }
+        rest: {
+          operations: [
+            {
+              template: {
+                url: nestedValue
+              }
+            }
+          ]
+        }
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      var rest = instructions.dataSources.rest;
+      expect(rest).to.have.property('operations');
+      expect(rest.operations[0]).to.have.property('template');
+      expect(rest.operations[0].template).to.have.property('url');
+      expect(rest.operations[0].template.method).to.eql('POST');
+      expect(rest.operations[0].template.url).to.eql(nestedValue);
+    });
+
+    it('merges Array properties', function() {
+      var nestedValue = ['value'];
+      appdir.createConfigFilesSync();
+      appdir.writeConfigFileSync('datasources.local.json', {
+        db: { nested: nestedValue }
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      var db = instructions.dataSources.db;
+      expect(db).to.have.property('nested');
+      expect(db.nested).to.eql(nestedValue);
+    });
+
+    it('errors on mismatched arrays', function() {
+      var nestedValue = 'http://api.test.com';
+      appdir.createConfigFilesSync();
+      appdir.writeConfigFileSync('datasources.local.json', {
+        rest: {
+          operations: [
+            {
+              template: {
+                url: nestedValue
+              }
+            },
+            {
+              template: {
+                method: 'GET',
+                url: nestedValue
+              }
+            }
+          ]
+        }
       });
 
       expect(function() { boot.compile(appdir.PATH); })
-        .to.throw(/`nested` is not a value type/);
+        .to.throw(/an array and lengths mismatch/);
     });
 
     it('merges app configs from multiple files', function() {

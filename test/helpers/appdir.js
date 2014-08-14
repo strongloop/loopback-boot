@@ -28,6 +28,16 @@ appdir.createConfigFilesSync = function(appConfig, dataSources, models) {
     db: {
       connector: 'memory',
       defaultForType: 'db'
+    },
+    rest: {
+      connector: 'rest',
+      operations: [
+        {
+          template: {
+            method: 'POST'
+          }
+        }
+      ]
     }
   }, dataSources);
   appdir.writeConfigFileSync ('datasources.json', dataSources);

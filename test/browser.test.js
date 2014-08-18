@@ -70,6 +70,9 @@ function createBrowserLikeContext() {
     // used by `debug` module
     document: { documentElement: { style: {} } },
 
+    // used by `debug` module
+    navigator: { userAgent: 'sandbox' },
+
     // used by crypto-browserify & friends
     Int32Array: Int32Array,
     DataView: DataView,

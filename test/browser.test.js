@@ -7,6 +7,10 @@ var sandbox = require('./helpers/sandbox');
 var vm = require('vm');
 
 describe('browser support', function() {
+  this.timeout(60000); // 60s to give browserify enough time to finish
+
+  beforeEach(sandbox.reset);
+
   it('has API for bundling and executing boot instructions', function(done) {
     var appDir = path.resolve(__dirname, './fixtures/browser-app');
 
@@ -67,6 +71,9 @@ function createBrowserLikeContext() {
 
     // used by `debug` module
     document: { documentElement: { style: {} } },
+
+    // used by `debug` module
+    navigator: { userAgent: 'sandbox' },
 
     // used by crypto-browserify & friends
     Int32Array: Int32Array,

@@ -170,12 +170,10 @@ describe('executor', function() {
     });
     
     it('should define `mixins/*` files', function() {
-      if (app.loopback.modelBuilder.mixins) {
-        var modelBuilder = app.loopback.modelBuilder;
-        var registry = modelBuilder.mixins.mixins;
-        expect(registry).to.have.property('Example');
-        expect(registry).to.have.property('TimeStamps');
-      }
+      var modelBuilder = app.loopback.modelBuilder;
+      var registry = modelBuilder.mixins.mixins;
+      expect(registry).to.have.property('Example');
+      expect(registry).to.have.property('TimeStamps');
     });
     
   });

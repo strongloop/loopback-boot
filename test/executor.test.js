@@ -230,6 +230,7 @@ describe('executor', function() {
         var modelBuilder = app.loopback.modelBuilder;
         var registry = modelBuilder.mixins.mixins;
         expect(registry).to.have.property('Example');
+        expect(registry).to.have.property('TimeStamps');
       }
     });
     

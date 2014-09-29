@@ -179,6 +179,23 @@ describe('compiler', function() {
       expect(appConfig).to.have.property('fromJs', true);
     });
 
+    it('supports `appConfigRootDir` option', function() {
+      appdir.createConfigFilesSync({port:3000});
+
+      var customDir = path.resolve(appdir.PATH, 'custom');
+      fs.mkdirsSync(customDir);
+      fs.renameSync(
+        path.resolve(appdir.PATH, 'config.json'),
+        path.resolve(customDir, 'config.json'));
+
+      var instructions = boot.compile({
+        appRootDir: appdir.PATH,
+        appConfigRootDir: path.resolve(appdir.PATH, 'custom')
+      });
+
+     expect(instructions.config).to.have.property('port');
+    });
+
     it('supports `dsRootDir` option', function() {
       appdir.createConfigFilesSync();
 

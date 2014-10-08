@@ -125,29 +125,62 @@ describe('compiler', function() {
       expect(db).to.have.property('fromJs', true);
     });
 
-    it('merges Object properties', function() {
-      var nestedValue = { key: 'value' };
+    it('merges new Object values', function() {
+      var objectValue = { key: 'value' };
       appdir.createConfigFilesSync();
       appdir.writeConfigFileSync('datasources.local.json', {
-        db: { nested: nestedValue }
+        db: { nested: objectValue }
       });
 
       var instructions = boot.compile(appdir.PATH);
 
       var db = instructions.dataSources.db;
       expect(db).to.have.property('nested');
-      expect(db.nested).to.eql(nestedValue);
+      expect(db.nested).to.eql(objectValue);
     });
 
-    it('merges nested Object properties', function() {
-      var nestedValue = 'http://api.test.com';
-      appdir.createConfigFilesSync();
+    it('deeply merges Object values', function() {
+      appdir.createConfigFilesSync({}, {
+        email: {
+          transport: {
+            host: 'localhost'
+          }
+        }
+      });
+
+      appdir.writeConfigFileSync('datasources.local.json', {
+        email: {
+          transport: {
+            host: 'mail.example.com'
+          }
+        }
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+      var email = instructions.dataSources.email;
+      expect(email.transport.host).to.equal('mail.example.com');
+    });
+
+    it('deeply merges Array values of the same length', function() {
+      appdir.createConfigFilesSync({}, {
+        rest: {
+          operations: [
+            {
+              template: {
+                method: 'POST',
+                url: 'http://localhost:12345'
+              }
+            }
+          ]
+        }
+
+      });
       appdir.writeConfigFileSync('datasources.local.json', {
         rest: {
           operations: [
             {
               template: {
-                url: nestedValue
+                url: 'http://api.example.com'
               }
             }
           ]
@@ -157,50 +190,103 @@ describe('compiler', function() {
       var instructions = boot.compile(appdir.PATH);
 
       var rest = instructions.dataSources.rest;
-      expect(rest).to.have.property('operations');
-      expect(rest.operations[0]).to.have.property('template');
-      expect(rest.operations[0].template).to.have.property('url');
-      expect(rest.operations[0].template.method).to.eql('POST');
-      expect(rest.operations[0].template.url).to.eql(nestedValue);
+      expect(rest.operations[0].template).to.eql({
+        method: 'POST', // the value from datasources.json
+        url: 'http://api.example.com' // overriden in datasources.local.json
+      });
     });
 
     it('merges Array properties', function() {
-      var nestedValue = ['value'];
+      var arrayValue = ['value'];
       appdir.createConfigFilesSync();
       appdir.writeConfigFileSync('datasources.local.json', {
-        db: { nested: nestedValue }
+        db: { nested: arrayValue }
       });
 
       var instructions = boot.compile(appdir.PATH);
 
       var db = instructions.dataSources.db;
       expect(db).to.have.property('nested');
-      expect(db.nested).to.eql(nestedValue);
+      expect(db.nested).to.eql(arrayValue);
     });
 
-    it('errors on mismatched arrays', function() {
-      var nestedValue = 'http://api.test.com';
-      appdir.createConfigFilesSync();
-      appdir.writeConfigFileSync('datasources.local.json', {
-        rest: {
-          operations: [
+    it('refuses to merge Array properties of different length', function() {
+      appdir.createConfigFilesSync({
+        nest: {
+          array: []
+        }
+      });
+
+      appdir.writeConfigFileSync('config.local.json', {
+        nest: {
+          array: [
             {
-              template: {
-                url: nestedValue
-              }
-            },
-            {
-              template: {
-                method: 'GET',
-                url: nestedValue
-              }
+              key: 'value'
             }
           ]
         }
       });
 
       expect(function() { boot.compile(appdir.PATH); })
-        .to.throw(/an array and lengths mismatch/);
+        .to.throw(/array values of different length.*nest\.array/);
+    });
+
+    it('refuses to merge Array of different length in Array', function() {
+      appdir.createConfigFilesSync({
+        key: [[]]
+      });
+
+      appdir.writeConfigFileSync('config.local.json', {
+        key: [['value']]
+      });
+
+      expect(function() { boot.compile(appdir.PATH); })
+        .to.throw(/array values of different length.*key\[0\]/);
+    });
+
+    it('returns full key of an incorrect Array value', function() {
+      appdir.createConfigFilesSync({
+        toplevel: [
+          {
+            nested: []
+          }
+        ]
+      });
+
+      appdir.writeConfigFileSync('config.local.json', {
+        toplevel: [
+          {
+            nested: [ 'value' ]
+          }
+        ]
+      });
+
+      expect(function() { boot.compile(appdir.PATH); })
+        .to.throw(/array values of different length.*toplevel\[0\]\.nested/);
+    });
+
+    it('refuses to merge incompatible object properties', function() {
+      appdir.createConfigFilesSync({
+        key: []
+      });
+      appdir.writeConfigFileSync('config.local.json', {
+        key: {}
+      });
+
+      expect(function() { boot.compile(appdir.PATH); })
+        .to.throw(/incompatible types.*key/);
+    });
+
+    it('refuses to merge incompatible array items', function() {
+      appdir.createConfigFilesSync({
+        key: [[]]
+      });
+      appdir.writeConfigFileSync('config.local.json', {
+        key: [{}]
+      });
+
+      expect(function() { boot.compile(appdir.PATH); })
+        .to.throw(/incompatible types.*key\[0\]/);
     });
 
     it('merges app configs from multiple files', function() {

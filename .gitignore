@@ -10,6 +10,7 @@
 *.pid
 *.swp
 *.swo
+*.iml
 node_modules
 checkstyle.xml
 loopback-boot-*.tgz

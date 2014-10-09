@@ -75,12 +75,12 @@ var addInstructionsToBrowserify = require('./lib/bundler');
  * @header boot(app, [options])
  */
 
-exports = module.exports = function bootLoopBackApp(app, options) {
+exports = module.exports = function bootLoopBackApp(app, options, callback) {
   // backwards compatibility with loopback's app.boot
   options.env = options.env || app.get('env');
 
   var instructions = compile(options);
-  execute(app, instructions);
+  execute(app, instructions, callback);
 };
 
 /**

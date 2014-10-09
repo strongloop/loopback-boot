@@ -23,15 +23,54 @@ var addInstructionsToBrowserify = require('./lib/bundler');
  *  2. Configures Models from the `model-config.json` file in the application
  *    root directory.
  *
+ *  3. Configures the LoopBack Application object from the `config.json` file
+ *     in the application root directory. These properties can be accessed
+ *     using `app.get('propname')`.
+ *
  * If the argument is an object, then it looks for `models`, `dataSources`,
- * and `appRootDir` properties of the object.
+ * 'config', `modelsRootDir`, `dsRootDir`, `appConfigRootDir` and `appRootDir`
+ * properties of the object.
+ *
  * If the object has no `appRootDir` property then it sets the current working
  * directory as the application root directory.
+ *
+ * The execution environment, {env}, is established from, in order,
+ *  - `options.env`
+ *  - `process.env.NODE_ENV`,
+ *  - the literal `development`.
+ *
  * Then it:
  *
- * 1. Creates DataSources from the `options.dataSources` object.
+ *  1. Creates DataSources from the `options.dataSources` object, if provided;
+ *    otherwise, it searches for the files
+ *     - `datasources.json`,
+ *     - `datasources.local.js` or `datasources.local.json` (only one),
+ *     - `datasources.{env}.js` or `datasources.{env}.json` (only one)
  *
- * 2. Configures Models from the `options.models` object.
+ *    in the directory designated by 'options.dsRootDir', if present, or the
+ *    application root directory. It merges the data source definitions from
+ *    the files found.
+ *
+ *  2. Creates Models from the `options.models` object, if provided;
+ *    otherwise, it searches for the files
+ *     - `model-config.json`,
+ *     - `model-config.local.js` or `model-config.local.json` (only one),
+ *     - `model-config.{env}.js` or `model-config.{env}.json` (only one)
+ *
+ *    in the directory designated by 'options.modelsRootDir', if present, or
+ *    the application root directory. It merges the model definitions from the
+ *    files found.
+ *
+ *  3. Configures the Application object from the `options.config` object,
+ *    if provided;
+ *    otherwise, it searches for the files
+ *     - `config.json`,
+ *     - `config.local.js` or `config.local.json` (only one),
+ *     - `config.{env}.js` or `config.{env}.json` (only one)
+ *
+ *    in the directory designated by 'options.appConfigRootDir', if present, or
+ *    the application root directory. It merges the properties from the files
+ *    found.
  *
  * In both cases, the function loads JavaScript files in the
  * `/boot` subdirectory of the application root directory with `require()`.
@@ -55,6 +94,8 @@ var addInstructionsToBrowserify = require('./lib/bundler');
  * @property {String} [appRootDir] Directory to use when loading JSON and
  * JavaScript files.
  * Defaults to the current directory (`process.cwd()`).
+ * @property {String} [appConfigRootDir] Directory to use when loading
+ * `config.json`. Defaults to `appRootDir`.
  * @property {Object} [models] Object containing `Model` configurations.
  * @property {Object} [dataSources] Object containing `DataSource` definitions.
  * @property {String} [modelsRootDir] Directory to use when loading

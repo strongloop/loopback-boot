@@ -109,7 +109,7 @@ var addInstructionsToBrowserify = require('./lib/bundler');
  * for files containing model definitions.
  * @property {Array.<String>} [mixinSources] List of directories where to look
  * for files containing model mixin definitions.
- * @property {Array.<String>} [bootSources] List of directories where to look
+ * @property {Array.<String>} [bootDirs] List of directories where to look
  * for boot scripts.
  * @property {Array.<String>} [bootScripts] List of script files to execute
  * on boot.

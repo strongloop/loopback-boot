@@ -1,1 +1,1 @@
-process.loadedFooJS = true;
+process.bootFlags.push('fooLoaded');

@@ -174,6 +174,7 @@ describe('executor', function() {
       var registry = modelBuilder.mixins.mixins;
       expect(registry).to.have.property('Example');
       expect(registry).to.have.property('TimeStamps');
+      expect(registry).to.have.property('bar'); // mixinName
     });
     
   });

@@ -113,6 +113,8 @@ var addInstructionsToBrowserify = require('./lib/bundler');
  * for boot scripts.
  * @property {Array.<String>} [bootScripts] List of script files to execute
  * on boot.
+ * @property {String|Function|Boolean} [normalization] Mixin normalization format
+ * can be false, 'none', 'classify', 'dasherize' - defaults to 'classify'.
  * @end
  *
  * @header boot(app, [options])

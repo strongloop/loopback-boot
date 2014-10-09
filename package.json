@@ -1,6 +1,6 @@
 {
   "name": "loopback-boot",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Convention-based bootstrapper for LoopBack applications",
   "keywords": [
     "StrongLoop",
@@ -23,19 +23,21 @@
     "url": "https://github.com/strongloop/loopback-boot/blob/master/LICENSE"
   },
   "dependencies": {
+    "async": "~0.9.0",
     "commondir": "0.0.1",
-    "debug": "^1.0.4",
+    "debug": "^2.0.0",
     "lodash.clonedeep": "^2.4.1",
     "semver": "^2.3.0",
     "toposort": "^0.2.10",
     "underscore": "^1.6.0"
   },
   "devDependencies": {
+    "browserify": "^4.1.8",
+    "fs-extra": "^0.10.0",
+    "jshint": "^2.5.6",
     "loopback": "^1.5.0",
     "mocha": "^1.19.0",
     "must": "^0.12.0",
-    "supertest": "^0.13.0",
-    "fs-extra": "^0.10.0",
-    "browserify": "^4.1.8"
+    "supertest": "^0.13.0"
   }
 }

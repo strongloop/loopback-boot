@@ -3,6 +3,7 @@ var path = require('path');
 var loopback = require('loopback');
 var assert = require('assert');
 var expect = require('must');
+var fs = require('fs-extra');
 var sandbox = require('./helpers/sandbox');
 var appdir = require('./helpers/appdir');
 
@@ -161,13 +162,62 @@ describe('executor', function() {
 
   describe('with boot and models files', function() {
     beforeEach(function() {
+      process.bootFlags = process.bootFlags || [];
       boot.execute(app, simpleAppInstructions());
     });
 
-    it('should run `boot/*` files', function() {
-      assert(process.loadedFooJS);
-      delete process.loadedFooJS;
+    afterEach(function() {
+      delete process.bootFlags;
     });
+
+    it('should run `boot/*` files', function(done) {
+      // scripts are loaded by the order of file names
+      expect(process.bootFlags).to.eql([
+        'barLoaded',
+        'barSyncLoaded',
+        'fooLoaded',
+        'barStarted'
+      ]);
+
+      // bar finished happens in the next tick
+      // barSync executed after bar finished
+      setTimeout(function() {
+        expect(process.bootFlags).to.eql([
+          'barLoaded',
+          'barSyncLoaded',
+          'fooLoaded',
+          'barStarted',
+          'barFinished',
+          'barSyncExecuted'
+        ]);
+        done();
+      }, 10);
+    });
+  });
+
+  describe('with boot with callback', function() {
+    beforeEach(function() {
+      process.bootFlags = process.bootFlags || [];
+    });
+
+    afterEach(function() {
+      delete process.bootFlags;
+    });
+
+    it('should run `boot/*` files asynchronously', function(done) {
+      boot.execute(app, simpleAppInstructions(), function() {
+        expect(process.bootFlags).to.eql([
+          'barLoaded',
+          'barSyncLoaded',
+          'fooLoaded',
+          'barStarted',
+          'barFinished',
+          'barSyncExecuted'
+        ]);
+        done();
+      });
+    });
+
   });
 
   describe('with PaaS and npm env variables', function() {
@@ -299,5 +349,7 @@ function someInstructions(values) {
 }
 
 function simpleAppInstructions() {
-  return boot.compile(SIMPLE_APP);
+  // Copy it so that require will happend again
+  fs.copySync(SIMPLE_APP, appdir.PATH);
+  return boot.compile(appdir.PATH);
 }

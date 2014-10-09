@@ -620,6 +620,40 @@ describe('compiler', function() {
       instructions = boot.compile(appdir.PATH);
       expect(instructions.config).to.not.have.property('modified');
     });
+    
+    it('support mixin name normalization - classify (default)', function() {
+      var options = { appRootDir: SIMPLE_APP };
+      var instructions = boot.compile(options);
+      expect(instructions.mixins).to.have.property('Example');
+      expect(instructions.mixins).to.have.property('Foo');
+      expect(instructions.mixins).to.have.property('TimeStamps');
+    });
+    
+    it('support mixin name normalization - dasherize', function() {
+      var options = { appRootDir: SIMPLE_APP, normalization: 'dasherize' };
+      var instructions = boot.compile(options);
+      expect(instructions.mixins).to.have.property('example');
+      expect(instructions.mixins).to.have.property('foo');
+      expect(instructions.mixins).to.have.property('time-stamps');
+    });
+    
+    it('support mixin name normalization - custom function', function() {
+      var normalize = function(name) { return name.toUpperCase(); };
+      var options = { appRootDir: SIMPLE_APP, normalization: normalize };
+      var instructions = boot.compile(options);
+      expect(instructions.mixins).to.have.property('EXAMPLE');
+      expect(instructions.mixins).to.have.property('FOO');
+      expect(instructions.mixins).to.have.property('TIME-STAMPS');
+    });
+    
+    it('support skip mixin name normalization - none', function() {
+      var options = { appRootDir: SIMPLE_APP, normalization: false };
+      var instructions = boot.compile(options);
+      expect(instructions.mixins).to.have.property('example');
+      expect(instructions.mixins).to.have.property('Foo');
+      expect(instructions.mixins).to.have.property('time-stamps');
+    });
+    
   });
 });
 

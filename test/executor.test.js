@@ -193,6 +193,15 @@ describe('executor', function() {
         done();
       }, 10);
     });
+    
+    it('should define `mixins/*` files', function() {
+      if (app.loopback.datasourceJuggler && app.loopback.datasourceJuggler.mixins) {
+        var mixins = app.loopback.datasourceJuggler.mixins;
+        expect(mixins.registry).to.have.property('Example');
+        expect(mixins.registry).to.have.property('TimeStamps');
+        expect(mixins.registry).to.have.property('bar'); // mixinName
+      }
+    });
   });
 
   describe('with boot with callback', function() {
@@ -217,7 +226,15 @@ describe('executor', function() {
         done();
       });
     });
-
+    
+    it('should define `mixins/*` files', function() {
+      var modelBuilder = app.loopback.modelBuilder;
+      var registry = modelBuilder.mixins.mixins;
+      expect(registry).to.have.property('Example');
+      expect(registry).to.have.property('TimeStamps');
+      expect(registry).to.have.property('bar'); // mixinName
+    });
+    
   });
 
   describe('with PaaS and npm env variables', function() {

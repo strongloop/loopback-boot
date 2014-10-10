@@ -6,6 +6,7 @@ var sandbox = require('./helpers/sandbox');
 var appdir = require('./helpers/appdir');
 
 var SIMPLE_APP = path.join(__dirname, 'fixtures', 'simple-app');
+var MIXIN_SOURCES = path.join(__dirname, 'fixtures', 'mixins');
 
 describe('compiler', function() {
   beforeEach(sandbox.reset);
@@ -620,6 +621,47 @@ describe('compiler', function() {
       instructions = boot.compile(appdir.PATH);
       expect(instructions.config).to.not.have.property('modified');
     });
+    
+    it('has a mixinSources option', function() {
+      var options = { appRootDir: SIMPLE_APP, mixinSources: [MIXIN_SOURCES] };
+      var instructions = boot.compile(options);
+      expect(instructions.mixins).to.not.have.property('TimeStamps');
+      expect(instructions.mixins).to.have.property('Other');
+    });
+    
+    it('supports mixin name normalization - classify (default)', function() {
+      var options = { appRootDir: SIMPLE_APP };
+      var instructions = boot.compile(options);
+      expect(instructions.mixins).to.have.property('Example');
+      expect(instructions.mixins).to.have.property('Foo');
+      expect(instructions.mixins).to.have.property('TimeStamps');
+    });
+    
+    it('supports mixin name normalization - dasherize', function() {
+      var options = { appRootDir: SIMPLE_APP, normalization: 'dasherize' };
+      var instructions = boot.compile(options);
+      expect(instructions.mixins).to.have.property('example');
+      expect(instructions.mixins).to.have.property('foo');
+      expect(instructions.mixins).to.have.property('time-stamps');
+    });
+    
+    it('supports mixin name normalization - custom function', function() {
+      var normalize = function(name) { return name.toUpperCase(); };
+      var options = { appRootDir: SIMPLE_APP, normalization: normalize };
+      var instructions = boot.compile(options);
+      expect(instructions.mixins).to.have.property('EXAMPLE');
+      expect(instructions.mixins).to.have.property('FOO');
+      expect(instructions.mixins).to.have.property('TIME-STAMPS');
+    });
+    
+    it('supports skip mixin name normalization - none', function() {
+      var options = { appRootDir: SIMPLE_APP, normalization: false };
+      var instructions = boot.compile(options);
+      expect(instructions.mixins).to.have.property('example');
+      expect(instructions.mixins).to.have.property('Foo');
+      expect(instructions.mixins).to.have.property('time-stamps');
+    });
+    
   });
 });
 

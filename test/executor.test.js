@@ -198,6 +198,8 @@ describe('executor', function() {
       if (app.loopback.datasourceJuggler && app.loopback.datasourceJuggler.mixins) {
         var mixins = app.loopback.datasourceJuggler.mixins;
         expect(mixins.registry).to.have.property('Example');
+        expect(mixins.registry).to.have.property('TimeStamps');
+        expect(mixins.registry).to.have.property('bar'); // mixinName
       }
     });
   });
@@ -233,7 +235,6 @@ describe('executor', function() {
       expect(registry).to.have.property('bar'); // mixinName
     });
     
->>>>>>> Support loading of mixing
   });
 
   describe('with PaaS and npm env variables', function() {

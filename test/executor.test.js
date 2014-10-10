@@ -193,6 +193,13 @@ describe('executor', function() {
         done();
       }, 10);
     });
+    
+    it('should define `mixins/*` files', function() {
+      if (app.loopback.datasourceJuggler && app.loopback.datasourceJuggler.mixins) {
+        var mixins = app.loopback.datasourceJuggler.mixins;
+        expect(mixins.registry).to.have.property('Example');
+      }
+    });
   });
 
   describe('with boot with callback', function() {
@@ -217,7 +224,15 @@ describe('executor', function() {
         done();
       });
     });
-
+    
+    it('should define `mixins/*` files', function() {
+      if (app.loopback.datasourceJuggler && app.loopback.datasourceJuggler.mixins) {
+        var mixins = app.loopback.datasourceJuggler.mixins;
+        expect(mixins.registry).to.have.property('Example');
+      }
+    });
+    
+>>>>>>> Support loading of mixing
   });
 
   describe('with PaaS and npm env variables', function() {

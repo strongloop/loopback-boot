@@ -450,6 +450,28 @@ describe('compiler', function() {
         sourceFile: path.resolve(appdir.PATH, 'models', 'car.js')
       });
     });
+
+    it('loads coffeescript models from `./models`', function() {
+      appdir.createConfigFilesSync({}, {}, {
+        Car: { dataSource: 'db' }
+      });
+      appdir.writeConfigFileSync('models/car.json', { name: 'Car' });
+      appdir.writeFileSync('models/car.coffee', '');
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.models).to.have.length(1);
+      expect(instructions.models[0]).to.eql({
+        name: 'Car',
+        config: {
+          dataSource: 'db'
+        },
+        definition: {
+          name: 'Car'
+        },
+        sourceFile: path.resolve(appdir.PATH, 'models', 'car.coffee')
+      });
+    });
     
     it('supports `modelSources` option', function() {
       appdir.createConfigFilesSync({}, {}, {

@@ -1,4 +1,10 @@
 {
+  "_meta": {
+    "sources": [
+      "./models",
+      "loopback/common/models"
+    ]
+  },
   "Customer": {
     "dataSource": "db"
   }

@@ -27,17 +27,17 @@
     "commondir": "0.0.1",
     "debug": "^2.0.0",
     "lodash.clonedeep": "^2.4.1",
-    "semver": "^2.3.0",
+    "semver": "^4.1.0",
     "toposort": "^0.2.10",
     "underscore": "^1.6.0"
   },
   "devDependencies": {
-    "browserify": "^4.1.8",
-    "fs-extra": "^0.10.0",
+    "browserify": "^6.1.0",
+    "fs-extra": "^0.12.0",
     "jshint": "^2.5.6",
-    "loopback": "^1.5.0",
+    "loopback": "^2.5.0",
     "mocha": "^1.19.0",
     "must": "^0.12.0",
-    "supertest": "^0.13.0"
+    "supertest": "^0.14.0"
   }
 }

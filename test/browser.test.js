@@ -33,6 +33,7 @@ describe('browser support', function() {
 function browserifyTestApp(appDir, next) {
   var b = browserify({
     basedir: appDir,
+    debug: true
   });
   b.require('./app.js', { expose: 'browser-app' });
 
@@ -40,7 +41,7 @@ function browserifyTestApp(appDir, next) {
 
   var bundlePath = sandbox.resolve('browser-app-bundle.js');
   var out = fs.createWriteStream(bundlePath);
-  b.bundle({ debug: true }).pipe(out);
+  b.bundle().pipe(out);
   
   out.on('error', function(err) { return next(err); });
   out.on('close', function() {
@@ -68,6 +69,9 @@ function createBrowserLikeContext() {
       // used by `debug` module
       debug: process.env.DEBUG
     },
+
+    // used by DataSource.prototype.ready
+    setTimeout: setTimeout,
 
     // used by `debug` module
     document: { documentElement: { style: {} } },

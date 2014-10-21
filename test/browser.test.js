@@ -69,6 +69,9 @@ function createBrowserLikeContext() {
       debug: process.env.DEBUG
     },
 
+    // used by DataSource.prototype.ready
+    setTimeout: setTimeout,
+
     // used by `debug` module
     document: { documentElement: { style: {} } },
 

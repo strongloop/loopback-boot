@@ -501,6 +501,30 @@ describe('compiler', function() {
       });
     });
 
+    it('supports sources relative to node_modules', function() {
+      appdir.createConfigFilesSync({}, {}, {
+        User: { dataSource: 'db' }
+      });
+
+      var instructions = boot.compile({
+        appRootDir: appdir.PATH,
+        modelSources: [
+          'loopback/common/models',
+          'loopback/common/dir-does-not-exist'
+        ]
+      });
+
+      expect(instructions.models).to.have.length(1);
+      expect(instructions.models[0]).to.eql({
+        name: 'User',
+        config: {
+          dataSource: 'db'
+        },
+        definition: require('loopback/common/models/user.json'),
+        sourceFile: require.resolve('loopback/common/models/user.js')
+      });
+    });
+
     it('handles model definitions with no code', function() {
       appdir.createConfigFilesSync({}, {}, {
         Car: { dataSource: 'db' }

@@ -160,6 +160,22 @@ describe('executor', function() {
     expect(actual).to.equal('not attached');
   });
 
+  it('skips definition of already defined LoopBack models', function() {
+    var builtinModel = {
+      name: 'User',
+      definition: fs.readJsonFileSync(
+        require.resolve('loopback/common/models/user.json')
+      ),
+      config: { dataSource: 'db' },
+      sourceFile: require.resolve('loopback/common/models/user.js')
+    };
+    builtinModel.definition.redefined = true;
+
+    boot.execute(app, someInstructions({ models: [ builtinModel ] }));
+
+    expect(app.models.User.settings.redefined, 'redefined').to.not.equal(true);
+  });
+
   describe('with boot and models files', function() {
     beforeEach(function() {
       process.bootFlags = process.bootFlags || [];

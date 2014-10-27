@@ -6,6 +6,31 @@ var browserify = require('browserify');
 var sandbox = require('./helpers/sandbox');
 var vm = require('vm');
 
+var compileStrategies = {
+  'default': function(appDir) {
+    var b = browserify({
+      basedir: appDir,
+      debug: true
+    });
+
+    b.require('./app.js', { expose: 'browser-app' });
+    return b;
+  },
+
+  'coffee': function(appDir) {
+    var b = browserify({
+      basedir: appDir,
+      extensions: ['.coffee'],
+      debug: true
+    });
+
+    b.transform('coffeeify');
+
+    b.require('./app.coffee', { expose: 'browser-app' });
+    return b;
+  },
+};
+
 describe('browser support', function() {
   this.timeout(60000); // 60s to give browserify enough time to finish
 
@@ -28,14 +53,38 @@ describe('browser support', function() {
       done();
     });
   });
+
+  it('supports coffee-script files', function(done) {
+    // add coffee-script to require.extensions
+    require('coffee-script/register');
+
+    var appDir = path.resolve(__dirname, './fixtures/coffee-app');
+
+    browserifyTestApp(appDir, 'coffee', function(err, bundlePath) {
+      if (err) return done(err);
+
+      var app = executeBundledApp(bundlePath);
+
+      // configured in fixtures/browser-app/boot/configure.coffee
+      expect(app.settings).to.have.property('custom-key', 'custom-value');
+      expect(Object.keys(app.models)).to.include('Customer');
+      expect(app.models.Customer.settings)
+        .to.have.property('_customized', 'Customer');
+      done();
+    });
+  });
 });
 
-function browserifyTestApp(appDir, next) {
-  var b = browserify({
-    basedir: appDir,
-    debug: true
-  });
-  b.require('./app.js', { expose: 'browser-app' });
+function browserifyTestApp(appDir, strategy, next) {
+  //set default args
+  if (((typeof strategy) === 'function') && !next) {
+    next = strategy;
+    strategy = undefined;
+  }
+  if (!strategy)
+    strategy = 'default';
+
+  var b = compileStrategies[strategy](appDir);
 
   boot.compileToBrowserify(appDir, b);
 

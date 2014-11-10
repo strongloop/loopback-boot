@@ -112,8 +112,9 @@ var addInstructionsToBrowserify = require('./lib/bundler');
  * @property {Array.<String>} [bootScripts] List of script files to execute
  * on boot.
  * @end
+ * @param {Function} [callback] Callback function.
  *
- * @header boot(app, [options])
+ * @header boot(app, [options], [callback])
  */
 
 exports = module.exports = function bootLoopBackApp(app, options, callback) {

@@ -6,6 +6,7 @@ var expect = require('chai').expect;
 var fs = require('fs-extra');
 var sandbox = require('./helpers/sandbox');
 var appdir = require('./helpers/appdir');
+var supertest = require('supertest');
 
 var SIMPLE_APP = path.join(__dirname, 'fixtures', 'simple-app');
 
@@ -18,6 +19,13 @@ describe('executor', function() {
 
   beforeEach(function() {
     app = loopback();
+
+    // process.bootFlags is used by simple-app/boot/*.js scripts
+    process.bootFlags = [];
+  });
+
+  afterEach(function() {
+    delete process.bootFlags;
   });
 
   var dummyInstructions = someInstructions({
@@ -178,7 +186,6 @@ describe('executor', function() {
 
   describe('with boot and models files', function() {
     beforeEach(function() {
-      process.bootFlags = process.bootFlags || [];
       boot.execute(app, simpleAppInstructions());
     });
 
@@ -212,14 +219,6 @@ describe('executor', function() {
   });
 
   describe('with boot with callback', function() {
-    beforeEach(function() {
-      process.bootFlags = process.bootFlags || [];
-    });
-
-    afterEach(function() {
-      delete process.bootFlags;
-    });
-
     it('should run `boot/*` files asynchronously', function(done) {
       boot.execute(app, simpleAppInstructions(), function() {
         expect(process.bootFlags).to.eql([
@@ -233,7 +232,6 @@ describe('executor', function() {
         done();
       });
     });
-
   });
 
   describe('with PaaS and npm env variables', function() {
@@ -326,6 +324,68 @@ describe('executor', function() {
     boot.execute(app, someInstructions({ files: { boot: [file] } }));
     expect(app.fnCalled, 'exported fn was called').to.be.true();
   });
+
+  it('configures middleware', function(done) {
+    var pushNamePath = require.resolve('./helpers/push-name-middleware');
+
+    boot.execute(app, someInstructions({
+      middleware: {
+        phases: ['initial', 'custom'],
+        middleware: [
+          {
+            sourceFile: pushNamePath,
+            config: {
+              phase: 'initial',
+              params: 'initial'
+            }
+          },
+          {
+            sourceFile: pushNamePath,
+            config: {
+              phase: 'custom',
+              params: 'custom'
+            }
+          },
+          {
+            sourceFile: pushNamePath,
+            config: {
+              phase: 'routes',
+              params: 'routes'
+            }
+          },
+          {
+            sourceFile: pushNamePath,
+            config: {
+              phase: 'routes',
+              enabled: false,
+              params: 'disabled'
+            }
+          }
+        ]
+      }
+    }));
+
+    supertest(app)
+      .get('/')
+      .end(function(err, res) {
+        if (err) return done(err);
+        var names = (res.headers.names || '').split(',');
+        expect(names).to.eql(['initial', 'custom', 'routes']);
+        done();
+      });
+  });
+
+  it('configures middleware (end-to-end)', function(done) {
+    boot.execute(app, simpleAppInstructions());
+
+    supertest(app)
+      .get('/')
+      .end(function(err, res) {
+        if (err) return done(err);
+        expect(res.headers.names).to.equal('custom-middleware');
+        done();
+      });
+  });
 });
 
 function assertValidDataSource(dataSource) {
@@ -350,6 +410,7 @@ function someInstructions(values) {
     config: values.config || {},
     models: values.models || [],
     dataSources: values.dataSources || { db: { connector: 'memory' } },
+    middleware: values.middleware || { phases: [], middleware: [] },
     files: {
       boot: []
     }

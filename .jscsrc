@@ -1,0 +1,24 @@
+{
+  "preset": "google",
+  "requireCurlyBraces": [
+     "do",
+     "try",
+     "catch"
+  ],
+  "disallowSpacesInsideObjectBrackets": null,
+  "requireSpaceAfterLineComment": true,
+  "maximumLineLength": {
+     "value": 80,
+     "allowRegex": true
+  },
+  "validateJSDoc": {
+    "checkParamNames": false,
+    "checkRedundantParams": false,
+    "requireParamTypes": true
+  },
+  "excludeFiles": [
+    "node_modules/**",
+    "coverage/**",
+    "test/sandbox/**"
+  ]
+}

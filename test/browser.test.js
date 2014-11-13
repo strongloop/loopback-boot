@@ -76,7 +76,7 @@ describe('browser support', function() {
 });
 
 function browserifyTestApp(appDir, strategy, next) {
-  //set default args
+  // set default args
   if (((typeof strategy) === 'function') && !next) {
     next = strategy;
     strategy = undefined;

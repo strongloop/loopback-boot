@@ -12,7 +12,10 @@ describe('compiler', function() {
   beforeEach(appdir.init);
 
   describe('from options', function() {
-    var options, instructions, appConfig;
+    var options;
+    var instructions;
+    var appConfig;
+
     beforeEach(function() {
       options = {
         config: {
@@ -256,7 +259,7 @@ describe('compiler', function() {
       appdir.writeConfigFileSync('config.local.json', {
         toplevel: [
           {
-            nested: [ 'value' ]
+            nested: ['value']
           }
         ]
       });
@@ -337,7 +340,7 @@ describe('compiler', function() {
         appConfigRootDir: path.resolve(appdir.PATH, 'custom')
       });
 
-     expect(instructions.config).to.have.property('port');
+      expect(instructions.config).to.have.property('port');
     });
 
     it('supports `dsRootDir` option', function() {

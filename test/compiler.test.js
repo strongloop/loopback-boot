@@ -1,7 +1,7 @@
 var boot = require('../');
 var fs = require('fs-extra');
 var path = require('path');
-var expect = require('must');
+var expect = require('chai').expect;
 var sandbox = require('./helpers/sandbox');
 var appdir = require('./helpers/appdir');
 
@@ -12,7 +12,10 @@ describe('compiler', function() {
   beforeEach(appdir.init);
 
   describe('from options', function() {
-    var options, instructions, appConfig;
+    var options;
+    var instructions;
+    var appConfig;
+
     beforeEach(function() {
       options = {
         config: {
@@ -256,7 +259,7 @@ describe('compiler', function() {
       appdir.writeConfigFileSync('config.local.json', {
         toplevel: [
           {
-            nested: [ 'value' ]
+            nested: ['value']
           }
         ]
       });
@@ -337,7 +340,7 @@ describe('compiler', function() {
         appConfigRootDir: path.resolve(appdir.PATH, 'custom')
       });
 
-     expect(instructions.config).to.have.property('port');
+      expect(instructions.config).to.have.property('port');
     });
 
     it('supports `dsRootDir` option', function() {
@@ -379,7 +382,7 @@ describe('compiler', function() {
       var instructions = boot.compile(appdir.PATH);
       expect(instructions.files.boot).to.eql([initJs]);
     });
-    
+
     it('supports `bootDirs` option', function() {
       appdir.createConfigFilesSync();
       var initJs = appdir.writeFileSync('custom-boot/init.js',
@@ -390,7 +393,7 @@ describe('compiler', function() {
       });
       expect(instructions.files.boot).to.eql([initJs]);
     });
-    
+
     it('supports `bootScripts` option', function() {
       appdir.createConfigFilesSync();
       var initJs = appdir.writeFileSync('custom-boot/init.js',
@@ -475,19 +478,19 @@ describe('compiler', function() {
         sourceFile: path.resolve(appdir.PATH, 'models', 'car.coffee')
       });
     });
-    
+
     it('supports `modelSources` option', function() {
       appdir.createConfigFilesSync({}, {}, {
         Car: { dataSource: 'db' }
       });
       appdir.writeConfigFileSync('custom-models/car.json', { name: 'Car' });
       appdir.writeFileSync('custom-models/car.js', '');
-      
+
       var instructions = boot.compile({
         appRootDir: appdir.PATH,
         modelSources: ['./custom-models']
       });
-      
+
       expect(instructions.models).to.have.length(1);
       expect(instructions.models[0]).to.eql({
         name: 'Car',

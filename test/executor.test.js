@@ -2,7 +2,7 @@ var boot = require('../');
 var path = require('path');
 var loopback = require('loopback');
 var assert = require('assert');
-var expect = require('must');
+var expect = require('chai').expect;
 var fs = require('fs-extra');
 var sandbox = require('./helpers/sandbox');
 var appdir = require('./helpers/appdir');
@@ -171,7 +171,7 @@ describe('executor', function() {
     };
     builtinModel.definition.redefined = true;
 
-    boot.execute(app, someInstructions({ models: [ builtinModel ] }));
+    boot.execute(app, someInstructions({ models: [builtinModel] }));
 
     expect(app.models.User.settings.redefined, 'redefined').to.not.equal(true);
   });
@@ -266,7 +266,7 @@ describe('executor', function() {
     });
 
     it('should prioritize sources', function() {
-      /*jshint camelcase:false */
+      // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
       process.env.npm_config_host = randomHost();
       process.env.OPENSHIFT_SLS_IP = randomHost();
       process.env.OPENSHIFT_NODEJS_IP = randomHost();
@@ -323,11 +323,10 @@ describe('executor', function() {
       'module.exports = function(app) { app.fnCalled = true; };');
 
     delete app.fnCalled;
-    boot.execute(app, someInstructions({ files: { boot: [ file ] } }));
+    boot.execute(app, someInstructions({ files: { boot: [file] } }));
     expect(app.fnCalled, 'exported fn was called').to.be.true();
   });
 });
-
 
 function assertValidDataSource(dataSource) {
   // has methods
@@ -340,7 +339,7 @@ function assertValidDataSource(dataSource) {
   assert.isFunc(dataSource, 'operations');
 }
 
-assert.isFunc = function (obj, name) {
+assert.isFunc = function(obj, name) {
   assert(obj, 'cannot assert function ' + name +
     ' on object that does not exist');
   assert(typeof obj[name] === 'function', name + ' is not a function');

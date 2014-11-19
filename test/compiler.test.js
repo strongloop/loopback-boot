@@ -673,6 +673,186 @@ describe('compiler', function() {
       expect(instructions.config).to.not.have.property('modified');
     });
   });
+
+  describe('for middleware', function() {
+    beforeEach(function() {
+      appdir.createConfigFilesSync();
+    });
+
+    it('emits middleware instructions', function() {
+      appdir.writeConfigFileSync('middleware.json', {
+        initial: {
+        },
+        custom: {
+          'loopback/server/middleware/url-not-found': {
+            params: 'some-config-data'
+          }
+        },
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.middleware).to.eql({
+        phases: ['initial', 'custom'],
+        middleware: [{
+          sourceFile:
+            require.resolve('loopback/server/middleware/url-not-found'),
+          config: {
+            phase: 'custom',
+            params: 'some-config-data'
+          }
+        }]
+      });
+    });
+
+    it('fails when a module middleware cannot be resolved', function() {
+      appdir.writeConfigFileSync('middleware.json', {
+        final: {
+          'loopback/path-does-not-exist': { }
+        }
+      });
+
+      expect(function() { boot.compile(appdir.PATH); })
+        .to.throw(/path-does-not-exist/);
+    });
+
+    it('resolves paths relatively to appRootDir', function() {
+      appdir.writeConfigFileSync('./middleware.json', {
+        routes: {
+          // resolves to ./middleware.json
+          './middleware': { }
+        }
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.middleware).to.eql({
+        phases: ['routes'],
+        middleware: [{
+          sourceFile: path.resolve(appdir.PATH, 'middleware.json'),
+          config: { phase: 'routes' }
+        }]
+      });
+    });
+
+    it('merges config.params', function() {
+      appdir.writeConfigFileSync('./middleware.json', {
+        routes: {
+          './middleware': {
+            params: {
+              key: 'initial value'
+            }
+          }
+        }
+      });
+
+      appdir.writeConfigFileSync('./middleware.local.json', {
+        routes: {
+          './middleware': {
+            params: {
+              key: 'custom value',
+            }
+          }
+        }
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.middleware.middleware[0].config.params).to.eql({
+        key: 'custom value'
+      });
+    });
+
+    it('merges config.enabled', function() {
+      appdir.writeConfigFileSync('./middleware.json', {
+        routes: {
+          './middleware': {
+            params: {
+              key: 'initial value'
+            }
+          }
+        }
+      });
+
+      appdir.writeConfigFileSync('./middleware.local.json', {
+        routes: {
+          './middleware': {
+            enabled: false
+          }
+        }
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.middleware.middleware[0].config)
+        .to.have.property('enabled', false);
+    });
+
+    it('flattens sub-phases', function() {
+      appdir.writeConfigFileSync('middleware.json', {
+        'initial:after': {
+        },
+        'custom:before': {
+          'loopback/server/middleware/url-not-found': {
+            params: 'some-config-data'
+          }
+        },
+        'custom:after': {
+
+        }
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.middleware.phases, 'phases')
+        .to.eql(['initial', 'custom']);
+      expect(instructions.middleware.middleware, 'middleware')
+        .to.eql([{
+          sourceFile:
+            require.resolve('loopback/server/middleware/url-not-found'),
+          config: {
+            phase: 'custom:before',
+            params: 'some-config-data'
+          }
+        }]);
+    });
+
+    it('supports multiple instances of the same middleware', function() {
+
+      appdir.writeConfigFileSync('middleware.json', {
+        'final': {
+          './middleware': [
+            {
+              params: 'first'
+            },
+            {
+              params: 'second'
+            }
+          ]
+        },
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.middleware.middleware)
+        .to.eql([
+          {
+            sourceFile: path.resolve(appdir.PATH, 'middleware.json'),
+            config: {
+              phase: 'final',
+              params: 'first'
+            }
+          },
+          {
+            sourceFile: path.resolve(appdir.PATH, 'middleware.json'),
+            config: {
+              phase: 'final',
+              params: 'second'
+            }
+          },
+        ]);
+    });
+  });
 });
 
 function getNameProperty(obj) {

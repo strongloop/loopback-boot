@@ -405,6 +405,19 @@ describe('compiler', function() {
       expect(instructions.files.boot).to.eql([initJs]);
     });
 
+    it('should remove duplicate scripts', function(){
+      appdir.createConfigFilesSync();
+      var initJs = appdir.writeFileSync('custom-boot/init.js',
+        'module.exports = function(app) { app.fnCalled = true; };');
+      var instructions = boot.compile({
+        appRootDir: appdir.PATH,
+        bootDirs:[path.dirname(initJs)],
+        bootScripts: [initJs]
+      });
+      expect(instructions.files.boot).to.eql([initJs]);
+      expect(instructions.files.boot.length).to.eql(1);
+    })
+
     it('ignores models/ subdirectory', function() {
       appdir.createConfigFilesSync();
       appdir.writeFileSync('models/my-model.js', '');

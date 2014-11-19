@@ -47,3 +47,8 @@ appdir.writeFileSync = function(name, content) {
   fs.writeFileSync(filePath, content, 'utf-8');
   return filePath;
 };
+
+appdir.deleteConfigFileSync = function(name) {
+  var filePath = path.resolve(PATH, name);
+  return fs.removeSync(filePath);
+};

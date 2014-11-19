@@ -117,6 +117,25 @@ describe('compiler', function() {
       expect(actualLoadOrder, 'load order').to.eql(expectedLoadOrder);
     });
 
+    it('accepts alternative .js config files', function() {
+      appdir.createConfigFilesSync();
+      // delete generated config.json
+      // It shouldn't be needed when an alternative config is supplied
+      appdir.deleteConfigFileSync('config.json');
+
+      appdir.writeFileSync('config.local.js',
+        'module.exports = ' +
+        '{ port: 3000, host: "127.0.0.1", restApiRoot: "/api" };');
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.config).to.eql({
+        port: 3000,
+        host: '127.0.0.1',
+        restApiRoot: '/api'
+      });
+    });
+
     it('supports .js for custom datasource config files', function() {
       appdir.createConfigFilesSync();
       appdir.writeFileSync('datasources.local.js',

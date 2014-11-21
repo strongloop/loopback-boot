@@ -375,6 +375,34 @@ describe('executor', function() {
       });
   });
 
+  it('configures middleware using shortform', function(done) {
+
+    boot.execute(app, someInstructions({
+      middleware: {
+        middleware: [
+          {
+            sourceFile: require.resolve('loopback'),
+            fragment: 'static',
+            config: {
+              phase: 'files',
+              params: path.join(__dirname, './fixtures/simple-app/client/')
+            }
+          }
+        ]
+      }
+    }));
+
+    supertest(app)
+      .get('/')
+      .end(function(err, res) {
+        if (err) return done(err);
+        expect(res.text).to.eql('<!DOCTYPE html>\n<html>\n<head lang="en">\n' +
+          '    <meta charset="UTF-8">\n    <title>simple-app</title>\n' +
+          '</head>\n<body>\n<h1>simple-app</h1>\n</body>\n</html>');
+        done();
+      });
+  });
+
   it('configures middleware (end-to-end)', function(done) {
     boot.execute(app, simpleAppInstructions());
 

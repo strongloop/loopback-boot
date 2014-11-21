@@ -675,34 +675,52 @@ describe('compiler', function() {
   });
 
   describe('for middleware', function() {
-    beforeEach(function() {
-      appdir.createConfigFilesSync();
-    });
 
-    it('emits middleware instructions', function() {
-      appdir.writeConfigFileSync('middleware.json', {
+    function testMiddlewareRegistration(middlewareId, sourceFile) {
+      var json = {
         initial: {
         },
         custom: {
-          'loopback/server/middleware/url-not-found': {
-            params: 'some-config-data'
-          }
-        },
-      });
+        }
+      };
+
+      json.custom[middlewareId] = {
+        params: 'some-config-data'
+      };
+
+      appdir.writeConfigFileSync('middleware.json', json);
 
       var instructions = boot.compile(appdir.PATH);
 
       expect(instructions.middleware).to.eql({
         phases: ['initial', 'custom'],
-        middleware: [{
-          sourceFile:
-            require.resolve('loopback/server/middleware/url-not-found'),
-          config: {
-            phase: 'custom',
-            params: 'some-config-data'
+        middleware: [
+          {
+            sourceFile: sourceFile,
+            config: {
+              phase: 'custom',
+              params: 'some-config-data'
+            }
           }
-        }]
+        ]
       });
+    }
+
+    var sourceFileForUrlNotFound;
+    beforeEach(function() {
+      fs.copySync(SIMPLE_APP, appdir.PATH);
+      sourceFileForUrlNotFound = require.resolve(
+        'loopback/server/middleware/url-not-found');
+    });
+
+    it('emits middleware instructions', function() {
+      testMiddlewareRegistration('loopback/server/middleware/url-not-found',
+        sourceFileForUrlNotFound);
+    });
+
+    it('emits middleware instructions for fragment', function() {
+      testMiddlewareRegistration('loopback#url-not-found',
+        sourceFileForUrlNotFound);
     });
 
     it('fails when a module middleware cannot be resolved', function() {
@@ -715,6 +733,20 @@ describe('compiler', function() {
       expect(function() { boot.compile(appdir.PATH); })
         .to.throw(/path-does-not-exist/);
     });
+
+    it('fails when a module middleware fragment cannot be resolved',
+      function() {
+        appdir.writeConfigFileSync('middleware.json', {
+          final: {
+            'loopback#path-does-not-exist': { }
+          }
+        });
+
+        expect(function() {
+          boot.compile(appdir.PATH);
+        })
+          .to.throw(/path-does-not-exist/);
+      });
 
     it('resolves paths relatively to appRootDir', function() {
       appdir.writeConfigFileSync('./middleware.json', {
@@ -750,7 +782,7 @@ describe('compiler', function() {
         routes: {
           './middleware': {
             params: {
-              key: 'custom value',
+              key: 'custom value'
             }
           }
         }
@@ -829,7 +861,7 @@ describe('compiler', function() {
               params: 'second'
             }
           ]
-        },
+        }
       });
 
       var instructions = boot.compile(appdir.PATH);
@@ -849,9 +881,79 @@ describe('compiler', function() {
               phase: 'final',
               params: 'second'
             }
-          },
+          }
         ]);
     });
+
+    it('supports shorthand notation for middleware paths', function() {
+      appdir.writeConfigFileSync('middleware.json', {
+        'final': {
+          'loopback#url-not-found': {}
+        }
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.middleware.middleware[0].sourceFile)
+        .to.equal(require.resolve('loopback/server/middleware/url-not-found'));
+    });
+
+    it('supports shorthand notation for relative paths', function() {
+      appdir.writeConfigFileSync('middleware.json', {
+        'routes': {
+          './middleware/index#myMiddleware': {
+          }
+        }
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.middleware.middleware[0].sourceFile)
+        .to.equal(path.resolve(appdir.PATH,
+          './middleware/index.js'));
+      expect(instructions.middleware.middleware[0]).have.property(
+        'fragment',
+        'myMiddleware');
+    });
+
+    it('supports shorthand notation when the fragment name matches a property',
+      function() {
+        appdir.writeConfigFileSync('middleware.json', {
+          'final': {
+            'loopback#errorHandler': {}
+          }
+        });
+
+        var instructions = boot.compile(appdir.PATH);
+
+        expect(instructions.middleware.middleware[0]).have.property(
+          'sourceFile',
+          require.resolve('loopback'));
+        expect(instructions.middleware.middleware[0]).have.property(
+          'fragment',
+          'errorHandler');
+      });
+
+    // FIXME: [rfeng] The following test is disabled until
+    // https://github.com/strongloop/loopback-boot/issues/73 is fixed
+    it.skip('resolves modules relative to appRootDir', function() {
+        var HANDLER_FILE = 'node_modules/handler/index.js';
+        appdir.writeFileSync(
+          HANDLER_FILE,
+          'module.exports = function(req, res, next) { next(); }');
+
+        appdir.writeConfigFileSync('middleware.json', {
+          'initial': {
+            'handler': {}
+          }
+        });
+
+        var instructions = boot.compile(appdir.PATH);
+
+        expect(instructions.middleware.middleware[0]).have.property(
+          'sourceFile',
+          appdir.resolve(HANDLER_FILE));
+      });
   });
 });
 

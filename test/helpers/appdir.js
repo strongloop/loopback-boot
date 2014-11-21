@@ -42,8 +42,12 @@ appdir.writeConfigFileSync = function(name, json) {
 };
 
 appdir.writeFileSync = function(name, content) {
-  var filePath = path.resolve(PATH, name);
+  var filePath = this.resolve(name);
   fs.mkdirsSync(path.dirname(filePath));
   fs.writeFileSync(filePath, content, 'utf-8');
   return filePath;
+};
+
+appdir.resolve = function(name) {
+  return path.resolve(PATH, name);
 };

@@ -1,24 +1,21 @@
 {
 "node": true,
 "browser": true,
-"camelcase" : true,
 "eqnull" : true,
 "indent": 2,
 "undef": true,
 "unused": true,
 "quotmark": "single",
-"maxlen": 80,
-"trailing": true,
 "newcap": true,
 "nonew": true,
 "sub": true,
 "unused": "vars",
 "globals": {
-  "describe": true,
-  "it": true,
-  "before": true,
-  "beforeEach": true,
-  "after": true,
-  "afterEach": true
+  "describe": false,
+  "it": false,
+  "before": false,
+  "beforeEach": false,
+  "after": false,
+  "afterEach": false
 }
 }

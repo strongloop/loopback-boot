@@ -1,7 +1,7 @@
 var boot = require('../');
 var fs = require('fs-extra');
 var path = require('path');
-var expect = require('must');
+var expect = require('chai').expect;
 var sandbox = require('./helpers/sandbox');
 var appdir = require('./helpers/appdir');
 
@@ -12,7 +12,10 @@ describe('compiler', function() {
   beforeEach(appdir.init);
 
   describe('from options', function() {
-    var options, instructions, appConfig;
+    var options;
+    var instructions;
+    var appConfig;
+
     beforeEach(function() {
       options = {
         config: {
@@ -256,7 +259,7 @@ describe('compiler', function() {
       appdir.writeConfigFileSync('config.local.json', {
         toplevel: [
           {
-            nested: [ 'value' ]
+            nested: ['value']
           }
         ]
       });
@@ -337,7 +340,7 @@ describe('compiler', function() {
         appConfigRootDir: path.resolve(appdir.PATH, 'custom')
       });
 
-     expect(instructions.config).to.have.property('port');
+      expect(instructions.config).to.have.property('port');
     });
 
     it('supports `dsRootDir` option', function() {
@@ -379,7 +382,7 @@ describe('compiler', function() {
       var instructions = boot.compile(appdir.PATH);
       expect(instructions.files.boot).to.eql([initJs]);
     });
-    
+
     it('supports `bootDirs` option', function() {
       appdir.createConfigFilesSync();
       var initJs = appdir.writeFileSync('custom-boot/init.js',
@@ -390,7 +393,7 @@ describe('compiler', function() {
       });
       expect(instructions.files.boot).to.eql([initJs]);
     });
-    
+
     it('supports `bootScripts` option', function() {
       appdir.createConfigFilesSync();
       var initJs = appdir.writeFileSync('custom-boot/init.js',
@@ -475,19 +478,19 @@ describe('compiler', function() {
         sourceFile: path.resolve(appdir.PATH, 'models', 'car.coffee')
       });
     });
-    
+
     it('supports `modelSources` option', function() {
       appdir.createConfigFilesSync({}, {}, {
         Car: { dataSource: 'db' }
       });
       appdir.writeConfigFileSync('custom-models/car.json', { name: 'Car' });
       appdir.writeFileSync('custom-models/car.js', '');
-      
+
       var instructions = boot.compile({
         appRootDir: appdir.PATH,
         modelSources: ['./custom-models']
       });
-      
+
       expect(instructions.models).to.have.length(1);
       expect(instructions.models[0]).to.eql({
         name: 'Car',
@@ -669,6 +672,288 @@ describe('compiler', function() {
       instructions = boot.compile(appdir.PATH);
       expect(instructions.config).to.not.have.property('modified');
     });
+  });
+
+  describe('for middleware', function() {
+
+    function testMiddlewareRegistration(middlewareId, sourceFile) {
+      var json = {
+        initial: {
+        },
+        custom: {
+        }
+      };
+
+      json.custom[middlewareId] = {
+        params: 'some-config-data'
+      };
+
+      appdir.writeConfigFileSync('middleware.json', json);
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.middleware).to.eql({
+        phases: ['initial', 'custom'],
+        middleware: [
+          {
+            sourceFile: sourceFile,
+            config: {
+              phase: 'custom',
+              params: 'some-config-data'
+            }
+          }
+        ]
+      });
+    }
+
+    var sourceFileForUrlNotFound;
+    beforeEach(function() {
+      fs.copySync(SIMPLE_APP, appdir.PATH);
+      sourceFileForUrlNotFound = require.resolve(
+        'loopback/server/middleware/url-not-found');
+    });
+
+    it('emits middleware instructions', function() {
+      testMiddlewareRegistration('loopback/server/middleware/url-not-found',
+        sourceFileForUrlNotFound);
+    });
+
+    it('emits middleware instructions for fragment', function() {
+      testMiddlewareRegistration('loopback#url-not-found',
+        sourceFileForUrlNotFound);
+    });
+
+    it('fails when a module middleware cannot be resolved', function() {
+      appdir.writeConfigFileSync('middleware.json', {
+        final: {
+          'loopback/path-does-not-exist': { }
+        }
+      });
+
+      expect(function() { boot.compile(appdir.PATH); })
+        .to.throw(/path-does-not-exist/);
+    });
+
+    it('fails when a module middleware fragment cannot be resolved',
+      function() {
+        appdir.writeConfigFileSync('middleware.json', {
+          final: {
+            'loopback#path-does-not-exist': { }
+          }
+        });
+
+        expect(function() {
+          boot.compile(appdir.PATH);
+        })
+          .to.throw(/path-does-not-exist/);
+      });
+
+    it('resolves paths relatively to appRootDir', function() {
+      appdir.writeConfigFileSync('./middleware.json', {
+        routes: {
+          // resolves to ./middleware.json
+          './middleware': { }
+        }
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.middleware).to.eql({
+        phases: ['routes'],
+        middleware: [{
+          sourceFile: path.resolve(appdir.PATH, 'middleware.json'),
+          config: { phase: 'routes' }
+        }]
+      });
+    });
+
+    it('merges config.params', function() {
+      appdir.writeConfigFileSync('./middleware.json', {
+        routes: {
+          './middleware': {
+            params: {
+              key: 'initial value'
+            }
+          }
+        }
+      });
+
+      appdir.writeConfigFileSync('./middleware.local.json', {
+        routes: {
+          './middleware': {
+            params: {
+              key: 'custom value'
+            }
+          }
+        }
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.middleware.middleware[0].config.params).to.eql({
+        key: 'custom value'
+      });
+    });
+
+    it('merges config.enabled', function() {
+      appdir.writeConfigFileSync('./middleware.json', {
+        routes: {
+          './middleware': {
+            params: {
+              key: 'initial value'
+            }
+          }
+        }
+      });
+
+      appdir.writeConfigFileSync('./middleware.local.json', {
+        routes: {
+          './middleware': {
+            enabled: false
+          }
+        }
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.middleware.middleware[0].config)
+        .to.have.property('enabled', false);
+    });
+
+    it('flattens sub-phases', function() {
+      appdir.writeConfigFileSync('middleware.json', {
+        'initial:after': {
+        },
+        'custom:before': {
+          'loopback/server/middleware/url-not-found': {
+            params: 'some-config-data'
+          }
+        },
+        'custom:after': {
+
+        }
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.middleware.phases, 'phases')
+        .to.eql(['initial', 'custom']);
+      expect(instructions.middleware.middleware, 'middleware')
+        .to.eql([{
+          sourceFile:
+            require.resolve('loopback/server/middleware/url-not-found'),
+          config: {
+            phase: 'custom:before',
+            params: 'some-config-data'
+          }
+        }]);
+    });
+
+    it('supports multiple instances of the same middleware', function() {
+
+      appdir.writeConfigFileSync('middleware.json', {
+        'final': {
+          './middleware': [
+            {
+              params: 'first'
+            },
+            {
+              params: 'second'
+            }
+          ]
+        }
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.middleware.middleware)
+        .to.eql([
+          {
+            sourceFile: path.resolve(appdir.PATH, 'middleware.json'),
+            config: {
+              phase: 'final',
+              params: 'first'
+            }
+          },
+          {
+            sourceFile: path.resolve(appdir.PATH, 'middleware.json'),
+            config: {
+              phase: 'final',
+              params: 'second'
+            }
+          }
+        ]);
+    });
+
+    it('supports shorthand notation for middleware paths', function() {
+      appdir.writeConfigFileSync('middleware.json', {
+        'final': {
+          'loopback#url-not-found': {}
+        }
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.middleware.middleware[0].sourceFile)
+        .to.equal(require.resolve('loopback/server/middleware/url-not-found'));
+    });
+
+    it('supports shorthand notation for relative paths', function() {
+      appdir.writeConfigFileSync('middleware.json', {
+        'routes': {
+          './middleware/index#myMiddleware': {
+          }
+        }
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.middleware.middleware[0].sourceFile)
+        .to.equal(path.resolve(appdir.PATH,
+          './middleware/index.js'));
+      expect(instructions.middleware.middleware[0]).have.property(
+        'fragment',
+        'myMiddleware');
+    });
+
+    it('supports shorthand notation when the fragment name matches a property',
+      function() {
+        appdir.writeConfigFileSync('middleware.json', {
+          'final': {
+            'loopback#errorHandler': {}
+          }
+        });
+
+        var instructions = boot.compile(appdir.PATH);
+
+        expect(instructions.middleware.middleware[0]).have.property(
+          'sourceFile',
+          require.resolve('loopback'));
+        expect(instructions.middleware.middleware[0]).have.property(
+          'fragment',
+          'errorHandler');
+      });
+
+    // FIXME: [rfeng] The following test is disabled until
+    // https://github.com/strongloop/loopback-boot/issues/73 is fixed
+    it.skip('resolves modules relative to appRootDir', function() {
+        var HANDLER_FILE = 'node_modules/handler/index.js';
+        appdir.writeFileSync(
+          HANDLER_FILE,
+          'module.exports = function(req, res, next) { next(); }');
+
+        appdir.writeConfigFileSync('middleware.json', {
+          'initial': {
+            'handler': {}
+          }
+        });
+
+        var instructions = boot.compile(appdir.PATH);
+
+        expect(instructions.middleware.middleware[0]).have.property(
+          'sourceFile',
+          appdir.resolve(HANDLER_FILE));
+      });
   });
 });
 

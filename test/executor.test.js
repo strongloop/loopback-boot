@@ -2,10 +2,11 @@ var boot = require('../');
 var path = require('path');
 var loopback = require('loopback');
 var assert = require('assert');
-var expect = require('must');
+var expect = require('chai').expect;
 var fs = require('fs-extra');
 var sandbox = require('./helpers/sandbox');
 var appdir = require('./helpers/appdir');
+var supertest = require('supertest');
 
 var SIMPLE_APP = path.join(__dirname, 'fixtures', 'simple-app');
 
@@ -18,6 +19,13 @@ describe('executor', function() {
 
   beforeEach(function() {
     app = loopback();
+
+    // process.bootFlags is used by simple-app/boot/*.js scripts
+    process.bootFlags = [];
+  });
+
+  afterEach(function() {
+    delete process.bootFlags;
   });
 
   var dummyInstructions = someInstructions({
@@ -171,14 +179,13 @@ describe('executor', function() {
     };
     builtinModel.definition.redefined = true;
 
-    boot.execute(app, someInstructions({ models: [ builtinModel ] }));
+    boot.execute(app, someInstructions({ models: [builtinModel] }));
 
     expect(app.models.User.settings.redefined, 'redefined').to.not.equal(true);
   });
 
   describe('with boot and models files', function() {
     beforeEach(function() {
-      process.bootFlags = process.bootFlags || [];
       boot.execute(app, simpleAppInstructions());
     });
 
@@ -212,14 +219,6 @@ describe('executor', function() {
   });
 
   describe('with boot with callback', function() {
-    beforeEach(function() {
-      process.bootFlags = process.bootFlags || [];
-    });
-
-    afterEach(function() {
-      delete process.bootFlags;
-    });
-
     it('should run `boot/*` files asynchronously', function(done) {
       boot.execute(app, simpleAppInstructions(), function() {
         expect(process.bootFlags).to.eql([
@@ -233,7 +232,6 @@ describe('executor', function() {
         done();
       });
     });
-
   });
 
   describe('with PaaS and npm env variables', function() {
@@ -266,7 +264,7 @@ describe('executor', function() {
     });
 
     it('should prioritize sources', function() {
-      /*jshint camelcase:false */
+      // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
       process.env.npm_config_host = randomHost();
       process.env.OPENSHIFT_SLS_IP = randomHost();
       process.env.OPENSHIFT_NODEJS_IP = randomHost();
@@ -323,11 +321,100 @@ describe('executor', function() {
       'module.exports = function(app) { app.fnCalled = true; };');
 
     delete app.fnCalled;
-    boot.execute(app, someInstructions({ files: { boot: [ file ] } }));
+    boot.execute(app, someInstructions({ files: { boot: [file] } }));
     expect(app.fnCalled, 'exported fn was called').to.be.true();
   });
-});
 
+  it('configures middleware', function(done) {
+    var pushNamePath = require.resolve('./helpers/push-name-middleware');
+
+    boot.execute(app, someInstructions({
+      middleware: {
+        phases: ['initial', 'custom'],
+        middleware: [
+          {
+            sourceFile: pushNamePath,
+            config: {
+              phase: 'initial',
+              params: 'initial'
+            }
+          },
+          {
+            sourceFile: pushNamePath,
+            config: {
+              phase: 'custom',
+              params: 'custom'
+            }
+          },
+          {
+            sourceFile: pushNamePath,
+            config: {
+              phase: 'routes',
+              params: 'routes'
+            }
+          },
+          {
+            sourceFile: pushNamePath,
+            config: {
+              phase: 'routes',
+              enabled: false,
+              params: 'disabled'
+            }
+          }
+        ]
+      }
+    }));
+
+    supertest(app)
+      .get('/')
+      .end(function(err, res) {
+        if (err) return done(err);
+        var names = (res.headers.names || '').split(',');
+        expect(names).to.eql(['initial', 'custom', 'routes']);
+        done();
+      });
+  });
+
+  it('configures middleware using shortform', function(done) {
+
+    boot.execute(app, someInstructions({
+      middleware: {
+        middleware: [
+          {
+            sourceFile: require.resolve('loopback'),
+            fragment: 'static',
+            config: {
+              phase: 'files',
+              params: path.join(__dirname, './fixtures/simple-app/client/')
+            }
+          }
+        ]
+      }
+    }));
+
+    supertest(app)
+      .get('/')
+      .end(function(err, res) {
+        if (err) return done(err);
+        expect(res.text).to.eql('<!DOCTYPE html>\n<html>\n<head lang="en">\n' +
+          '    <meta charset="UTF-8">\n    <title>simple-app</title>\n' +
+          '</head>\n<body>\n<h1>simple-app</h1>\n</body>\n</html>');
+        done();
+      });
+  });
+
+  it('configures middleware (end-to-end)', function(done) {
+    boot.execute(app, simpleAppInstructions());
+
+    supertest(app)
+      .get('/')
+      .end(function(err, res) {
+        if (err) return done(err);
+        expect(res.headers.names).to.equal('custom-middleware');
+        done();
+      });
+  });
+});
 
 function assertValidDataSource(dataSource) {
   // has methods
@@ -340,7 +427,7 @@ function assertValidDataSource(dataSource) {
   assert.isFunc(dataSource, 'operations');
 }
 
-assert.isFunc = function (obj, name) {
+assert.isFunc = function(obj, name) {
   assert(obj, 'cannot assert function ' + name +
     ' on object that does not exist');
   assert(typeof obj[name] === 'function', name + ' is not a function');
@@ -351,6 +438,7 @@ function someInstructions(values) {
     config: values.config || {},
     models: values.models || [],
     dataSources: values.dataSources || { db: { connector: 'memory' } },
+    middleware: values.middleware || { phases: [], middleware: [] },
     files: {
       boot: []
     }

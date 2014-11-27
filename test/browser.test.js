@@ -1,7 +1,7 @@
 var boot = require('../');
 var fs = require('fs');
 var path = require('path');
-var expect = require('must');
+var expect = require('chai').expect;
 var browserify = require('browserify');
 var sandbox = require('./helpers/sandbox');
 var vm = require('vm');
@@ -76,7 +76,7 @@ describe('browser support', function() {
 });
 
 function browserifyTestApp(appDir, strategy, next) {
-  //set default args
+  // set default args
   if (((typeof strategy) === 'function') && !next) {
     next = strategy;
     strategy = undefined;
@@ -91,7 +91,7 @@ function browserifyTestApp(appDir, strategy, next) {
   var bundlePath = sandbox.resolve('browser-app-bundle.js');
   var out = fs.createWriteStream(bundlePath);
   b.bundle().pipe(out);
-  
+
   out.on('error', function(err) { return next(err); });
   out.on('close', function() {
     next(null, bundlePath);

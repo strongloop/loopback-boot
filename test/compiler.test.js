@@ -790,7 +790,7 @@ describe('compiler', function() {
 
       var instructions = boot.compile(appdir.PATH);
 
-      expect(instructions.middleware.middleware[0].config.params).to.eql({
+      expectFirstMiddlewareParams(instructions).to.eql({
         key: 'custom value'
       });
     });
@@ -954,9 +954,93 @@ describe('compiler', function() {
           'sourceFile',
           appdir.resolve(HANDLER_FILE));
       });
+
+    describe('config with relative paths in params', function() {
+      var RELATIVE_PATH_PARAMS = [
+        '$!./here',
+        '$!../there'
+      ];
+
+      var absolutePathParams;
+      beforeEach(function resolveRelativePathParams() {
+        absolutePathParams = RELATIVE_PATH_PARAMS.map(function(p) {
+          return appdir.resolve(p.slice(2));
+        });
+      });
+
+      it('converts paths in top-level array items', function() {
+        givenMiddlewareEntrySync({ params: RELATIVE_PATH_PARAMS });
+
+        var instructions = boot.compile(appdir.PATH);
+
+        expectFirstMiddlewareParams(instructions)
+          .to.eql(absolutePathParams);
+      });
+
+      it('converts paths in top-level object properties', function() {
+        givenMiddlewareEntrySync({ params: {
+          path: RELATIVE_PATH_PARAMS[0],
+        }});
+
+        var instructions = boot.compile(appdir.PATH);
+
+        expectFirstMiddlewareParams(instructions)
+          .to.eql({ path: absolutePathParams[0] });
+      });
+
+      it('converts path value when params is a string', function() {
+        givenMiddlewareEntrySync({ params: RELATIVE_PATH_PARAMS[0] });
+
+        var instructions = boot.compile(appdir.PATH);
+
+        expectFirstMiddlewareParams(instructions)
+          .to.eql(absolutePathParams[0]);
+      });
+
+      it('converts paths in nested properties', function() {
+        givenMiddlewareEntrySync({ params: {
+          nestedObject: {
+            path: RELATIVE_PATH_PARAMS[0]
+          },
+          nestedArray: RELATIVE_PATH_PARAMS
+        }});
+
+        var instructions = boot.compile(appdir.PATH);
+
+        expectFirstMiddlewareParams(instructions)
+          .to.eql({
+            nestedObject: {
+              path: absolutePathParams[0]
+            },
+            nestedArray: absolutePathParams
+          });
+      });
+
+      it('does not convert values not starting with `./` or `../`', function() {
+        var PARAMS = ['$!.somerc', '$!/root', '$!hello!'];
+        givenMiddlewareEntrySync({ params: PARAMS});
+
+        var instructions = boot.compile(appdir.PATH);
+
+        expectFirstMiddlewareParams(instructions).to.eql(PARAMS);
+      });
+    });
   });
 });
 
 function getNameProperty(obj) {
   return obj.name;
+}
+
+function givenMiddlewareEntrySync(config) {
+  appdir.writeConfigFileSync('middleware.json', {
+    initial: {
+      // resolves to ./middleware.json
+      './middleware': config
+    }
+  });
+}
+
+function expectFirstMiddlewareParams(instructions) {
+  return expect(instructions.middleware.middleware[0].config.params);
 }

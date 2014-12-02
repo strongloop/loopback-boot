@@ -1,3 +1,9 @@
+2014-12-02, Version 2.5.0
+=========================
+
+ * compiler: resolve paths in middleware params (Miroslav Bajtoš)
+
+
 2014-11-27, Version 2.4.0
 =========================
 

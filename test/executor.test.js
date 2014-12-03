@@ -52,6 +52,32 @@ describe('executor', function() {
     }
   });
 
+  describe('when booting', function() {
+    it('should set the booting status', function(done) {
+      expect(app.booting).to.be.undefined();
+      boot.execute(app, dummyInstructions, function(err) {
+        expect(err).to.be.undefined();
+        expect(app.booting).to.be.false();
+        done();
+      });
+    });
+
+    it('should emit the `booted` event', function(done) {
+      app.on('booted', function() {
+        // This test fails with a timeout when the `booted` event has not been
+        // emitted correctly
+        done();
+      });
+      boot.execute(app, dummyInstructions, function(err) {
+        expect(err).to.be.undefined();
+      });
+    });
+
+    it('should work when called synchronously', function() {
+      boot.execute(app, dummyInstructions);
+    });
+  });
+
   it('configures models', function() {
     boot.execute(app, dummyInstructions);
     assert(app.models);

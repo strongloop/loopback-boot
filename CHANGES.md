@@ -1,3 +1,9 @@
+2014-12-08, Version 2.5.1
+=========================
+
+ * Replace underscore with lodash (Ryan Graham)
+
+
 2014-12-02, Version 2.5.0
 =========================
 

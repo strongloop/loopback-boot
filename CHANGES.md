@@ -1,3 +1,9 @@
+2014-12-19, Version 2.5.2
+=========================
+
+ * Dedupe boot scripts (Eric Satterwhite)
+
+
 2014-12-08, Version 2.5.1
 =========================
 

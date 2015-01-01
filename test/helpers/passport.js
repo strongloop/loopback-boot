@@ -1,6 +1,6 @@
 var framework = {
-  initialize: function (passport) {
-    return function (req, res, next) {
+  initialize: function(passport) {
+    return function(req, res, next) {
       req._passport = passport;
       res.setHeader('passport', 'initialized');
       next();
@@ -8,11 +8,11 @@ var framework = {
   }
 };
 
-var Passport = function () {
+var Passport = function() {
   this._framework = framework;
 };
 
-Passport.prototype.initialize = function () {
+Passport.prototype.initialize = function() {
   return this._framework.initialize(this);
 };
 

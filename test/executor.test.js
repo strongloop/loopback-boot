@@ -414,6 +414,29 @@ describe('executor', function() {
         done();
       });
   });
+
+  it('configures middleware (that requires `this`)', function(done) {
+    var passportPath = require.resolve('./helpers/passport');
+
+    boot.execute(app, someInstructions({
+      middleware: {
+        phases: ['auth'],
+        middleware: [
+          {
+            sourceFile: passportPath,
+            fragment: 'initialize',
+            config: {
+              phase: 'auth:before'
+            }
+          }
+        ]
+      }
+    }));
+
+    supertest(app)
+      .get('/')
+      .expect('passport', 'initialized', done);
+  });
 });
 
 function assertValidDataSource(dataSource) {

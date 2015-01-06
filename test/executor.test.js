@@ -414,6 +414,22 @@ describe('executor', function() {
         done();
       });
   });
+
+  it('configures components', function() {
+    appdir.writeConfigFileSync('component-config.json', {
+      './components/test-component': {
+        option: 'value'
+      }
+    });
+
+    appdir.writeFileSync('components/test-component/index.js',
+      'module.exports = ' +
+      'function(app, options) { app.componentOptions = options; }');
+
+    boot(app, appdir.PATH);
+
+    expect(app.componentOptions).to.eql({ option: 'value' });
+  });
 });
 
 function assertValidDataSource(dataSource) {
@@ -439,6 +455,7 @@ function someInstructions(values) {
     models: values.models || [],
     dataSources: values.dataSources || { db: { connector: 'memory' } },
     middleware: values.middleware || { phases: [], middleware: [] },
+    components: values.components || [],
     files: {
       boot: []
     }

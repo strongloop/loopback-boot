@@ -109,6 +109,8 @@ var addInstructionsToBrowserify = require('./lib/bundler');
  * for files containing model definitions.
  * @property {Object} [middleware] Middleware configuration to use instead
  * of `{appRootDir}/middleware.json`
+ * @property {Object} [components] Component configuration to use instead
+ * of `{appRootDir}/component-config.json`
  * @property {Array.<String>} [bootDirs] List of directories where to look
  * for boot scripts.
  * @property {Array.<String>} [bootScripts] List of script files to execute

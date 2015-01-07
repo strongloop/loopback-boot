@@ -1038,6 +1038,35 @@ describe('compiler', function() {
       });
     });
   });
+
+  describe('for components', function() {
+    it('loads component configs from multiple files', function() {
+      appdir.createConfigFilesSync();
+      appdir.writeConfigFileSync('component-config.json', {
+        debug: { option: 'value' }
+      });
+      appdir.writeConfigFileSync('component-config.local.json', {
+        debug: { local: 'applied' }
+      });
+
+      var env = process.env.NODE_ENV || 'development';
+      appdir.writeConfigFileSync('component-config.' + env + '.json', {
+        debug: { env: 'applied' }
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      var component = instructions.components[0];
+      expect(component).to.eql({
+        sourceFile: require.resolve('debug'),
+        config: {
+          option: 'value',
+          local: 'applied',
+          env: 'applied'
+        }
+      });
+    });
+  });
 });
 
 function getNameProperty(obj) {

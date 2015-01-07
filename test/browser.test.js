@@ -50,6 +50,10 @@ describe('browser support', function() {
       expect(app.models.Customer.settings)
         .to.have.property('_customized', 'Customer');
 
+      // configured in fixtures/browser-app/component-config.json
+      // and fixtures/browser-app/components/dummy-component.js
+      expect(app.dummyComponentOptions).to.eql({ option: 'value' });
+
       done();
     });
   });

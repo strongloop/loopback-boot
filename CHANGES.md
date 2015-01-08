@@ -1,3 +1,13 @@
+2015-01-08, Version 2.6.0
+=========================
+
+ * Add "booting" flag and emit "booted" event (Simon Ho)
+
+ * Configure components via `component-config.json` (Miroslav Bajtoš)
+
+ * Fix bad CLA URL in CONTRIBUTING.md (Ryan Graham)
+
+
 2014-12-19, Version 2.5.2
 =========================
 

@@ -52,6 +52,32 @@ describe('executor', function() {
     }
   });
 
+  describe('when booting', function() {
+    it('should set the booting status', function(done) {
+      expect(app.booting).to.be.undefined();
+      boot.execute(app, dummyInstructions, function(err) {
+        expect(err).to.be.undefined();
+        expect(app.booting).to.be.false();
+        done();
+      });
+    });
+
+    it('should emit the `booted` event', function(done) {
+      app.on('booted', function() {
+        // This test fails with a timeout when the `booted` event has not been
+        // emitted correctly
+        done();
+      });
+      boot.execute(app, dummyInstructions, function(err) {
+        expect(err).to.be.undefined();
+      });
+    });
+
+    it('should work when called synchronously', function() {
+      boot.execute(app, dummyInstructions);
+    });
+  });
+
   it('configures models', function() {
     boot.execute(app, dummyInstructions);
     assert(app.models);
@@ -414,6 +440,22 @@ describe('executor', function() {
         done();
       });
   });
+
+  it('configures components', function() {
+    appdir.writeConfigFileSync('component-config.json', {
+      './components/test-component': {
+        option: 'value'
+      }
+    });
+
+    appdir.writeFileSync('components/test-component/index.js',
+      'module.exports = ' +
+      'function(app, options) { app.componentOptions = options; }');
+
+    boot(app, appdir.PATH);
+
+    expect(app.componentOptions).to.eql({ option: 'value' });
+  });
 });
 
 function assertValidDataSource(dataSource) {
@@ -439,6 +481,7 @@ function someInstructions(values) {
     models: values.models || [],
     dataSources: values.dataSources || { db: { connector: 'memory' } },
     middleware: values.middleware || { phases: [], middleware: [] },
+    components: values.components || [],
     files: {
       boot: []
     }

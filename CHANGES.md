@@ -1,3 +1,9 @@
+2015-01-12, Version 2.6.1
+=========================
+
+ * Fix "incompatible loopback version" check & msg (Miroslav Bajtoš)
+
+
 2015-01-08, Version 2.6.0
 =========================
 

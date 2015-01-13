@@ -175,6 +175,17 @@ describe('executor', function() {
     expect(app.models.Customer._modelsWhenAttached).to.include('UniqueName');
   });
 
+  it('throws on bad require() call inside boot script', function() {
+    var file = appdir.writeFileSync('boot/badScript.js',
+      'require("doesnt-exist"); module.exports = {};');
+
+    function doBoot() {
+      boot.execute(app, someInstructions({ files: { boot: [file] } }));
+    }
+
+    expect(doBoot).to.throw(/Cannot find module \'doesnt-exist\'/);
+  });
+
   it('instantiates data sources', function() {
     boot.execute(app, dummyInstructions);
     assert(app.dataSources);

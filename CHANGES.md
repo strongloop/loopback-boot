@@ -1,3 +1,9 @@
+2015-01-13, Version 2.6.2
+=========================
+
+ * Don't swallow error when a sub-dependency doesn't resolve. (Samuel Reed)
+
+
 2015-01-12, Version 2.6.1
 =========================
 

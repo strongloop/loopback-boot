@@ -183,6 +183,17 @@ describe('executor', function() {
     expect(app.fnCalled, 'exported fn was called').to.be.true();
   });
 
+  it('throws on bad require() call inside model', function() {
+    var file = appdir.writeFileSync('models/BadCustomer.js',
+      'require("doesnt-exist"); module.exports = {};');
+
+    function doBoot() {
+      boot.execute(app, someInstructions({ files: { models: [ file ] } }));
+    }
+
+    expect(doBoot).to.throw(/Cannot find module \'doesnt-exist\'/);
+  });
+
   it('does not call Model ctor exported by models/model.json', function() {
     var file = appdir.writeFileSync('models/model.js',
         'var loopback = require("loopback");\n' +

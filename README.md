@@ -2,7 +2,7 @@
 
 A convention-based bootstrapper for LoopBack applications.
 
-For full documentation, see the official StrongLoop documentation: [Application initialization](http://docs.strongloop.com/display/LB/Application+initialization) and [Creating a LoopBack application](http://docs.strongloop.com/display/LB/Creating+a+LoopBack+application).
+For full documentation, see the official StrongLoop documentation: [Defining boot scripts](http://docs.strongloop.com/display/LB/Defining+boot+scripts) and [Creating a LoopBack application](http://docs.strongloop.com/display/LB/Creating+an+application).
 
 ## Overview
 
@@ -13,7 +13,7 @@ The loopback-boot module initializes (bootstraps) a LoopBack application.  Speci
  - Configures application settings
  - Runs additional boot scripts, so you can put custom setup code in multiple small files instead of in the main application file.
 
-For more information, see [Application initialization](http://docs.strongloop.com/display/LB/Application+initialization).
+For more information, see [Defining boot scripts](http://docs.strongloop.com/display/LB/Defining+boot+scripts).
 
 ### Version notes
 
@@ -25,8 +25,6 @@ The version range `2.x` supports the new project layout as scaffolded by
 `yo loopback`.
 
 This document describes the configuration conventions of the `2.x` versions.
-See the [official documentation](http://docs.strongloop.com/display/LB/Application+initialization)
-for instructions on upgrading existing projects.
 
 ## Installation
 

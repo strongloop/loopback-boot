@@ -1,6 +1,6 @@
 {
   "name": "loopback-boot",
-  "version": "2.6.3",
+  "version": "2.6.4",
   "description": "Convention-based bootstrapper for LoopBack applications",
   "keywords": [
     "StrongLoop",

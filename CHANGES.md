@@ -1,115 +1,9 @@
-2015-01-13, Version 2.6.3
+2015-02-02, Version 2.6.4
 =========================
 
- * Don't swallow error when a sub-dependency doesn't resolve. (Samuel Reed)
+ * executor: pass correct `this` to middleware (Clark Wang)
 
- * Fix "incompatible loopback version" check & msg (Miroslav Bajtoš)
-
- * Add "booting" flag and emit "booted" event (Simon Ho)
-
- * Configure components via `component-config.json` (Miroslav Bajtoš)
-
- * Fix bad CLA URL in CONTRIBUTING.md (Ryan Graham)
-
- * Dedupe boot scripts (Eric Satterwhite)
-
- * Replace underscore with lodash (Ryan Graham)
-
- * compiler: resolve paths in middleware params (Miroslav Bajtoš)
-
- * Implement shorthand notation for middleware paths (Raymond Feng)
-
- * Load middleware and phases from `middleware.json` (Miroslav Bajtoš)
-
- * Add jscs style check, fix violations found (Miroslav Bajtoš)
-
- * Clean up .jshintrc (Miroslav Bajtoš)
-
- * Use `chai` instead of `must` (Miroslav Bajtoš)
-
- * Bump version (Raymond Feng)
-
- * Fix the test for built-in models on Windows (Raymond Feng)
-
- * Fix jsdoc (Raymond Feng)
-
- * compiler: fix coding style violations (Miroslav Bajtoš)
-
- * support coffee-script models and client code (bitmage)
-
- * compiler: support module-relative model sources (Miroslav Bajtoš)
-
- * Skip definitions of built-in loopback models (Miroslav Bajtoš)
-
- * package: update dependency versions (Miroslav Bajtoš)
-
- * Use loopback 2.x in unit tests. (Miroslav Bajtoš)
-
- * Add support for async boot scripts (Raymond Feng)
-
- * Clean up jsdoc comments. (Miroslav Bajtoš)
-
- * Custom rootDir for app config (johnsoftek)
-
- * compiler: improve merging of Arrays and Objects (Miroslav Bajtoš)
-
- * config-loader: deeply merge Array and Object vals (Shelby Sanders)
-
- * gitignore: add Idea's *.iml files (Miroslav Bajtoš)
-
- * package: Add `jshint` to `devDependencies` (Miroslav Bajtoš)
-
- * Update contribution guidelines (Ryan Graham)
-
- * test: ensure sandbox dir is present (Miroslav Bajtoš)
-
- * test: add `global.navigator` for browser tests (Miroslav Bajtoš)
-
- * test: increase timeout for browserify (Miroslav Bajtoš)
-
- * index: fix jshint error (Miroslav Bajtoš)
-
- * documentation fix (Alex)
-
- * Fix typo (Fabien Franzen)
-
- * Implemented modelSources, bootDirs and bootScripts options (Fabien Franzen)
-
- * executor: remove `Base` arg from model function (Miroslav Bajtoš)
-
- * v2.0.0-beta3 (Miroslav Bajtoš)
-
- * compiler: return a clone of instructions (Miroslav Bajtoš)
-
- * test: export Int32Array and DataView for browser (Miroslav Bajtoš)
-
- * v2.0.0-beta2 (Miroslav Bajtoš)
-
- * Rename `models.json` to `model-config.json` (Miroslav Bajtoš)
-
- * Remove non-API docs. (Rand McKinney)
-
- * 2.0.0-beta1 (Miroslav Bajtoš)
-
- * test: fix jshint warnings (Miroslav Bajtoš)
-
- * compiler: fix references to loopback (Miroslav Bajtoš)
-
- * Rename `app.json` to `config.json` (Miroslav Bajtoš)
-
- * compiler: Sort models topologically (Miroslav Bajtoš)
-
- * executor: Split model boot into two phases (Miroslav Bajtoš)
-
- * compiler: Move model-sources cfg to models.json (Miroslav Bajtoš)
-
- * package: Bump up the version to 2.0.0-dev (Miroslav Bajtoš)
-
- * Rework model configuration (Miroslav Bajtoš)
-
- * Remove auto-attach. (Miroslav Bajtoš)
-
- * Change models.json to configure existing models (Miroslav Bajtoš)
+ * Fix broken links (Rand McKinney)
 
 
 2015-01-13, Version 2.6.2
@@ -238,6 +132,12 @@
  * compiler: return a clone of instructions (Miroslav Bajtoš)
 
  * Remove README from API docs (Rand McKinney)
+
+
+2015-01-13, Version 2.6.3
+=========================
+
+ * Don't swallow error when a sub-dependency doesn't resolve. (Samuel Reed)
 
 
 2015-01-12, Version 2.6.1

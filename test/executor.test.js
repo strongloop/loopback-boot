@@ -467,6 +467,29 @@ describe('executor', function() {
 
     expect(app.componentOptions).to.eql({ option: 'value' });
   });
+
+  it('configures middleware (that requires `this`)', function(done) {
+    var passportPath = require.resolve('./fixtures/passport');
+
+    boot.execute(app, someInstructions({
+      middleware: {
+        phases: ['auth'],
+        middleware: [
+          {
+            sourceFile: passportPath,
+            fragment: 'initialize',
+            config: {
+              phase: 'auth:before'
+            }
+          }
+        ]
+      }
+    }));
+
+    supertest(app)
+      .get('/')
+      .expect('passport', 'initialized', done);
+  });
 });
 
 function assertValidDataSource(dataSource) {

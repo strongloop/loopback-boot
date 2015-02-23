@@ -57,8 +57,8 @@ describe('executor', function() {
       expect(app.booting).to.be.undefined();
       boot.execute(app, simpleAppInstructions(), function(err) {
         expect(err).to.be.undefined();
-        expect(process.bootingFlagSet).to.be.ok();
-        expect(app.booting).to.not.be.ok();
+        expect(process.bootingFlagSet).to.be.true();
+        expect(app.booting).to.be.false();
         done();
       });
     });

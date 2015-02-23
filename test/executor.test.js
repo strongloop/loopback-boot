@@ -53,11 +53,12 @@ describe('executor', function() {
   });
 
   describe('when booting', function() {
-    it('should set the booting status', function(done) {
+    it('should set the `booting` flag during execution', function(done) {
       expect(app.booting).to.be.undefined();
-      boot.execute(app, dummyInstructions, function(err) {
+      boot.execute(app, simpleAppInstructions(), function(err) {
         expect(err).to.be.undefined();
-        expect(app.booting).to.be.false();
+        expect(process.bootingFlagSet).to.be.ok();
+        expect(app.booting).to.not.be.ok();
         done();
       });
     });

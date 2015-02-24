@@ -28,8 +28,34 @@ describe('compiler', function() {
         models: {
           'foo-bar-bat-baz': {
             dataSource: 'the-db'
+          },
+          'foo-bar-bat-baz-with-def': {
+            dataSource: 'the-db'
+          },
+          'foo-bar-bat-baz-with-def-no-source': {
+            dataSource: 'the-db'
           }
         },
+        modelDefinitions: [
+          {
+            definition: {
+              name: 'foo-bar-bat-baz-with-def'
+            },
+            sourceFile: path.join(SIMPLE_APP, 'common', 'models', 'foo-bar-bat-baz-with-def.js')
+          },
+          {
+            definition: { // sourceFile is a not existing file.
+              name: 'foo-bar-bat-baz-with-def-no-source'
+            },
+            sourceFile: path.join(SIMPLE_APP, 'common', 'models', 'foo-bar-bat-baz-with-def!!!.js')
+          },
+          {
+            definition: {
+              name: 'i-should-not-exist' //not in 'models'
+            },
+            sourceFile: path.join(SIMPLE_APP, 'common', 'models', 'i-should-not-exist.js')
+          }
+        ],
         dataSources: {
           'the-db': {
             connector: 'memory',
@@ -61,7 +87,7 @@ describe('compiler', function() {
     });
 
     it('has models definition', function() {
-      expect(instructions.models).to.have.length(1);
+      expect(instructions.models).to.have.length(3);
       expect(instructions.models[0]).to.eql({
         name: 'foo-bar-bat-baz',
         config: {
@@ -70,6 +96,16 @@ describe('compiler', function() {
         definition: undefined,
         sourceFile: undefined
       });
+    });
+
+    it('load model definitions from object', function() {
+      expect(instructions.models[1].name).to.equal('foo-bar-bat-baz-with-def');
+      expect(instructions.models[1].definition).not.to.equal(undefined);
+      expect(instructions.models[1].sourceFile).not.to.equal(undefined);
+
+      expect(instructions.models[2].name).to.equal('foo-bar-bat-baz-with-def-no-source');
+      expect(instructions.models[2].definition).not.to.equal(undefined);
+      expect(instructions.models[2].sourceFile).to.equal(undefined);
     });
 
     it('has datasources definition', function() {

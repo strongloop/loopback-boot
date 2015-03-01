@@ -276,7 +276,31 @@ describe('executor', function() {
       var modelBuilder = app.loopback.modelBuilder;
       var registry = modelBuilder.mixins.mixins;
       expect(registry).to.have.property('Example');
+      expect(registry).to.have.property('Foo');
       expect(registry).to.have.property('TimeStamps');
+
+      var meta = modelBuilder.mixins.meta;
+      expect(meta).to.have.property('Example');
+      expect(meta).to.have.property('Foo');
+      expect(meta).to.have.property('TimeStamps');
+
+      expect(meta.Foo.name).to.equal('Foo');
+      expect(meta.Foo).to.have.property('filepath');
+
+      var description = 'Track create and update';
+
+      var options = {
+        postfix: {
+          type: 'string',
+          description: 'The postfix string',
+          default: 'At'
+        }
+      };
+
+      expect(meta.TimeStamps.name).to.equal('Timestamping');
+      expect(meta.TimeStamps).to.have.property('filepath');
+      expect(meta.TimeStamps.description).to.equal(description);
+      expect(meta.TimeStamps.options).to.eql(options);
     });
 
   });

@@ -271,6 +271,14 @@ describe('executor', function() {
         done();
       });
     });
+
+    it('should define `mixins/*` files', function() {
+      var modelBuilder = app.loopback.modelBuilder;
+      var registry = modelBuilder.mixins.mixins;
+      expect(registry).to.have.property('Example');
+      expect(registry).to.have.property('TimeStamps');
+    });
+
   });
 
   describe('with PaaS and npm env variables', function() {

@@ -7,6 +7,7 @@ var fs = require('fs-extra');
 var sandbox = require('./helpers/sandbox');
 var appdir = require('./helpers/appdir');
 var supertest = require('supertest');
+var os = require('os');
 
 var SIMPLE_APP = path.join(__dirname, 'fixtures', 'simple-app');
 
@@ -434,9 +435,10 @@ describe('executor', function() {
       .get('/')
       .end(function(err, res) {
         if (err) return done(err);
-        expect(res.text).to.eql('<!DOCTYPE html>\n<html>\n<head lang="en">\n' +
+        expect(res.text).to.eql(('<!DOCTYPE html>\n<html>\n<head lang="en">\n' +
           '    <meta charset="UTF-8">\n    <title>simple-app</title>\n' +
-          '</head>\n<body>\n<h1>simple-app</h1>\n</body>\n</html>');
+          '</head>\n<body>\n<h1>simple-app</h1>\n' +
+          '</body>\n</html>').replace(/\n/g, os.EOL));
         done();
       });
   });

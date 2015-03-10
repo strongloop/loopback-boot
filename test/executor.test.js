@@ -468,7 +468,25 @@ describe('executor', function() {
 
     boot(app, appdir.PATH);
 
+    expect(Object.keys(require.cache)).to.include(
+      appdir.resolve('components/test-component/index.js'));
+
     expect(app.componentOptions).to.eql({ option: 'value' });
+  });
+
+  it('disables component when configuration is not set', function() {
+    appdir.writeConfigFileSync('component-config.json', {
+      './components/test-component': false
+    });
+
+    appdir.writeFileSync('components/test-component/index.js',
+      'module.exports = ' +
+      'function(app, options) { app.componentOptions = options; }');
+
+    boot(app, appdir.PATH);
+
+    expect(Object.keys(require.cache)).to.not.include(
+      appdir.resolve('components/test-component/index.js'));
   });
 
   it('configures middleware (that requires `this`)', function(done) {

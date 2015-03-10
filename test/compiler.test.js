@@ -417,6 +417,28 @@ describe('compiler', function() {
       expect(instructions.files.boot).to.eql([initJs]);
     });
 
+    it('should resolve relative path in `bootScripts`', function() {
+      appdir.createConfigFilesSync();
+      var initJs = appdir.writeFileSync('custom-boot/init.js',
+        'module.exports = function(app) { app.fnCalled = true; };');
+      var instructions = boot.compile({
+        appRootDir: appdir.PATH,
+        bootScripts: ['./custom-boot/init.js']
+      });
+      expect(instructions.files.boot).to.eql([initJs]);
+    });
+
+    it('should resolve relative path in `bootDirs`', function() {
+      appdir.createConfigFilesSync();
+      var initJs = appdir.writeFileSync('custom-boot/init.js',
+        'module.exports = function(app) { app.fnCalled = true; };');
+      var instructions = boot.compile({
+        appRootDir: appdir.PATH,
+        bootDirs:['./custom-boot']
+      });
+      expect(instructions.files.boot).to.eql([initJs]);
+    });
+
     it('ignores models/ subdirectory', function() {
       appdir.createConfigFilesSync();
       appdir.writeFileSync('models/my-model.js', '');

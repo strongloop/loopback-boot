@@ -28,34 +28,8 @@ describe('compiler', function() {
         models: {
           'foo-bar-bat-baz': {
             dataSource: 'the-db'
-          },
-          'foo-bar-bat-baz-with-def': {
-            dataSource: 'the-db'
-          },
-          'foo-bar-bat-baz-with-def-no-source': {
-            dataSource: 'the-db'
           }
         },
-        modelDefinitions: [
-          {
-            definition: {
-              name: 'foo-bar-bat-baz-with-def'
-            },
-            sourceFile: path.join(SIMPLE_APP, 'common', 'models', 'foo-bar-bat-baz-with-def.js')
-          },
-          {
-            definition: { // sourceFile is a not existing file.
-              name: 'foo-bar-bat-baz-with-def-no-source'
-            },
-            sourceFile: path.join(SIMPLE_APP, 'common', 'models', 'foo-bar-bat-baz-with-def!!!.js')
-          },
-          {
-            definition: {
-              name: 'i-should-not-exist' //not in 'models'
-            },
-            sourceFile: path.join(SIMPLE_APP, 'common', 'models', 'i-should-not-exist.js')
-          }
-        ],
         dataSources: {
           'the-db': {
             connector: 'memory',
@@ -87,7 +61,7 @@ describe('compiler', function() {
     });
 
     it('has models definition', function() {
-      expect(instructions.models).to.have.length(3);
+      expect(instructions.models).to.have.length(1);
       expect(instructions.models[0]).to.eql({
         name: 'foo-bar-bat-baz',
         config: {
@@ -98,18 +72,78 @@ describe('compiler', function() {
       });
     });
 
-    it('load model definitions from object', function() {
-      expect(instructions.models[1].name).to.equal('foo-bar-bat-baz-with-def');
-      expect(instructions.models[1].definition).not.to.equal(undefined);
-      expect(instructions.models[1].sourceFile).not.to.equal(undefined);
-
-      expect(instructions.models[2].name).to.equal('foo-bar-bat-baz-with-def-no-source');
-      expect(instructions.models[2].definition).not.to.equal(undefined);
-      expect(instructions.models[2].sourceFile).to.equal(undefined);
-    });
-
     it('has datasources definition', function() {
       expect(instructions.dataSources).to.eql(options.dataSources);
+    });
+
+    describe('with custom model definitions', function() {
+      var instructionCustom;
+
+      beforeEach(function(){
+        appdir.writeFileSync('custom-models/model-with-definitions.js', '');
+        instructionCustom = boot.compile({
+          appRootDir: appdir.PATH,
+          models: {
+            'model-without-definitions': {
+              dataSource: 'the-db'
+            },
+            'model-with-definitions': {
+              dataSource: 'the-db'
+            },
+            'model-with-definitions-without-source-file': {
+              dataSource: 'the-db'
+            }
+          },
+          modelDefinitions: [
+            {
+              definition: {
+                name: 'model-with-definitions'
+              },
+              sourceFile: path.join(appdir.PATH, 'custom-models', 'model-with-definitions.js')
+            },
+            {
+              definition: { // sourceFile is a not existing file.
+                name: 'model-with-definitions-without-source-file'
+              },
+              sourceFile: path.join(appdir.PATH, 'custom-models', 'model-with-definitions-without-source-file.js')
+            },
+            {
+              definition: {
+                name: 'model-that-should-not-exist' //not in 'models'
+              },
+              sourceFile: path.join(appdir.PATH, 'custom-models', 'i-should-not-exist.js')
+            }
+          ],
+          dataSources: {
+            'the-db': {
+              connector: 'memory',
+              defaultForType: 'db'
+            }
+          }
+        });
+      });
+
+      it('should loads models defined in `models` only.', function() {
+        expect(instructionCustom.models).to.have.length(3);
+      });
+
+      it('should loads model without definition.', function() {
+        expect(instructionCustom.models[0].name).to.equal('model-without-definitions');
+        expect(instructionCustom.models[0].definition).to.equal(undefined);
+        expect(instructionCustom.models[0].sourceFile).to.equal(undefined);
+      });
+
+      it('should set source file path if the file exist.', function() {
+        expect(instructionCustom.models[1].name).to.equal('model-with-definitions');
+        expect(instructionCustom.models[1].definition).not.to.equal(undefined);
+        expect(instructionCustom.models[1].sourceFile).not.to.equal(undefined);
+      });
+
+      it('should not set source file path if the file does not exist.', function() {
+        expect(instructionCustom.models[2].name).to.equal('model-with-definitions-without-source-file');
+        expect(instructionCustom.models[2].definition).not.to.equal(undefined);
+        expect(instructionCustom.models[2].sourceFile).to.equal(undefined);
+      });
     });
   });
 

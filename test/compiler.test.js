@@ -77,20 +77,35 @@ describe('compiler', function() {
     });
 
     describe('with custom model definitions', function() {
-      var instructionCustom;
+      var dataSources = {
+        'the-db': {
+          connector: 'memory',
+          defaultForType: 'db'
+        }
+      };
 
-      beforeEach(function(){
-        appdir.writeFileSync('custom-models/model-with-definitions.js', '');
-        instructionCustom = boot.compile({
+      it('should loads model without definition.', function() {
+        var instruction = boot.compile({
           appRootDir: appdir.PATH,
           models: {
             'model-without-definitions': {
               dataSource: 'the-db'
-            },
+            }
+          },
+          modelDefinitions: [],
+          dataSources: dataSources
+        });
+        expect(instruction.models[0].name).to.equal('model-without-definitions');
+        expect(instruction.models[0].definition).to.equal(undefined);
+        expect(instruction.models[0].sourceFile).to.equal(undefined);
+      });
+
+      it('should set source file path if the file exist.', function() {
+        appdir.writeFileSync('custom-models/model-with-definitions.js', '');
+        var instruction = boot.compile({
+          appRootDir: appdir.PATH,
+          models: {
             'model-with-definitions': {
-              dataSource: 'the-db'
-            },
-            'model-with-definitions-without-source-file': {
               dataSource: 'the-db'
             }
           },
@@ -100,49 +115,84 @@ describe('compiler', function() {
                 name: 'model-with-definitions'
               },
               sourceFile: path.join(appdir.PATH, 'custom-models', 'model-with-definitions.js')
-            },
-            {
-              definition: { // sourceFile is a not existing file.
-                name: 'model-with-definitions-without-source-file'
-              },
-              sourceFile: path.join(appdir.PATH, 'custom-models', 'model-with-definitions-without-source-file.js')
-            },
-            {
-              definition: {
-                name: 'model-that-should-not-exist' //not in 'models'
-              },
-              sourceFile: path.join(appdir.PATH, 'custom-models', 'i-should-not-exist.js')
             }
           ],
-          dataSources: {
-            'the-db': {
-              connector: 'memory',
-              defaultForType: 'db'
-            }
-          }
+          dataSources: dataSources
         });
-      });
-
-      it('should loads models defined in `models` only.', function() {
-        expect(instructionCustom.models).to.have.length(3);
-      });
-
-      it('should loads model without definition.', function() {
-        expect(instructionCustom.models[0].name).to.equal('model-without-definitions');
-        expect(instructionCustom.models[0].definition).to.equal(undefined);
-        expect(instructionCustom.models[0].sourceFile).to.equal(undefined);
-      });
-
-      it('should set source file path if the file exist.', function() {
-        expect(instructionCustom.models[1].name).to.equal('model-with-definitions');
-        expect(instructionCustom.models[1].definition).not.to.equal(undefined);
-        expect(instructionCustom.models[1].sourceFile).not.to.equal(undefined);
+        expect(instruction.models[0].name).to.equal('model-with-definitions');
+        expect(instruction.models[0].definition).not.to.equal(undefined);
+        expect(instruction.models[0].sourceFile).not.to.equal(undefined);
       });
 
       it('should not set source file path if the file does not exist.', function() {
-        expect(instructionCustom.models[2].name).to.equal('model-with-definitions-without-source-file');
-        expect(instructionCustom.models[2].definition).not.to.equal(undefined);
-        expect(instructionCustom.models[2].sourceFile).to.equal(undefined);
+        var instruction = boot.compile({
+          appRootDir: appdir.PATH,
+          models: {
+            'model-with-definitions-with-falsey-source-file': {
+              dataSource: 'the-db'
+            }
+          },
+          modelDefinitions: [
+            {
+              definition: { // sourceFile is a not existing file.
+                name: 'model-with-definitions-with-falsey-source-file'
+              },
+              sourceFile: path.join(appdir.PATH, 'custom-models', 'model-with-definitions-with-falsey-source-file.js')
+            }
+          ],
+          dataSources: dataSources
+        });
+        expect(instruction.models[0].name).to.equal('model-with-definitions-with-falsey-source-file');
+        expect(instruction.models[0].definition).not.to.equal(undefined);
+        expect(instruction.models[0].sourceFile).to.equal(undefined);
+      });
+
+      it('should not set source file path if no source file supplied.', function() {
+        var instruction = boot.compile({
+          appRootDir: appdir.PATH,
+          models: {
+            'model-with-definitions-without-source-file-property': {
+              dataSource: 'the-db'
+            }
+          },
+          modelDefinitions: [
+            {
+              definition: { // sourceFile is a not existing file.
+                name: 'model-with-definitions-without-source-file-property'
+              }
+            }
+          ],
+          dataSources: dataSources
+        });
+        expect(instruction.models[0].name).to.equal('model-with-definitions-without-source-file-property');
+        expect(instruction.models[0].definition).not.to.equal(undefined);
+        expect(instruction.models[0].sourceFile).to.equal(undefined);
+      });
+
+      it('should loads models defined in `models` only.', function() {
+        var instruction = boot.compile({
+          appRootDir: appdir.PATH,
+          models: {
+            'some-model': {
+              dataSource: 'the-db'
+            }
+          },
+          modelDefinitions: [
+            {
+              definition: {
+                name: 'some-model'
+              }
+            },
+            {
+              definition: {
+                name: 'some-fictional-model'
+              }
+            }
+          ],
+          dataSources: dataSources
+        });
+
+        expect(instruction.models).to.have.length(1);
       });
     });
   });

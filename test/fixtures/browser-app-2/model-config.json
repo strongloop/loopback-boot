@@ -1,0 +1,11 @@
+{
+  "_meta": {
+    "sources": [
+      "./models",
+      "loopback/common/models"
+    ]
+  },
+  "Robot": {
+    "dataSource": "db"
+  }
+}

@@ -439,6 +439,69 @@ describe('compiler', function() {
       expect(instructions.files.boot).to.eql([initJs]);
     });
 
+    it('should resolve non-relative path in `bootScripts`', function() {
+      appdir.createConfigFilesSync();
+      var initJs = appdir.writeFileSync('custom-boot/init.js', '');
+      var instructions = boot.compile({
+        appRootDir: appdir.PATH,
+        bootScripts: ['custom-boot/init.js']
+      });
+      expect(instructions.files.boot).to.eql([initJs]);
+    });
+
+    it('should resolve non-relative path in `bootDirs`', function() {
+      appdir.createConfigFilesSync();
+      var initJs = appdir.writeFileSync('custom-boot/init.js', '');
+      var instructions = boot.compile({
+        appRootDir: appdir.PATH,
+        bootDirs:['custom-boot']
+      });
+      expect(instructions.files.boot).to.eql([initJs]);
+    });
+
+    it('resolves missing extensions in `bootScripts`', function() {
+      appdir.createConfigFilesSync();
+      var initJs = appdir.writeFileSync('custom-boot/init.js', '');
+      var instructions = boot.compile({
+        appRootDir: appdir.PATH,
+        bootScripts:['./custom-boot/init']
+      });
+      expect(instructions.files.boot).to.eql([initJs]);
+    });
+
+    it('ignores index.js in `bootDirs`', function() {
+      appdir.createConfigFilesSync();
+      appdir.writeFileSync('custom-boot/index.js', '');
+      var instructions = boot.compile({
+        appRootDir: appdir.PATH,
+        bootDirs:['./custom-boot']
+      });
+      expect(instructions.files.boot).to.have.length(0);
+    });
+
+    it('resolves module relative path for `bootScripts`', function() {
+      appdir.createConfigFilesSync();
+      var initJs = appdir.writeFileSync('node_modules/custom-boot/init.js', '');
+      var instructions = boot.compile({
+        appRootDir: appdir.PATH,
+        bootScripts: ['custom-boot/init.js']
+      });
+      expect(instructions.files.boot).to.eql([initJs]);
+    });
+
+    it('explores `bootScripts` in app relative path', function() {
+      appdir.createConfigFilesSync();
+      var appJs = appdir.writeFileSync('./custom-boot/init.js', '');
+
+      appdir.writeFileSync('node_modules/custom-boot/init.js', '');
+
+      var instructions = boot.compile({
+        appRootDir: appdir.PATH,
+        bootScripts: ['custom-boot/init.js']
+      });
+      expect(instructions.files.boot).to.eql([appJs]);
+    });
+
     it('ignores models/ subdirectory', function() {
       appdir.createConfigFilesSync();
       appdir.writeFileSync('models/my-model.js', '');

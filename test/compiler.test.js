@@ -469,6 +469,18 @@ describe('compiler', function() {
       expect(instructions.files.boot).to.eql([initJs]);
     });
 
+    it('resolves missing extensions in `bootScripts` in module relative path',
+      function() {
+      appdir.createConfigFilesSync();
+      var initJs = appdir.writeFileSync('node_modules/custom-boot/init.js', '');
+
+      var instructions = boot.compile({
+        appRootDir: appdir.PATH,
+        bootScripts: ['custom-boot/init']
+      });
+      expect(instructions.files.boot).to.eql([initJs]);
+    });
+
     it('ignores index.js in `bootDirs`', function() {
       appdir.createConfigFilesSync();
       appdir.writeFileSync('custom-boot/index.js', '');

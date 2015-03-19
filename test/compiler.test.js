@@ -858,10 +858,11 @@ describe('compiler', function() {
       });
 
     it('resolves paths relatively to appRootDir', function() {
+      appdir.writeFileSync('my-middleware.js', '');
       appdir.writeConfigFileSync('./middleware.json', {
         routes: {
-          // resolves to ./middleware.json
-          './middleware': { }
+          // resolves to ./my-middleware.js
+          './my-middleware': { }
         }
       });
 
@@ -870,7 +871,7 @@ describe('compiler', function() {
       expect(instructions.middleware).to.eql({
         phases: ['routes'],
         middleware: [{
-          sourceFile: path.resolve(appdir.PATH, 'middleware.json'),
+          sourceFile: path.resolve(appdir.PATH, 'my-middleware.js'),
           config: { phase: 'routes' }
         }]
       });
@@ -959,10 +960,10 @@ describe('compiler', function() {
     });
 
     it('supports multiple instances of the same middleware', function() {
-
+      appdir.writeFileSync('my-middleware.js', '');
       appdir.writeConfigFileSync('middleware.json', {
         'final': {
-          './middleware': [
+          './my-middleware': [
             {
               params: 'first'
             },
@@ -978,14 +979,14 @@ describe('compiler', function() {
       expect(instructions.middleware.middleware)
         .to.eql([
           {
-            sourceFile: path.resolve(appdir.PATH, 'middleware.json'),
+            sourceFile: path.resolve(appdir.PATH, 'my-middleware.js'),
             config: {
               phase: 'final',
               params: 'first'
             }
           },
           {
-            sourceFile: path.resolve(appdir.PATH, 'middleware.json'),
+            sourceFile: path.resolve(appdir.PATH, 'my-middleware.js'),
             config: {
               phase: 'final',
               params: 'second'
@@ -1043,26 +1044,57 @@ describe('compiler', function() {
           'errorHandler');
       });
 
-    // FIXME: [rfeng] The following test is disabled until
-    // https://github.com/strongloop/loopback-boot/issues/73 is fixed
-    it.skip('resolves modules relative to appRootDir', function() {
-        var HANDLER_FILE = 'node_modules/handler/index.js';
-        appdir.writeFileSync(
-          HANDLER_FILE,
-          'module.exports = function(req, res, next) { next(); }');
+    it('resolves modules relative to appRootDir', function() {
+      var HANDLER_FILE = 'node_modules/handler/index.js';
+      appdir.writeFileSync(
+        HANDLER_FILE,
+        'module.exports = function(req, res, next) { next(); }');
 
-        appdir.writeConfigFileSync('middleware.json', {
-          'initial': {
-            'handler': {}
-          }
-        });
-
-        var instructions = boot.compile(appdir.PATH);
-
-        expect(instructions.middleware.middleware[0]).have.property(
-          'sourceFile',
-          appdir.resolve(HANDLER_FILE));
+      appdir.writeConfigFileSync('middleware.json', {
+        'initial': {
+          'handler': {}
+        }
       });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.middleware.middleware[0]).have.property(
+        'sourceFile',
+        appdir.resolve(HANDLER_FILE));
+    });
+
+    it('prefers appRootDir over node_modules for middleware', function() {
+      var appJS = appdir.writeFileSync('./my-middleware.js', '');
+      appdir.writeFileSync('node_modules/my-middleware.js', '');
+      appdir.writeConfigFileSync('middleware.json', {
+        'routes': {
+          './my-middleware': {}
+        }
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.middleware.middleware).to.have.length(1);
+      expect(instructions.middleware.middleware[0]).have.property(
+        'sourceFile', appJS);
+    });
+
+    it('does not treat module relative path as `appRootDir` relative',
+      function() {
+      appdir.writeFileSync('./my-middleware.js', '');
+      var moduleJS = appdir.writeFileSync('node_modules/my-middleware.js', '');
+      appdir.writeConfigFileSync('middleware.json', {
+        'routes': {
+          'my-middleware': {}
+        }
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.middleware.middleware).to.have.length(1);
+      expect(instructions.middleware.middleware[0]).have.property(
+        'sourceFile', moduleJS);
+    });
 
     describe('config with relative paths in params', function() {
       var RELATIVE_PATH_PARAMS = [

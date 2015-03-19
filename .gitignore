@@ -12,7 +12,7 @@
 *.swo
 *.iml
 node_modules
-generated-instructions.json
+generated-instructions*.json
 checkstyle.xml
 loopback-boot-*.tgz
 /test/sandbox/

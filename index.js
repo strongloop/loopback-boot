@@ -132,6 +132,9 @@ exports = module.exports = function bootLoopBackApp(app, options, callback) {
 /**
  * Compile boot instructions and add them to a browserify bundler.
  * @param {Object|String} options as described in `bootLoopBackApp` above.
+ * @property {String} [appId] Application identifier used to load the correct
+ * boot configuration when building multiple applications using browserify.
+ * @end
  * @param {Object} bundler A browserify bundler created by `browserify()`.
  *
  * @header boot.compileToBrowserify(options, bundler)

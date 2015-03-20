@@ -613,10 +613,60 @@ describe('compiler', function() {
       });
     });
 
+    it('resolves non-relative path in `modelSources` option', function() {
+      appdir.createConfigFilesSync({}, {}, {
+        Car: { dataSource: 'db' }
+      });
+      appdir.writeConfigFileSync('custom-models/car.json', { name: 'Car' });
+      appdir.writeFileSync('custom-models/car.js', '');
+
+      var instructions = boot.compile({
+        appRootDir: appdir.PATH,
+        modelSources: ['custom-models']
+      });
+
+      expect(instructions.models).to.have.length(1);
+      expect(instructions.models[0]).to.eql({
+        name: 'Car',
+        config: {
+          dataSource: 'db'
+        },
+        definition: {
+          name: 'Car'
+        },
+        sourceFile: path.resolve(appdir.PATH, 'custom-models', 'car.js')
+      });
+    });
+
     it('supports `sources` option in `model-config.json`', function() {
       appdir.createConfigFilesSync({}, {}, {
         _meta: {
           sources: ['./custom-models']
+        },
+        Car: { dataSource: 'db' }
+      });
+      appdir.writeConfigFileSync('custom-models/car.json', { name: 'Car' });
+      appdir.writeFileSync('custom-models/car.js', '');
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.models).to.have.length(1);
+      expect(instructions.models[0]).to.eql({
+        name: 'Car',
+        config: {
+          dataSource: 'db'
+        },
+        definition: {
+          name: 'Car'
+        },
+        sourceFile: path.resolve(appdir.PATH, 'custom-models', 'car.js')
+      });
+    });
+
+    it('resolves non-relative path in `sources` option', function() {
+      appdir.createConfigFilesSync({}, {}, {
+        _meta: {
+          sources: ['custom-models']
         },
         Car: { dataSource: 'db' }
       });

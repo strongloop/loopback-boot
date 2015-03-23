@@ -5,6 +5,9 @@ var expect = require('chai').expect;
 var sandbox = require('./helpers/sandbox');
 var appdir = require('./helpers/appdir');
 
+// add coffee-script to require.extensions
+require('coffee-script/register');
+
 var SIMPLE_APP = path.join(__dirname, 'fixtures', 'simple-app');
 
 describe('compiler', function() {
@@ -394,6 +397,63 @@ describe('compiler', function() {
       expect(instructions.files.boot).to.eql([initJs]);
     });
 
+    it('should resolve relative path in `bootDirs`', function() {
+      appdir.createConfigFilesSync();
+      var initJs = appdir.writeFileSync('custom-boot/init.js',
+        'module.exports = function(app) { app.fnCalled = true; };');
+      var instructions = boot.compile({
+        appRootDir: appdir.PATH,
+        bootDirs:['./custom-boot']
+      });
+      expect(instructions.files.boot).to.eql([initJs]);
+    });
+
+    it('should resolve non-relative path in `bootDirs`', function() {
+      appdir.createConfigFilesSync();
+      var initJs = appdir.writeFileSync('custom-boot/init.js', '');
+      var instructions = boot.compile({
+        appRootDir: appdir.PATH,
+        bootDirs:['custom-boot']
+      });
+      expect(instructions.files.boot).to.eql([initJs]);
+    });
+
+    it('ignores index.js in `bootDirs`', function() {
+      appdir.createConfigFilesSync();
+      appdir.writeFileSync('custom-boot/index.js', '');
+      var instructions = boot.compile({
+        appRootDir: appdir.PATH,
+        bootDirs:['./custom-boot']
+      });
+      expect(instructions.files.boot).to.have.length(0);
+    });
+
+    it('prefers coffeescript over json in `appRootDir/bootDir`', function() {
+      appdir.createConfigFilesSync();
+      var coffee = appdir.writeFileSync('./custom-boot/init.coffee', '');
+      appdir.writeFileSync('./custom-boot/init.json', {});
+
+      var instructions = boot.compile({
+        appRootDir: appdir.PATH,
+        bootDirs: ['./custom-boot']
+      });
+      expect(instructions.files.boot).to.eql([coffee]);
+    });
+
+    it('prefers coffeescript over json in `bootDir` non-relative path',
+      function() {
+      appdir.createConfigFilesSync();
+      var coffee = appdir.writeFileSync('custom-boot/init.coffee',
+        '');
+      appdir.writeFileSync('custom-boot/init.json', '');
+
+      var instructions = boot.compile({
+        appRootDir: appdir.PATH,
+        bootDirs: ['custom-boot']
+      });
+      expect(instructions.files.boot).to.eql([coffee]);
+    });
+
     it('supports `bootScripts` option', function() {
       appdir.createConfigFilesSync();
       var initJs = appdir.writeFileSync('custom-boot/init.js',
@@ -428,33 +488,12 @@ describe('compiler', function() {
       expect(instructions.files.boot).to.eql([initJs]);
     });
 
-    it('should resolve relative path in `bootDirs`', function() {
-      appdir.createConfigFilesSync();
-      var initJs = appdir.writeFileSync('custom-boot/init.js',
-        'module.exports = function(app) { app.fnCalled = true; };');
-      var instructions = boot.compile({
-        appRootDir: appdir.PATH,
-        bootDirs:['./custom-boot']
-      });
-      expect(instructions.files.boot).to.eql([initJs]);
-    });
-
     it('should resolve non-relative path in `bootScripts`', function() {
       appdir.createConfigFilesSync();
       var initJs = appdir.writeFileSync('custom-boot/init.js', '');
       var instructions = boot.compile({
         appRootDir: appdir.PATH,
         bootScripts: ['custom-boot/init.js']
-      });
-      expect(instructions.files.boot).to.eql([initJs]);
-    });
-
-    it('should resolve non-relative path in `bootDirs`', function() {
-      appdir.createConfigFilesSync();
-      var initJs = appdir.writeFileSync('custom-boot/init.js', '');
-      var instructions = boot.compile({
-        appRootDir: appdir.PATH,
-        bootDirs:['custom-boot']
       });
       expect(instructions.files.boot).to.eql([initJs]);
     });
@@ -479,16 +518,6 @@ describe('compiler', function() {
         bootScripts: ['custom-boot/init']
       });
       expect(instructions.files.boot).to.eql([initJs]);
-    });
-
-    it('ignores index.js in `bootDirs`', function() {
-      appdir.createConfigFilesSync();
-      appdir.writeFileSync('custom-boot/index.js', '');
-      var instructions = boot.compile({
-        appRootDir: appdir.PATH,
-        bootDirs:['./custom-boot']
-      });
-      expect(instructions.files.boot).to.have.length(0);
     });
 
     it('resolves module relative path for `bootScripts`', function() {
@@ -564,9 +593,6 @@ describe('compiler', function() {
     });
 
     it('loads coffeescript models from `./models`', function() {
-      // add coffee-script to require.extensions
-      require('coffee-script/register');
-
       appdir.createConfigFilesSync({}, {}, {
         Car: { dataSource: 'db' }
       });
@@ -660,6 +686,75 @@ describe('compiler', function() {
         definition: require('loopback/common/models/user.json'),
         sourceFile: require.resolve('loopback/common/models/user.js')
       });
+    });
+
+    it('resolves relative path in `modelSources` option', function() {
+      appdir.createConfigFilesSync({}, {}, {
+        Car: { dataSource: 'db' }
+      });
+      appdir.writeConfigFileSync('custom-models/car.json', { name: 'Car' });
+      var appJS = appdir.writeFileSync('custom-models/car.js', '');
+
+      var instructions = boot.compile({
+        appRootDir: appdir.PATH,
+        modelSources: ['./custom-models']
+      });
+
+      expect(instructions.models).to.have.length(1);
+      expect(instructions.models[0].sourceFile).to.equal(appJS);
+    });
+
+    it('resolves module relative path in `modelSources` option', function() {
+      appdir.createConfigFilesSync({}, {}, {
+        Car: { dataSource: 'db' }
+      });
+      appdir.writeConfigFileSync('node_modules/custom-models/car.json',
+        { name: 'Car' });
+      var appJS = appdir.writeFileSync('node_modules/custom-models/car.js', '');
+
+      var instructions = boot.compile({
+        appRootDir: appdir.PATH,
+        modelSources: ['custom-models']
+      });
+
+      expect(instructions.models).to.have.length(1);
+      expect(instructions.models[0].sourceFile).to.equal(appJS);
+    });
+
+    it('resolves relative path in `sources` option in `model-config.json`',
+      function() {
+      appdir.createConfigFilesSync({}, {}, {
+        _meta: {
+          sources: ['./custom-models']
+        },
+        Car: { dataSource: 'db' }
+      });
+      appdir.writeConfigFileSync('custom-models/car.json', { name: 'Car' });
+      var appJS = appdir.writeFileSync('custom-models/car.js', '');
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.models).to.have.length(1);
+      expect(instructions.models[0].sourceFile).to.equal(appJS);
+    });
+
+    it('resolves module relative path in `sources` option in model-config.json',
+      function() {
+      appdir.createConfigFilesSync({}, {}, {
+        _meta: {
+          sources: ['custom-models']
+        },
+        Car: { dataSource: 'db' }
+      });
+      appdir.writeConfigFileSync('node_modules/custom-models/car.json',
+        { name: 'Car' });
+
+      var appJS = appdir.writeFileSync('node_modules/custom-models/car.js', '');
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.models).to.have.length(1);
+      expect(instructions.models[0].sourceFile).to.equal(appJS);
     });
 
     it('handles model definitions with no code', function() {
@@ -1096,6 +1191,73 @@ describe('compiler', function() {
         'sourceFile', moduleJS);
     });
 
+    it('loads middleware from coffeescript in appRootdir', function() {
+      var coffee = appdir.writeFileSync('my-middleware.coffee', '');
+      appdir.writeConfigFileSync('middleware.json', {
+        'routes': {
+          './my-middleware': {}
+        }
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.middleware.middleware[0]).have.property(
+        'sourceFile', coffee);
+    });
+
+    it('loads coffeescript from middleware under node_modules',
+      function() {
+      var file = appdir.writeFileSync('node_modules/my-middleware/index.coffee',
+        '');
+      appdir.writeFileSync('node_modules/my-middleware/index.json', '');
+      appdir.writeConfigFileSync('middleware.json', {
+        'routes': {
+          'my-middleware': {}
+        }
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.middleware.middleware).to.have.length(1);
+      expect(instructions.middleware.middleware[0]).have.property(
+        'sourceFile', file);
+    });
+
+    it('prefers coffeescript over json for relative middleware path',
+      function() {
+      var coffee = appdir.writeFileSync('my-middleware.coffee', '');
+      appdir.writeFileSync('my-middleware.json', '');
+      appdir.writeConfigFileSync('middleware.json', {
+        'routes': {
+          './my-middleware': {}
+        }
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.middleware.middleware).to.have.length(1);
+      expect(instructions.middleware.middleware[0]).have.property(
+        'sourceFile', coffee);
+    });
+
+    it('prefers coffeescript over json for module relative middleware path',
+      function() {
+      var coffee = appdir.writeFileSync('node_modules/my-middleware.coffee',
+        '');
+      appdir.writeFileSync('node_modules/my-middleware.json', '');
+      appdir.writeConfigFileSync('middleware.json', {
+        'routes': {
+          'my-middleware': {}
+        }
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.middleware.middleware).to.have.length(1);
+      expect(instructions.middleware.middleware[0]).have.property(
+        'sourceFile', coffee);
+    });
+
     describe('config with relative paths in params', function() {
       var RELATIVE_PATH_PARAMS = [
         '$!./here',
@@ -1195,6 +1357,75 @@ describe('compiler', function() {
         }
       });
     });
+
+    it('loads component relative to appRootDir', function() {
+      appdir.writeConfigFileSync('./component-config.json', {
+        './index': { }
+      });
+      var appJS = appdir.writeConfigFileSync('index.js', '');
+
+      var instructions = boot.compile(appdir.PATH);
+      expect(instructions.components[0]).have.property(
+        'sourceFile', appJS
+      );
+    });
+
+    it('loads component relative to node modules', function() {
+      appdir.writeConfigFileSync('component-config.json', {
+        'mycomponent': { }
+      });
+      var js = appdir.writeConfigFileSync('node_modules/mycomponent/index.js',
+        '');
+
+      var instructions = boot.compile(appdir.PATH);
+      expect(instructions.components[0]).have.property(
+        'sourceFile', js
+      );
+    });
+
+    it('retains backward compatibility for non-relative path in `appRootDir`',
+      function() {
+      appdir.writeConfigFileSync('component-config.json', {
+        'my-component/component.js': { }
+      });
+      appdir.writeConfigFileSync('./my-component/component.js', '');
+
+      expect(function() { boot.compile(appdir.PATH); })
+        .to.throw('Cannot resolve path \"my-component/component.js\"');
+    });
+
+    it('prefers coffeescript over json for relative path component',
+      function() {
+      appdir.writeConfigFileSync('component-config.json', {
+        './component': { }
+      });
+
+      var coffee = appdir.writeFileSync('component.coffee', '');
+      appdir.writeFileSync('component.json', '');
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.components).to.have.length(1);
+      expect(instructions.components[0]).have.property(
+        'sourceFile', coffee);
+    });
+
+    it('prefers coffeescript over json for module relative component path',
+      function() {
+      appdir.writeConfigFileSync('component-config.json', {
+        'component': { }
+      });
+
+      var coffee = appdir.writeFileSync('node_modules/component.coffee', '');
+      appdir.writeFileSync('node_modules/component.json', '');
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.components).to.have.length(1);
+      expect(instructions.components[0]).have.property(
+        'sourceFile', coffee);
+    });
+
   });
 });
 

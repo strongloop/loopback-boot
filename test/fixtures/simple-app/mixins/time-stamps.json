@@ -1,0 +1,13 @@
+{
+  "name": "Timestamping",
+  "version": "0.0.1",
+  "description": "Track create and update",
+  "keywords": ["model", "date", "time"],
+  "options": {
+    "postfix": { 
+      "type": "string",
+      "description": "The postfix string",
+      "default": "At"
+    }
+  }
+}

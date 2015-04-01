@@ -100,6 +100,72 @@ describe('compiler', function() {
         expect(instruction.models[0].sourceFile).to.equal(undefined);
       });
 
+      it('should load coffeescript models', function() {
+        require('coffee-script/register');
+
+        appdir.writeFileSync('custom-models/coffee-model-with-definitions.coffee', '');
+        var instruction = boot.compile({
+          appRootDir: appdir.PATH,
+          models: {
+            'coffee-model-with-definitions': {
+              dataSource: 'the-db'
+            }
+          },
+          modelDefinitions: [
+            {
+              definition: {
+                name: 'coffee-model-with-definitions'
+              },
+              sourceFile: path.join(appdir.PATH, 'custom-models', 'coffee-model-with-definitions.coffee')
+            }
+          ],
+          dataSources: dataSources
+        });
+        expect(instruction.models[0].name).to.equal('coffee-model-with-definitions');
+        expect(instruction.models[0].definition).not.to.equal(undefined);
+        expect(instruction.models[0].sourceFile).not.to.equal(undefined);
+      });
+
+      it('should handle sourceFile path without extension.', function() {
+        require('coffee-script/register');
+
+        appdir.writeFileSync('custom-models/coffee-model-without-ext.coffee', '');
+        appdir.writeFileSync('custom-models/js-model-without-ext.js', '');
+        var instruction = boot.compile({
+          appRootDir: appdir.PATH,
+          models: {
+            'coffee-model-without-ext': {
+              dataSource: 'the-db'
+            },
+            'js-model-without-ext': {
+              dataSource: 'the-db'
+            }
+          },
+          modelDefinitions: [
+            {
+              definition: {
+                name: 'coffee-model-without-ext'
+              },
+              sourceFile: path.join(appdir.PATH, 'custom-models', 'coffee-model-without-ext')
+            },
+            {
+              definition: {
+                name: 'js-model-without-ext'
+              },
+              sourceFile: path.join(appdir.PATH, 'custom-models', 'js-model-without-ext')
+            }
+          ],
+          dataSources: dataSources
+        });
+        expect(instruction.models[0].name).to.equal('coffee-model-without-ext');
+        expect(instruction.models[0].sourceFile)
+          .to.equal(path.join(appdir.PATH, 'custom-models', 'coffee-model-without-ext.coffee'));
+
+        expect(instruction.models[1].name).to.equal('js-model-without-ext');
+        expect(instruction.models[1].sourceFile)
+          .to.equal(path.join(appdir.PATH, 'custom-models', 'js-model-without-ext.js'));
+      });
+
       it('should set source file path if the file exist.', function() {
         appdir.writeFileSync('custom-models/model-with-definitions.js', '');
         var instruction = boot.compile({
@@ -121,7 +187,8 @@ describe('compiler', function() {
         });
         expect(instruction.models[0].name).to.equal('model-with-definitions');
         expect(instruction.models[0].definition).not.to.equal(undefined);
-        expect(instruction.models[0].sourceFile).not.to.equal(undefined);
+        expect(instruction.models[0].sourceFile)
+          .to.equal(path.join(appdir.PATH, 'custom-models', 'model-with-definitions.js'));
       });
 
       it('should not set source file path if the file does not exist.', function() {

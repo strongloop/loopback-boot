@@ -28,7 +28,8 @@
     "debug": "^2.0.0",
     "lodash": "^2.4.1",
     "semver": "^4.1.0",
-    "toposort": "^0.2.10"
+    "toposort": "^0.2.10",
+    "underscore.string": "^3.0.3"
   },
   "devDependencies": {
     "browserify": "^4.1.8",

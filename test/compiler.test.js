@@ -867,6 +867,144 @@ describe('compiler', function() {
         .to.throw(/cyclic dependency/i);
     });
 
+    it('uses file name as default value for model name', function() {
+      appdir.createConfigFilesSync({}, {}, {
+        Car: { dataSource: 'db' }
+      });
+      appdir.writeConfigFileSync('models/car.json', {});
+
+      var instructions = boot.compile(appdir.PATH);
+
+      var modelNames = instructions.models.map(getNameProperty);
+      expect(modelNames).to.eql(['Car']);
+    });
+
+    it('uses `OrderItem` as default model name for file with name `order-item`',
+      function() {
+      appdir.createConfigFilesSync({}, {}, {
+        OrderItem: { dataSource: 'db' }
+      });
+      appdir.writeConfigFileSync('models/order-item.json', {});
+
+      var instructions = boot.compile(appdir.PATH);
+
+      var modelNames = instructions.models.map(getNameProperty);
+      expect(modelNames).to.eql(['OrderItem']);
+    });
+
+    it('uses `OrderItem` as default model name for file with name `order_item`',
+      function() {
+      appdir.createConfigFilesSync({}, {}, {
+        OrderItem: { dataSource: 'db' }
+      });
+      appdir.writeConfigFileSync('models/order_item.json', {});
+
+      var instructions = boot.compile(appdir.PATH);
+
+      var modelNames = instructions.models.map(getNameProperty);
+      expect(modelNames).to.eql(['OrderItem']);
+    });
+
+    it('uses `OrderItem` as default model name for file with name `order item`',
+      function() {
+      appdir.createConfigFilesSync({}, {}, {
+        OrderItem: { dataSource: 'db' }
+      });
+      appdir.writeConfigFileSync('models/order item.json', {});
+
+      var instructions = boot.compile(appdir.PATH);
+
+      var modelNames = instructions.models.map(getNameProperty);
+      expect(modelNames).to.eql(['OrderItem']);
+    });
+
+    it('overrides `default model name` by `name` in model definition',
+      function() {
+      appdir.createConfigFilesSync({}, {}, {
+        overrideCar: { dataSource: 'db' }
+      });
+      appdir.writeConfigFileSync('models/car.json', { name: 'overrideCar'});
+
+      var instructions = boot.compile(appdir.PATH);
+
+      var modelNames = instructions.models.map(getNameProperty);
+      expect(modelNames).to.eql(['overrideCar']);
+    });
+
+    it('overwrites model with same default name', function() {
+      appdir.createConfigFilesSync({}, {}, {
+        'OrderItem': { dataSource: 'db' }
+      });
+
+      appdir.writeConfigFileSync('models/order-item.json', {
+        properties: {
+          price: { type: 'number' }
+        }
+      });
+      appdir.writeFileSync('models/order-item.js', '');
+
+      appdir.writeConfigFileSync('models/orderItem.json', {
+        properties: {
+          quantity: { type: 'number' }
+        }
+      });
+      var appJS = appdir.writeFileSync('models/orderItem.js', '');
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.models).to.eql([{
+        name: 'OrderItem',
+        config: {
+          dataSource: 'db'
+        },
+        definition: {
+          name: 'OrderItem',
+          properties: {
+            quantity: {type: 'number'}
+          }
+        },
+        sourceFile: appJS
+      }]);
+    });
+
+    it('overwrites model with same name in model definition', function() {
+      appdir.createConfigFilesSync({}, {}, {
+        'customOrder': { dataSource: 'db' }
+      });
+
+      appdir.writeConfigFileSync('models/order1.json', {
+        name : 'customOrder',
+        properties: {
+          price: { type: 'number' }
+        }
+      });
+      appdir.writeFileSync('models/order1.js', '');
+
+      appdir.writeConfigFileSync('models/order2.json', {
+        name : 'customOrder',
+        properties: {
+          quantity: { type: 'number' }
+        }
+      });
+      var appJS = appdir.writeFileSync('models/order2.js', '');
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.models).to.eql([{
+        name: 'customOrder',
+        config: {
+          dataSource: 'db'
+        },
+        definition: {
+          name: 'customOrder',
+          properties: {
+            quantity: {type: 'number'}
+          }
+        },
+        sourceFile: appJS
+      }]);
+    });
+
     it('returns a new copy of JSON data', function() {
       appdir.createConfigFilesSync();
 

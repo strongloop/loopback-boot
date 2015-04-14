@@ -84,8 +84,8 @@ describe('executor', function() {
     boot.execute(app, dummyInstructions);
     assert(app.models);
     assert(app.models.User);
-    assert.equal(app.models.User, loopback.User,
-      'Boot should not have extended loopback.User model');
+    assert.equal(app.models.User, app.registry.getModel('User'),
+      'Boot should not have extended built-in User model');
     assertValidDataSource(app.models.User.dataSource);
     assert.isFunc(app.models.User, 'find');
     assert.isFunc(app.models.User, 'create');
@@ -114,7 +114,8 @@ describe('executor', function() {
 
     expect(app.models.Customer).to.exist();
     expect(app.models.Customer.settings._customized).to.be.equal('Customer');
-    expect(loopback.User.settings._customized).to.equal('Base');
+    var UserModel = app.registry.getModel('User');
+    expect(UserModel.settings._customized).to.equal('Base');
   });
 
   it('defines model without attaching it', function() {
@@ -175,6 +176,25 @@ describe('executor', function() {
     }));
 
     expect(app.models.Customer._modelsWhenAttached).to.include('UniqueName');
+  });
+
+  it('defines models in the local app registry', function() {
+    app = loopback({ localRegistry: true });
+    boot.execute(app, someInstructions({
+      models: [
+        {
+          name: 'LocalCustomer',
+          config: { dataSource: 'db' },
+          definition: { name: 'LocalCustomer' },
+          sourceFile: undefined
+        }
+      ]
+    }));
+
+    expect(Object.keys(loopback.registry.modelBuilder.models), 'global models')
+      .to.not.contain('LocalCustomer');
+    expect(Object.keys(app.registry.modelBuilder.models), 'local models')
+      .to.contain('LocalCustomer');
   });
 
   it('throws on bad require() call inside boot script', function() {

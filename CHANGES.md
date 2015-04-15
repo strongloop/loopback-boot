@@ -1,3 +1,37 @@
+2015-04-15, Version 2.7.0
+=========================
+
+ * Upgrade lodash and drop underscore.string (Bryan Clark)
+
+ * add console.error message to a bad require in a boot script (Bryan Clark)
+
+ * Support per-application registry of models (Miroslav Bajtoš)
+
+ * Use filename as default value for Model name (Pradnya Baviskar)
+
+ * compiler: code cleanup (Miroslav Bajtoš)
+
+ * Improve the resolution of relative paths  - resolve module relative path for component  - prioritize coffeescript over json (Pradnya Baviskar)
+
+ * Resolve module paths as relative to appRootDir - for middleware (Pradnya Baviskar)
+
+ * Support for multiple apps in browserified bundle. (Krishna Raman)
+
+ * Resolve missing file extension for module relative paths (Pradnya Baviskar)
+
+ * Resolve module paths as relative to appRootDir (Pradnya Baviskar)
+
+ * Resolve relative paths in  using appRootDir (Pradnya Baviskar)
+
+ * Add feature to disable component (Pradnya Baviskar)
+
+ * Fix test for different line endings on Windows (Pradnya Baviskar)
+
+ * Refactor unit test assertions to be more specific (Simon Ho)
+
+ * Add unit test to verify `app.booting flag status (Simon Ho)
+
+
 2015-02-20, Version 2.6.5
 =========================
 

@@ -294,6 +294,21 @@ describe('executor', function() {
   });
 
   describe('with PaaS and npm env variables', function() {
+    beforeEach(function cleanEnvironment() {
+      // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
+      delete process.env.npm_config_host;
+      delete process.env.OPENSHIFT_SLS_IP;
+      delete process.env.OPENSHIFT_NODEJS_IP;
+      delete process.env.HOST;
+      delete process.env.npm_package_config_host;
+
+      delete process.env.npm_config_port;
+      delete process.env.OPENSHIFT_SLS_PORT;
+      delete process.env.OPENSHIFT_NODEJS_PORT;
+      delete process.env.PORT;
+      delete process.env.npm_package_config_port;
+    });
+
     function bootWithDefaults() {
       app = loopback();
       boot.execute(app, someInstructions({
@@ -322,7 +337,7 @@ describe('executor', function() {
       assertHonored('PORT', 'HOST');
     });
 
-    it('should prioritize sources', function() {
+    it('should prioritize host sources', function() {
       // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
       process.env.npm_config_host = randomHost();
       process.env.OPENSHIFT_SLS_IP = randomHost();
@@ -332,13 +347,9 @@ describe('executor', function() {
 
       bootWithDefaults();
       assert.equal(app.get('host'), process.env.npm_config_host);
+    });
 
-      delete process.env.npm_config_host;
-      delete process.env.OPENSHIFT_SLS_IP;
-      delete process.env.OPENSHIFT_NODEJS_IP;
-      delete process.env.HOST;
-      delete process.env.npm_package_config_host;
-
+    it('should prioritize port sources', function() {
       process.env.npm_config_port = randomPort();
       process.env.OPENSHIFT_SLS_PORT = randomPort();
       process.env.OPENSHIFT_NODEJS_PORT = randomPort();
@@ -346,14 +357,7 @@ describe('executor', function() {
       process.env.npm_package_config_port = randomPort();
 
       bootWithDefaults();
-      assert.equal(app.get('host'), process.env.npm_config_host);
       assert.equal(app.get('port'), process.env.npm_config_port);
-
-      delete process.env.npm_config_port;
-      delete process.env.OPENSHIFT_SLS_PORT;
-      delete process.env.OPENSHIFT_NODEJS_PORT;
-      delete process.env.PORT;
-      delete process.env.npm_package_config_port;
     });
 
     function randomHost() {
@@ -371,6 +375,12 @@ describe('executor', function() {
 
     it('should default to port 3000', function() {
       boot.execute(app, someInstructions({ config: { port: undefined } }));
+      assert.equal(app.get('port'), 3000);
+    });
+
+    it('should ignore non-numeric port values in ENV', function() {
+      process.env.PORT = '123invalid';
+      boot.execute(app, someInstructions({ config: { port: 3000 } }));
       assert.equal(app.get('port'), 3000);
     });
   });

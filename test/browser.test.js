@@ -8,6 +8,7 @@ var vm = require('vm');
 
 describe('browser support', function() {
   this.timeout(60000); // 60s to give browserify enough time to finish
+  beforeEach(sandbox.reset);
 
   it('has API for bundling and executing boot instructions', function(done) {
     var appDir = path.resolve(__dirname, './fixtures/browser-app');

@@ -1,3 +1,13 @@
+2015-04-23, Version 2.7.1
+=========================
+
+ * executor: fix port lookup (Miroslav Bajtoš)
+
+ * Clean up compiler.tryResolveAppPath (Miroslav Bajtoš)
+
+ * Configure Travis CI builds (Miroslav Bajtoš)
+
+
 2015-04-15, Version 2.7.0
 =========================
 

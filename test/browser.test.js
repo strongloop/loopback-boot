@@ -61,6 +61,27 @@ describe('browser support', function() {
     });
   });
 
+  it('loads mixins', function(done) {
+    var appDir = path.resolve(__dirname, './fixtures/browser-app');
+    var options = {
+      appRootDir: appDir,
+      mixinDirs: ['./mixins']
+    };
+
+    browserifyTestApp(options, function(err, bundlePath) {
+      if (err) return done(err);
+
+      var app = executeBundledApp(bundlePath);
+
+      var modelBuilder = app.registry.modelBuilder;
+      var registry = modelBuilder.mixins.mixins;
+      expect(Object.keys(registry)).to.eql(['TimeStamps']);
+      expect(app.models.Customer.timeStampsMixin).to.eql(true);
+
+      done();
+    });
+  });
+
   it('supports coffee-script files', function(done) {
     // add coffee-script to require.extensions
     require('coffee-script/register');
@@ -82,7 +103,7 @@ describe('browser support', function() {
   });
 });
 
-function browserifyTestApp(appDir, strategy, next) {
+function browserifyTestApp(options, strategy, next) {
   // set default args
   if (((typeof strategy) === 'function') && !next) {
     next = strategy;
@@ -91,9 +112,10 @@ function browserifyTestApp(appDir, strategy, next) {
   if (!strategy)
     strategy = 'default';
 
+  var appDir = typeof(options) === 'object' ? options.appRootDir : options;
   var b = compileStrategies[strategy](appDir);
 
-  boot.compileToBrowserify(appDir, b);
+  boot.compileToBrowserify(options, b);
 
   exportBrowserifyToFile(b, 'browser-app-bundle.js', next);
 }

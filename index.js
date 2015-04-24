@@ -111,10 +111,14 @@ var addInstructionsToBrowserify = require('./lib/bundler');
  * of `{appRootDir}/middleware.json`
  * @property {Object} [components] Component configuration to use instead
  * of `{appRootDir}/component-config.json`
+ * @property {Array.<String>} [mixinDirs] List of directories where to look
+ * for files containing model mixin definitions.
  * @property {Array.<String>} [bootDirs] List of directories where to look
  * for boot scripts.
  * @property {Array.<String>} [bootScripts] List of script files to execute
  * on boot.
+ * @property {String|Function|Boolean} [normalization] Mixin normalization
+ * format: false, 'none', 'classify', 'dasherize' - defaults to 'classify'.
  * @end
  * @param {Function} [callback] Callback function.
  *

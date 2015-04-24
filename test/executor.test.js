@@ -291,6 +291,34 @@ describe('executor', function() {
         done();
       });
     });
+
+    describe ('for mixins', function() {
+      it('defines mixins from instructions', function() {
+        appdir.writeFileSync('mixins/example.js',
+          'module.exports = ' +
+          'function(Model, options) {}');
+
+        appdir.writeFileSync('mixins/time-stamps.js',
+          'module.exports = ' +
+          'function(Model, options) {}');
+
+        appdir.writeConfigFileSync('mixins/time-stamps.json', {
+          name: 'Timestamping'
+        });
+
+        var options = {
+          appRootDir: appdir.PATH,
+          mixinDirs: ['./mixins']
+        };
+
+        boot(app, options);
+
+        var modelBuilder = app.registry.modelBuilder;
+
+        var registry = modelBuilder.mixins.mixins;
+        expect(Object.keys(registry)).to.eql(['Example', 'Timestamping']);
+      });
+    });
   });
 
   describe('with PaaS and npm env variables', function() {

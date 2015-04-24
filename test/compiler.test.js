@@ -1014,6 +1014,160 @@ describe('compiler', function() {
       instructions = boot.compile(appdir.PATH);
       expect(instructions.config).to.not.have.property('modified');
     });
+
+    describe('for mixins', function() {
+      function verifyMixinIsFoundViaMixinDirs(sourceFile, mixinDirs) {
+        var appJS = appdir.writeFileSync(sourceFile, '');
+
+        var instructions = boot.compile({
+          appRootDir: appdir.PATH,
+          mixinDirs: mixinDirs
+        });
+
+        expect(instructions.mixins[0].sourceFile).to.eql(appJS);
+      }
+
+      it('supports `mixinDirs` option', function() {
+        verifyMixinIsFoundViaMixinDirs('mixins/other.js', ['./mixins']);
+      });
+
+      it('resolves relative path in `mixinDirs` option', function() {
+        verifyMixinIsFoundViaMixinDirs('custom-mixins/vehicle.js',
+          ['./custom-mixins']);
+      });
+
+      it('resolves module relative path in `mixinDirs` option', function() {
+        verifyMixinIsFoundViaMixinDirs('node_modules/custom-mixins/vehicle.js',
+          ['custom-mixins']);
+      });
+
+      describe('name normalization', function() {
+        var options;
+        beforeEach(function() {
+          options = { appRootDir: appdir.PATH, mixinDirs: ['./mixins'] };
+
+          appdir.writeFileSync('mixins/foo.js', '');
+          appdir.writeFileSync('mixins/time-stamps.js', '');
+          appdir.writeFileSync('mixins/camelCase.js', '');
+          appdir.writeFileSync('mixins/PascalCase.js', '');
+          appdir.writeFileSync('mixins/space name.js', '');
+        });
+
+        it('supports classify', function() {
+          options.normalization = 'classify';
+          var instructions = boot.compile(options);
+
+          var mixins = instructions.mixins;
+          var mixinNames = mixins.map(getNameProperty);
+
+          expect(mixinNames).to.eql([
+            'CamelCase', 'Foo', 'PascalCase', 'SpaceName', 'TimeStamps'
+          ]);
+        });
+
+        it('supports dasherize', function() {
+          options.normalization = 'dasherize';
+          var instructions = boot.compile(options);
+
+          var mixins = instructions.mixins;
+          var mixinNames = mixins.map(getNameProperty);
+
+          expect(mixinNames).to.eql([
+            'camel-case', 'foo', 'pascal-case', 'space-name', 'time-stamps'
+          ]);
+        });
+
+        it('supports custom function', function() {
+          var normalize = function(name) { return name.toUpperCase(); };
+          options.normalization = normalize;
+          var instructions = boot.compile(options);
+
+          var mixins = instructions.mixins;
+          var mixinNames = mixins.map(getNameProperty);
+
+          expect(mixinNames).to.eql([
+            'CAMELCASE', 'FOO', 'PASCALCASE', 'SPACE NAME', 'TIME-STAMPS'
+          ]);
+        });
+
+        it('supports none', function() {
+          options.normalization = 'none';
+          var instructions = boot.compile(options);
+
+          var mixins = instructions.mixins;
+          var mixinNames = mixins.map(getNameProperty);
+
+          expect(mixinNames).to.eql([
+            'camelCase', 'foo', 'PascalCase', 'space name', 'time-stamps'
+          ]);
+        });
+
+        it('supports false', function() {
+          options.normalization = false;
+          var instructions = boot.compile(options);
+
+          var mixins = instructions.mixins;
+          var mixinNames = mixins.map(getNameProperty);
+
+          expect(mixinNames).to.eql([
+            'camelCase', 'foo', 'PascalCase', 'space name', 'time-stamps'
+          ]);
+        });
+
+        it('defaults to classify', function() {
+          var instructions = boot.compile(options);
+
+          var mixins = instructions.mixins;
+          var mixinNames = mixins.map(getNameProperty);
+
+          expect(mixinNames).to.eql([
+            'CamelCase', 'Foo', 'PascalCase', 'SpaceName', 'TimeStamps'
+          ]);
+        });
+
+        it('throws error for invalid normalization format', function() {
+          options.normalization = 'invalidFormat';
+
+          expect(function() { boot.compile(options); })
+          .to.throw(/Invalid normalization format - "invalidFormat"/);
+        });
+      });
+
+      it('overrides default mixin name, by `name` in JSON', function() {
+        appdir.writeFileSync('mixins/foo.js', '');
+        appdir.writeConfigFileSync('mixins/foo.json', {name: 'fooBar'});
+
+        var options = { appRootDir: appdir.PATH,
+          mixinDirs: ['./mixins']
+        };
+        var instructions = boot.compile(options);
+
+        expect(instructions.mixins[0].name).to.eql('fooBar');
+      });
+
+      it('extends definition from JSON with same file name', function() {
+        var appJS = appdir.writeFileSync('mixins/foo-bar.js', '');
+
+        appdir.writeConfigFileSync('mixins/foo-bar.json', {
+          description: 'JSON file name same as JS file name' });
+        appdir.writeConfigFileSync('mixins/FooBar.json', {
+          description: 'JSON file name same as normalized name of mixin' });
+
+        var options = { appRootDir: appdir.PATH,
+          mixinDirs: ['./mixins'],
+          normalization: 'classify' };
+        var instructions = boot.compile(options);
+
+        expect(instructions.mixins).to.eql([
+          {
+            name: 'FooBar',
+            description: 'JSON file name same as JS file name',
+            sourceFile: appJS
+          }
+        ]);
+      });
+
+    });
   });
 
   describe('for middleware', function() {

@@ -64,8 +64,7 @@ describe('browser support', function() {
   it('loads mixins', function(done) {
     var appDir = path.resolve(__dirname, './fixtures/browser-app');
     var options = {
-      appRootDir: appDir,
-      mixinDirs: ['./mixins']
+      appRootDir: appDir
     };
 
     browserifyTestApp(options, function(err, bundlePath) {

@@ -1016,41 +1016,175 @@ describe('compiler', function() {
     });
 
     describe('for mixins', function() {
-      function verifyMixinIsFoundViaMixinDirs(sourceFile, mixinDirs) {
-        var appJS = appdir.writeFileSync(sourceFile, '');
+      describe(' - mixinDirs', function() {
+        function verifyMixinIsFoundViaMixinDirs(sourceFile, mixinDirs) {
+          var appJS = appdir.writeFileSync(sourceFile, '');
 
-        var instructions = boot.compile({
-          appRootDir: appdir.PATH,
-          mixinDirs: mixinDirs
+          var instructions = boot.compile({
+            appRootDir: appdir.PATH,
+            mixinDirs: mixinDirs
+          });
+
+          expect(instructions.mixins[0].sourceFile).to.eql(appJS);
+        }
+
+        it('supports `mixinDirs` option', function() {
+          verifyMixinIsFoundViaMixinDirs('custom-mixins/other.js',
+            ['./custom-mixins']);
         });
 
-        expect(instructions.mixins[0].sourceFile).to.eql(appJS);
-      }
+        it('resolves relative path in `mixinDirs` option', function() {
+          verifyMixinIsFoundViaMixinDirs('custom-mixins/other.js',
+            ['./custom-mixins']);
+        });
 
-      it('supports `mixinDirs` option', function() {
-        verifyMixinIsFoundViaMixinDirs('mixins/other.js', ['./mixins']);
+        it('resolves module relative path in `mixinDirs` option', function() {
+          verifyMixinIsFoundViaMixinDirs('node_modules/custom-mixins/other.js',
+            ['custom-mixins']);
+        });
       });
 
-      it('resolves relative path in `mixinDirs` option', function() {
-        verifyMixinIsFoundViaMixinDirs('custom-mixins/vehicle.js',
-          ['./custom-mixins']);
-      });
+      describe(' - mixinSources', function() {
+        beforeEach(function() {
+          appdir.createConfigFilesSync({}, {}, {
+            Car: { dataSource: 'db' }
+          });
+          appdir.writeConfigFileSync('models/car.json', {
+            name: 'Car',
+            mixins: {'TimeStamps': {} }
+          });
+        });
 
-      it('resolves module relative path in `mixinDirs` option', function() {
-        verifyMixinIsFoundViaMixinDirs('node_modules/custom-mixins/vehicle.js',
-          ['custom-mixins']);
+        function verifyMixinIsFoundViaMixinSources(sourceFile, mixinSources) {
+          var appJS = appdir.writeFileSync(sourceFile, '');
+
+          var instructions = boot.compile({
+            appRootDir: appdir.PATH,
+            mixinSources: mixinSources
+          });
+
+          expect(instructions.mixins[0].sourceFile).to.eql(appJS);
+        }
+
+        it('supports `mixinSources` option', function() {
+          verifyMixinIsFoundViaMixinSources('mixins/time-stamps.js',
+            ['./mixins']);
+        });
+
+        it('resolves relative path in `mixinSources` option', function() {
+          verifyMixinIsFoundViaMixinSources('custom-mixins/time-stamps.js',
+            ['./custom-mixins']);
+        });
+
+        it('resolves module relative path in `mixinSources` option',
+          function() {
+          verifyMixinIsFoundViaMixinSources(
+            'node_modules/custom-mixins/time-stamps.js',
+            ['custom-mixins']);
+        });
+
+        it('supports `mixins` option in `model-config.json`', function() {
+          appdir.createConfigFilesSync({}, {}, {
+            _meta: {
+              mixins: ['./custom-mixins']
+            },
+            Car: {
+              dataSource: 'db'
+            }
+          });
+
+          var appJS = appdir.writeFileSync('custom-mixins/time-stamps.js', '');
+          var instructions = boot.compile(appdir.PATH);
+          expect(instructions.mixins[0].sourceFile).to.eql(appJS);
+        });
+
+        it('sets by default `mixinSources` to `mixins` directory', function() {
+          var appJS = appdir.writeFileSync('mixins/time-stamps.js', '');
+          var instructions = boot.compile(appdir.PATH);
+          expect(instructions.mixins[0].sourceFile).to.eql(appJS);
+        });
+
+        it('loads only mixins used by models', function() {
+          var appJS = appdir.writeFileSync('mixins/time-stamps.js', '');
+          appdir.writeFileSync('mixins/foo.js', '');
+
+          var instructions = boot.compile(appdir.PATH);
+          expect(instructions.mixins).to.have.length(1);
+          expect(instructions.mixins[0].sourceFile).to.eql(appJS);
+        });
+
+        it('loads mixins from model using mixin name in JSON file', function() {
+          var appJS = appdir.writeFileSync('mixins/time-stamps.js', '');
+          appdir.writeConfigFileSync('mixins/time-stamps.json', {
+            name: 'Timestamping'
+          });
+
+          appdir.writeConfigFileSync('models/car.json', {
+            name: 'Car',
+            mixins: {'Timestamping': {} }
+          });
+
+          var instructions = boot.compile(appdir.PATH);
+          expect(instructions.mixins).to.have.length(1);
+          expect(instructions.mixins[0].sourceFile).to.eql(appJS);
+        });
+
+        it('loads mixin only once for dirs common to mixinDirs & mixinSources',
+          function() {
+          var appJS = appdir.writeFileSync('custom-mixins/time-stamps.js', '');
+
+          var options = {
+            appRootDir: appdir.PATH,
+            mixinDirs: ['./custom-mixins'],
+            mixinSources: ['./custom-mixins']
+          };
+
+          var instructions = boot.compile(options);
+          expect(instructions.mixins).to.have.length(1);
+          expect(instructions.mixins[0].sourceFile).to.eql(appJS);
+        });
+
+        it('loads mixin from mixinSources, when it is also found in mixinDirs',
+          function() {
+          appdir.writeFileSync('mixinDir/time-stamps.js', '');
+          var appJS = appdir.writeFileSync('mixinSource/time-stamps.js', '');
+
+          var options = {
+            appRootDir: appdir.PATH,
+            mixinDirs: ['./mixinDir'],
+            mixinSources: ['./mixinSource']
+          };
+
+          var instructions = boot.compile(options);
+          expect(instructions.mixins).to.have.length(1);
+          expect(instructions.mixins[0].sourceFile).to.eql(appJS);
+        });
+
+        it('loads mixin from the most recent mixin definition', function() {
+          appdir.writeFileSync('mixins1/time-stamps.js', '');
+          var mixins2 = appdir.writeFileSync('mixins2/time-stamps.js', '');
+
+          var options = {
+            appRootDir: appdir.PATH,
+            mixinSources: ['./mixins1', './mixins2']
+          };
+
+          var instructions = boot.compile(options);
+          expect(instructions.mixins).to.have.length(1);
+          expect(instructions.mixins[0].sourceFile).to.eql(mixins2);
+        });
       });
 
       describe('name normalization', function() {
         var options;
         beforeEach(function() {
-          options = { appRootDir: appdir.PATH, mixinDirs: ['./mixins'] };
+          options = { appRootDir: appdir.PATH, mixinDirs: ['./custom-mixins'] };
 
-          appdir.writeFileSync('mixins/foo.js', '');
-          appdir.writeFileSync('mixins/time-stamps.js', '');
-          appdir.writeFileSync('mixins/camelCase.js', '');
-          appdir.writeFileSync('mixins/PascalCase.js', '');
-          appdir.writeFileSync('mixins/space name.js', '');
+          appdir.writeFileSync('custom-mixins/foo.js', '');
+          appdir.writeFileSync('custom-mixins/time-stamps.js', '');
+          appdir.writeFileSync('custom-mixins/camelCase.js', '');
+          appdir.writeFileSync('custom-mixins/PascalCase.js', '');
+          appdir.writeFileSync('custom-mixins/space name.js', '');
         });
 
         it('supports classify', function() {
@@ -1146,15 +1280,15 @@ describe('compiler', function() {
       });
 
       it('extends definition from JSON with same file name', function() {
-        var appJS = appdir.writeFileSync('mixins/foo-bar.js', '');
+        var appJS = appdir.writeFileSync('custom-mixins/foo-bar.js', '');
 
-        appdir.writeConfigFileSync('mixins/foo-bar.json', {
+        appdir.writeConfigFileSync('custom-mixins/foo-bar.json', {
           description: 'JSON file name same as JS file name' });
-        appdir.writeConfigFileSync('mixins/FooBar.json', {
+        appdir.writeConfigFileSync('custom-mixins/FooBar.json', {
           description: 'JSON file name same as normalized name of mixin' });
 
         var options = { appRootDir: appdir.PATH,
-          mixinDirs: ['./mixins'],
+          mixinDirs: ['./custom-mixins'],
           normalization: 'classify' };
         var instructions = boot.compile(options);
 
@@ -1166,7 +1300,6 @@ describe('compiler', function() {
           }
         ]);
       });
-
     });
   });
 

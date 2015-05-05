@@ -97,6 +97,9 @@ var addInstructionsToBrowserify = require('./lib/bundler');
  * @property {String} [appConfigRootDir] Directory to use when loading
  * `config.json`. Defaults to `appRootDir`.
  * @property {Object} [models] Object containing `Model` configurations.
+ * @property {Array} [modelDefinitions] List of model definitions to use.
+ *   When `options.modelDefinitions` is provided, loopback-boot does not
+ *   search filesystem and use only the models provided in this argument.
  * @property {Object} [dataSources] Object containing `DataSource` definitions.
  * @property {String} [modelsRootDir] Directory to use when loading
  * `model-config.json`. Defaults to `appRootDir`.

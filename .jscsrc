@@ -5,6 +5,7 @@
      "try",
      "catch"
   ],
+  "disallowMultipleVarDecl": "exceptUndefined",
   "disallowSpacesInsideObjectBrackets": null,
   "requireSpaceAfterLineComment": true,
   "maximumLineLength": {

@@ -406,10 +406,10 @@ describe('executor', function() {
       assert.equal(app.get('port'), 3000);
     });
 
-    it('should ignore non-numeric port values in ENV', function() {
-      process.env.PORT = '123invalid';
+    it('should respect named pipes port values in ENV', function() {
+      process.env.PORT = '\.\pipe\test';
       boot.execute(app, someInstructions({ config: { port: 3000 } }));
-      assert.equal(app.get('port'), 3000);
+      assert.equal(app.get('port'), '\.\pipe\test');
     });
   });
 

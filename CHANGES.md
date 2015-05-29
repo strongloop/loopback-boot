@@ -1,3 +1,19 @@
+2015-05-29, Version 2.8.0
+=========================
+
+ * Support iisnode using named pipes as PORT value (Jonathan Sheely)
+
+ * support 'mixinsources' option (Pradnya Baviskar)
+
+ * compiler: Simplify verifyModelDefinitions() (Miroslav Bajtoš)
+
+ * Fix coding style issues, add API docs (Miroslav Bajtoš)
+
+ * Extend options arg to support custom model definitions (Shlomi Assaf)
+
+ * add support for mixins  - [mixinDirs]: List of directories to look for files  containing model mixin definition. (Pradnya Baviskar)
+
+
 2015-04-23, Version 2.7.1
 =========================
 

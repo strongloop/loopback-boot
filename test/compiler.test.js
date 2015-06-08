@@ -1564,7 +1564,9 @@ describe('compiler', function() {
         .to.throw(/path-does-not-exist/);
     });
 
-    it('does not fail when an optional module middleware cannot be resolved', function() {
+    it(
+      'does not fail when an optional middleware cannot be resolved',
+      function() {
       appdir.writeConfigFileSync('middleware.json', {
         final: {
           'loopback/path-does-not-exist': {
@@ -1591,7 +1593,8 @@ describe('compiler', function() {
           .to.throw(/path-does-not-exist/);
       });
 
-    it('does not fail when an optional module middleware fragment cannot be resolved',
+    it(
+      'does not fail when an optional middleware fragment cannot be resolved',
       function() {
         appdir.writeConfigFileSync('middleware.json', {
           final: {

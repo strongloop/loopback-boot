@@ -1564,6 +1564,20 @@ describe('compiler', function() {
         .to.throw(/path-does-not-exist/);
     });
 
+    it('does not fail when an optional middleware cannot be resolved',
+      function() {
+      appdir.writeConfigFileSync('middleware.json', {
+        final: {
+          'loopback/path-does-not-exist': {
+            optional: 'this middleware is optional'
+          }
+        }
+      });
+
+      expect(function() { boot.compile(appdir.PATH); })
+        .to.not.throw();
+    });
+
     it('fails when a module middleware fragment cannot be resolved',
       function() {
         appdir.writeConfigFileSync('middleware.json', {
@@ -1576,6 +1590,20 @@ describe('compiler', function() {
           boot.compile(appdir.PATH);
         })
           .to.throw(/path-does-not-exist/);
+      });
+
+    it('does not fail when an optional middleware fragment cannot be resolved',
+      function() {
+        appdir.writeConfigFileSync('middleware.json', {
+          final: {
+            'loopback#path-does-not-exist': {
+              optional: 'this middleware is optional'
+            }
+          }
+        });
+
+        expect(function() { boot.compile(appdir.PATH); })
+          .to.not.throw();
       });
 
     it('resolves paths relatively to appRootDir', function() {

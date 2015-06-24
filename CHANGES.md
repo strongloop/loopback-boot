@@ -1,3 +1,9 @@
+2015-06-24, Version 2.8.2
+=========================
+
+ * Excl. mod. main path from middleware instructions (Miroslav Bajtoš)
+
+
 2015-06-10, Version 2.8.1
 =========================
 

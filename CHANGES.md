@@ -1,3 +1,17 @@
+2015-06-24, Version 2.8.2
+=========================
+
+ * Excl. mod. main path from middleware instructions (Miroslav Bajtoš)
+
+
+2015-06-10, Version 2.8.1
+=========================
+
+ * Add more debug info for config loading (Ritchie Martori)
+
+ * use a new variable for better debug output (Bryan Clark)
+
+
 2015-05-29, Version 2.8.0
 =========================
 

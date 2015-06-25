@@ -1789,7 +1789,7 @@ describe('compiler', function() {
 
         expect(instructions.middleware.middleware[0]).have.property(
           'sourceFile',
-          require.resolve('loopback'));
+          pathWithoutIndex(require.resolve('loopback')));
         expect(instructions.middleware.middleware[0]).have.property(
           'fragment',
           'errorHandler');
@@ -1811,7 +1811,7 @@ describe('compiler', function() {
 
       expect(instructions.middleware.middleware[0]).have.property(
         'sourceFile',
-        appdir.resolve(HANDLER_FILE));
+        pathWithoutIndex(appdir.resolve(HANDLER_FILE)));
     });
 
     it('prefers appRootDir over node_modules for middleware', function() {
@@ -1876,7 +1876,7 @@ describe('compiler', function() {
 
       expect(instructions.middleware.middleware).to.have.length(1);
       expect(instructions.middleware.middleware[0]).have.property(
-        'sourceFile', file);
+        'sourceFile', pathWithoutIndex(file));
     });
 
     it('prefers coffeescript over json for relative middleware path',
@@ -2106,4 +2106,8 @@ function pathWithoutExtension(value) {
   return path.join(
     path.dirname(value),
     path.basename(value, path.extname(value)));
+}
+
+function pathWithoutIndex(filePath) {
+  return filePath.replace(/[\\\/]index\.[^.]+$/, '');
 }

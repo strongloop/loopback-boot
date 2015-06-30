@@ -115,7 +115,11 @@ var addInstructionsToBrowserify = require('./lib/bundler');
  * @property {Object} [components] Component configuration to use instead
  * of `{appRootDir}/component-config.json`
  * @property {Array.<String>} [mixinDirs] List of directories where to look
- * for files containing model mixin definitions.
+ * for files containing model mixin definitions. All files (mixins) found
+ * in these directory are loaded.
+ * @property {Array.<String>} [mixinSources] List of directories where to look
+ * for files containing model mixin definitions. Only mixins used by
+ * application models are loaded from these directories.
  * @property {Array.<String>} [bootDirs] List of directories where to look
  * for boot scripts.
  * @property {Array.<String>} [bootScripts] List of script files to execute

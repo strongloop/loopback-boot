@@ -4,6 +4,7 @@ function createContext() {
   var context = {
     // required by browserify
     XMLHttpRequest: function() { throw new Error('not implemented'); },
+    FormData: function() { throw new Error('not implemented'); },
 
     localStorage: {
       // used by `debug` module

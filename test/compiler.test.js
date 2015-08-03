@@ -417,6 +417,46 @@ describe('compiler', function() {
       expect(db.nested).to.eql(arrayValue);
     });
 
+    it('allows env specific model-config json', function() {
+      appdir.createConfigFilesSync();
+      appdir.writeConfigFileSync('model-config.local.json', {
+        foo: { dataSource: 'db' }
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.models).to.have.length(1);
+      expect(instructions.models[0]).to.have.property('name', 'foo');
+    });
+
+    it('allows env specific model-config json to be merged', function() {
+      appdir.createConfigFilesSync(null, null,
+        {foo: {dataSource: 'mongo', public: false}});
+      appdir.writeConfigFileSync('model-config.local.json', {
+        foo: {dataSource: 'db'}
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.models).to.have.length(1);
+      expect(instructions.models[0]).to.have.property('name', 'foo');
+      expect(instructions.models[0].config).to.eql({
+        dataSource: 'db',
+        public: false
+      });
+    });
+
+    it('allows env specific model-config js', function() {
+      appdir.createConfigFilesSync();
+      appdir.writeFileSync('model-config.local.js',
+        'module.exports = { foo: { dataSource: \'db\' } };');
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.models).to.have.length(1);
+      expect(instructions.models[0]).to.have.property('name', 'foo');
+    });
+
     it('refuses to merge Array properties of different length', function() {
       appdir.createConfigFilesSync({
         nest: {

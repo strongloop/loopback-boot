@@ -1,3 +1,19 @@
+2015-08-03, Version 2.9.0
+=========================
+
+ * Fix the build failure (Raymond Feng)
+
+ * Fix the model-config/datasource merge (Raymond Feng)
+
+ * Resolved style issue (Dennis Ashby)
+
+ * Added code to allow model-config to respect model-config.local.js and model-config.env.js as do other config files. (Dennis Ashby)
+
+ * Add jsdoc for `options.mixinSources` (Miroslav Bajtoš)
+
+ * allow middleware to be optional (Hage Yaapa)
+
+
 2015-06-24, Version 2.8.2
 =========================
 

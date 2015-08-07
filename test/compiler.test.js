@@ -1719,6 +1719,137 @@ describe('compiler', function() {
         .to.have.property('enabled', false);
     });
 
+    function verifyMiddlewareConfig() {
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.middleware.middleware)
+        .to.eql([
+          {
+            sourceFile: path.resolve(appdir.PATH, 'middleware'),
+            config: {
+              phase: 'routes',
+              params: {
+                key: 'initial value'
+              }
+            }
+          },
+          {
+            sourceFile: path.resolve(appdir.PATH, 'middleware'),
+            config: {
+              phase: 'routes',
+              params: {
+                key: 'custom value'
+              }
+            }
+          }
+        ]);
+    }
+
+    it('merges config.params array to array', function() {
+      appdir.writeConfigFileSync('./middleware.json', {
+        routes: {
+          './middleware': [{
+            params: {
+              key: 'initial value'
+            }
+          }]
+        }
+      });
+
+      appdir.writeConfigFileSync('./middleware.local.json', {
+        routes: {
+          './middleware': [{
+            params: {
+              key: 'custom value'
+            }
+          }]
+        }
+      });
+
+      verifyMiddlewareConfig();
+    });
+
+    it('merges config.params array to object', function() {
+      appdir.writeConfigFileSync('./middleware.json', {
+        routes: {
+          './middleware': {
+            params: {
+              key: 'initial value'
+            }
+          }
+        }
+      });
+
+      appdir.writeConfigFileSync('./middleware.local.json', {
+        routes: {
+          './middleware': [{
+            params: {
+              key: 'custom value'
+            }
+          }]
+        }
+      });
+
+      verifyMiddlewareConfig();
+    });
+
+    it('merges config.params object to array', function() {
+      appdir.writeConfigFileSync('./middleware.json', {
+        routes: {
+          './middleware': [{
+            params: {
+              key: 'initial value'
+            }
+          }]
+        }
+      });
+
+      appdir.writeConfigFileSync('./middleware.local.json', {
+        routes: {
+          './middleware': {
+            params: {
+              key: 'custom value'
+            }
+          }
+        }
+      });
+
+      verifyMiddlewareConfig();
+    });
+
+    it('merges config.params array to empty object', function() {
+      appdir.writeConfigFileSync('./middleware.json', {
+        routes: {
+          './middleware': {}
+        }
+      });
+
+      appdir.writeConfigFileSync('./middleware.local.json', {
+        routes: {
+          './middleware': [{
+            params: {
+              key: 'custom value'
+            }
+          }]
+        }
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.middleware.middleware)
+        .to.eql([
+          {
+            sourceFile: path.resolve(appdir.PATH, 'middleware'),
+            config: {
+              phase: 'routes',
+              params: {
+                key: 'custom value'
+              }
+            }
+          }
+        ]);
+    });
+
     it('flattens sub-phases', function() {
       appdir.writeConfigFileSync('middleware.json', {
         'initial:after': {

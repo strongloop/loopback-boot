@@ -1,3 +1,9 @@
+2015-08-10, Version 2.10.0
+==========================
+
+ * Enhance middleware config merge (Raymond Feng)
+
+
 2015-08-03, Version 2.9.0
 =========================
 

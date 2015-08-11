@@ -1,3 +1,9 @@
+2015-08-11, Version 2.11.0
+==========================
+
+ * Allow middleware array merge by a key in item objects (Raymond Feng)
+
+
 2015-08-10, Version 2.10.0
 ==========================
 

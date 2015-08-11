@@ -1850,6 +1850,59 @@ describe('compiler', function() {
         ]);
     });
 
+    it('merges config.params array to array by name', function() {
+      appdir.writeConfigFileSync('./middleware.json', {
+        routes: {
+          './middleware': [{
+            name: 'a',
+            params: {
+              key: 'initial value'
+            }
+          }]
+        }
+      });
+
+      appdir.writeConfigFileSync('./middleware.local.json', {
+        routes: {
+          './middleware': [{
+            name: 'a',
+            params: {
+              key: 'custom value'
+            }
+          }, {
+            params: {
+              key: '2nd value'
+            }
+          }]
+        }
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.middleware.middleware)
+        .to.eql([
+          {
+            sourceFile: path.resolve(appdir.PATH, 'middleware'),
+            config: {
+              name: 'a',
+              phase: 'routes',
+              params: {
+                key: 'custom value'
+              }
+            }
+          },
+          {
+            sourceFile: path.resolve(appdir.PATH, 'middleware'),
+            config: {
+              phase: 'routes',
+              params: {
+                key: '2nd value'
+              }
+            }
+          }
+        ]);
+    });
+
     it('flattens sub-phases', function() {
       appdir.writeConfigFileSync('middleware.json', {
         'initial:after': {

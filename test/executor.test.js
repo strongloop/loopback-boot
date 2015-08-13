@@ -292,7 +292,7 @@ describe('executor', function() {
       });
     });
 
-    describe ('for mixins', function() {
+    describe('for mixins', function() {
       var options;
       beforeEach(function() {
         appdir.writeFileSync('custom-mixins/example.js',
@@ -423,6 +423,77 @@ describe('executor', function() {
       boot.execute(app, someInstructions({ config: { port: 3000 } }));
       assert.equal(app.get('port'), NAMED_PORT);
     });
+  });
+
+  describe('with middleware.json', function() {
+
+    it('should parse a simple config variable', function(done) {
+      boot.execute(app, simpleMiddlewareConfig('routes',
+        { path: '${restApiRoot}' }
+      ));
+
+      supertest(app).get('/').end(function(err, res) {
+        if (err) return done(err);
+        expect(res.body.path).to.equal(app.get('restApiRoot'));
+        done();
+      });
+    });
+
+    it('should parse multiple config variables', function(done) {
+      boot.execute(app, simpleMiddlewareConfig('routes',
+        { path: '${restApiRoot}', env: '${env}' }
+      ));
+
+      supertest(app).get('/').end(function(err, res) {
+        if (err) return done(err);
+        expect(res.body.path).to.equal(app.get('restApiRoot'));
+        expect(res.body.env).to.equal(app.get('env'));
+        done();
+      });
+    });
+
+    it('should parse config variables in an array', function(done) {
+      boot.execute(app, simpleMiddlewareConfig('routes',
+        { paths: ['${restApiRoot}'] }
+      ));
+
+      supertest(app).get('/').end(function(err, res) {
+        if (err) return done(err);
+        expect(res.body.paths).to.eql(
+          [app.get('restApiRoot')]
+          );
+        done();
+      });
+    });
+
+    it('should parse config variables in an object', function(done) {
+      boot.execute(app, simpleMiddlewareConfig('routes',
+        { info: { path: '${restApiRoot}' } }
+      ));
+
+      supertest(app).get('/').end(function(err, res) {
+        if (err) return done(err);
+        expect(res.body.info).to.eql({
+          path: app.get('restApiRoot')
+        });
+        done();
+      });
+    });
+
+    it('should parse config variables in a nested object', function(done) {
+      boot.execute(app, simpleMiddlewareConfig('routes',
+        { nested: { info: { path: '${restApiRoot}' } } }
+      ));
+
+      supertest(app).get('/').end(function(err, res) {
+        if (err) return done(err);
+        expect(res.body.nested).to.eql({
+          info: { path: app.get('restApiRoot') }
+        });
+        done();
+      });
+    });
+
   });
 
   it('calls function exported by boot/init.js', function() {
@@ -582,6 +653,23 @@ describe('executor', function() {
       .expect('passport', 'initialized', done);
   });
 });
+
+function simpleMiddlewareConfig(phase, params) {
+  return someInstructions({
+    middleware: {
+      phases: [phase],
+      middleware: [
+        {
+          sourceFile: path.join(__dirname, './fixtures/simple-middleware.js'),
+          config: {
+            phase: phase,
+            params: params
+          }
+        }
+      ]
+    }
+  });
+}
 
 function assertValidDataSource(dataSource) {
   // has methods

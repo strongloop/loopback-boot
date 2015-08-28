@@ -1,3 +1,13 @@
+2015-08-28, Version 2.12.0
+==========================
+
+ * Resolve ${var} values in component-config.json (Hage Yaapa)
+
+ * Resolve ${var} values in middleware.json (Hack Sparrow)
+
+ * Upgrade Travis to container-based infrastructure (Miroslav Bajtoš)
+
+
 2015-08-11, Version 2.11.0
 ==========================
 

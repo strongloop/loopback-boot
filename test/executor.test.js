@@ -496,6 +496,77 @@ describe('executor', function() {
 
   });
 
+  describe('with component-config.json', function() {
+
+    it('should parse a simple config variable', function(done) {
+      boot.execute(app, simpleComponentConfig(
+        { path: '${restApiRoot}' }
+      ));
+
+      supertest(app).get('/component').end(function(err, res) {
+        if (err) return done(err);
+        expect(res.body.path).to.equal(app.get('restApiRoot'));
+        done();
+      });
+    });
+
+    it('should parse multiple config variables', function(done) {
+      boot.execute(app, simpleComponentConfig(
+        { path: '${restApiRoot}', env: '${env}' }
+      ));
+
+      supertest(app).get('/component').end(function(err, res) {
+        if (err) return done(err);
+        expect(res.body.path).to.equal(app.get('restApiRoot'));
+        expect(res.body.env).to.equal(app.get('env'));
+        done();
+      });
+    });
+
+    it('should parse config variables in an array', function(done) {
+      boot.execute(app, simpleComponentConfig(
+        { paths: ['${restApiRoot}'] }
+      ));
+
+      supertest(app).get('/component').end(function(err, res) {
+        if (err) return done(err);
+        expect(res.body.paths).to.eql(
+          [app.get('restApiRoot')]
+          );
+        done();
+      });
+    });
+
+    it('should parse config variables in an object', function(done) {
+      boot.execute(app, simpleComponentConfig(
+        { info: { path: '${restApiRoot}' } }
+      ));
+
+      supertest(app).get('/component').end(function(err, res) {
+        if (err) return done(err);
+        expect(res.body.info).to.eql({
+          path: app.get('restApiRoot')
+        });
+        done();
+      });
+    });
+
+    it('should parse config variables in a nested object', function(done) {
+      boot.execute(app, simpleComponentConfig(
+        { nested: { info: { path: '${restApiRoot}' } } }
+      ));
+
+      supertest(app).get('/component').end(function(err, res) {
+        if (err) return done(err);
+        expect(res.body.nested).to.eql({
+          info: { path: app.get('restApiRoot') }
+        });
+        done();
+      });
+    });
+
+  });
+
   it('calls function exported by boot/init.js', function() {
     var file = appdir.writeFileSync('boot/init.js',
       'module.exports = function(app) { app.fnCalled = true; };');
@@ -668,6 +739,17 @@ function simpleMiddlewareConfig(phase, params) {
         }
       ]
     }
+  });
+}
+
+function simpleComponentConfig(config) {
+  return someInstructions({
+    components: [
+      {
+        sourceFile: path.join(__dirname, './fixtures/simple-component.js'),
+        config: config
+      }
+    ]
   });
 }
 

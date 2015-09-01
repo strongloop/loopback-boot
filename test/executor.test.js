@@ -1,3 +1,4 @@
+var async = require('async');
 var boot = require('../');
 var path = require('path');
 var loopback = require('loopback');
@@ -426,7 +427,6 @@ describe('executor', function() {
   });
 
   describe('with middleware.json', function() {
-
     it('should parse a simple config variable', function(done) {
       boot.execute(app, simpleMiddlewareConfig('routes',
         { path: '${restApiRoot}' }
@@ -494,6 +494,37 @@ describe('executor', function() {
       });
     });
 
+    it('should not parse invalid config variables', function(done) {
+      var invalidDataTypes = [undefined, function() {}];
+      async.each(invalidDataTypes, function(invalidDataType, cb) {
+        var config = simpleMiddlewareConfig('routes', {
+          path: invalidDataType
+        });
+        boot.execute(app, config);
+
+        supertest(app)
+          .get('/')
+          .end(function(err, res) {
+            expect(err).to.be.null();
+            expect(res.body.path).to.be.undefined();
+            cb();
+          });
+      }, done);
+    });
+
+    it('should parse valid config variables', function(done) {
+      var config = simpleMiddlewareConfig('routes', {
+        props: ['a', '${vVar}', 1, true, function() {}, {x:1, y: '${y}'}]
+      });
+      boot.execute(app, config);
+
+      supertest(app)
+        .get('/')
+        .end(function(err, res) {
+          expect(err).to.be.null();
+          done();
+        });
+    });
   });
 
   describe('with component-config.json', function() {

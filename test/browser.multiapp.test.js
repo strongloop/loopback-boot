@@ -55,7 +55,6 @@ describe('browser support for multiple apps', function() {
 
 function browserifyTestApps(apps, next) {
   var b = browserify({
-    basedir: appDir,
     debug: true
   });
 

@@ -1,4 +1,10 @@
-2015-09-01, Version 2.12.1
+2015-09-09, Version 2.12.2
+==========================
+
+ * test: fix strict mode failure (Ryan Graham)
+
+
+2015-08-31, Version 2.12.1
 ==========================
 
  * Add config variable checks (Simon Ho)

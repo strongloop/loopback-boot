@@ -18,10 +18,7 @@
     "pretest": "jscs . && jshint .",
     "test": "mocha"
   },
-  "license": {
-    "name": "Dual MIT/StrongLoop",
-    "url": "https://github.com/strongloop/loopback-boot/blob/master/LICENSE"
-  },
+  "license": "MIT",
   "dependencies": {
     "async": "~0.9.0",
     "commondir": "0.0.1",

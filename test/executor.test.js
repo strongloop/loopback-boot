@@ -11,6 +11,7 @@ var supertest = require('supertest');
 var os = require('os');
 
 var SIMPLE_APP = path.join(__dirname, 'fixtures', 'simple-app');
+var ENV_APP = path.join(__dirname, 'fixtures', 'env-app');
 
 var app;
 
@@ -754,6 +755,19 @@ describe('executor', function() {
       .get('/')
       .expect('passport', 'initialized', done);
   });
+
+  describe('when booting with env', function() {
+    it('should set the `booting` flag during execution', function(done) {
+      expect(app.booting).to.be.undefined();
+      boot.execute(app, envAppInstructions(), function(err) {
+        if (err) return done(err);
+        expect(app.booting).to.be.false();
+        expect(process.bootFlags).to.not.have.property('barLoadedInTest');
+        done();
+      });
+    });
+  });
+
 });
 
 function simpleMiddlewareConfig(phase, params) {
@@ -825,4 +839,12 @@ function simpleAppInstructions() {
   // Copy it so that require will happend again
   fs.copySync(SIMPLE_APP, appdir.PATH);
   return boot.compile(appdir.PATH);
+}
+
+function envAppInstructions() {
+  fs.copySync(ENV_APP, appdir.PATH);
+  return boot.compile({
+    appRootDir: appdir.PATH,
+    env: 'test'
+  });
 }

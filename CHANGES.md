@@ -1,3 +1,11 @@
+2015-10-01, Version 2.13.0
+==========================
+
+ * add env folder for boot (yorkie)
+
+ * Use strongloop conventions for licensing (Sam Roberts)
+
+
 2015-09-09, Version 2.12.2
 ==========================
 

@@ -340,12 +340,14 @@ describe('executor', function() {
       delete process.env.npm_config_host;
       delete process.env.OPENSHIFT_SLS_IP;
       delete process.env.OPENSHIFT_NODEJS_IP;
+      delete process.env.VCAP_APP_HOST;
       delete process.env.HOST;
       delete process.env.npm_package_config_host;
 
       delete process.env.npm_config_port;
       delete process.env.OPENSHIFT_SLS_PORT;
       delete process.env.OPENSHIFT_NODEJS_PORT;
+      delete process.env.VCAP_APP_PORT;
       delete process.env.PORT;
       delete process.env.npm_package_config_port;
     });
@@ -375,6 +377,7 @@ describe('executor', function() {
       assertHonored('npm_config_port', 'npm_config_host');
       assertHonored('npm_package_config_port', 'npm_package_config_host');
       assertHonored('OPENSHIFT_SLS_PORT', 'OPENSHIFT_SLS_IP');
+      assertHonored('VCAP_APP_PORT', 'VCAP_APP_HOST');
       assertHonored('PORT', 'HOST');
     });
 
@@ -383,6 +386,7 @@ describe('executor', function() {
       process.env.npm_config_host = randomHost();
       process.env.OPENSHIFT_SLS_IP = randomHost();
       process.env.OPENSHIFT_NODEJS_IP = randomHost();
+      process.env.VCAP_APP_HOST = randomHost();
       process.env.HOST = randomHost();
       process.env.npm_package_config_host = randomHost();
 
@@ -394,6 +398,7 @@ describe('executor', function() {
       process.env.npm_config_port = randomPort();
       process.env.OPENSHIFT_SLS_PORT = randomPort();
       process.env.OPENSHIFT_NODEJS_PORT = randomPort();
+      process.env.VCAP_APP_PORT = randomPort();
       process.env.PORT = randomPort();
       process.env.npm_package_config_port = randomPort();
 

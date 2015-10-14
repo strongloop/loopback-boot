@@ -1,3 +1,9 @@
+2015-10-14, Version 2.14.0
+==========================
+
+ * Support bluemix env variables for host and port (Miroslav Bajtoš)
+
+
 2015-10-01, Version 2.13.0
 ==========================
 

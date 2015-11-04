@@ -531,6 +531,19 @@ describe('executor', function() {
           done();
         });
     });
+
+    it('should preserve object prototypes', function(done) {
+      var config = simpleMiddlewareConfig(
+        'routes',
+        // IMPORTANT we need more than one item to trigger the original issue
+        [/^\/foobar/, /^\/another/],
+        {});
+      boot.execute(app, config);
+
+      supertest(app).get('/foobar')
+        .expect(200)
+        .end(done);
+    });
   });
 
   describe('with component-config.json', function() {
@@ -775,17 +788,26 @@ describe('executor', function() {
 
 });
 
-function simpleMiddlewareConfig(phase, params) {
+function simpleMiddlewareConfig(phase, paths, params) {
+  if (params === undefined) {
+    params = paths;
+    paths = undefined;
+  }
+
+  var config = {
+    phase: phase,
+    params: params
+  };
+
+  if (paths) config.paths = paths;
+
   return someInstructions({
     middleware: {
       phases: [phase],
       middleware: [
         {
           sourceFile: path.join(__dirname, './fixtures/simple-middleware.js'),
-          config: {
-            phase: phase,
-            params: params
-          }
+          config: config,
         }
       ]
     }

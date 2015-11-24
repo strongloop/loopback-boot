@@ -1,3 +1,11 @@
+2015-11-24, Version 2.14.1
+==========================
+
+ * Warn user if missing a config file (Amir Jafarian)
+
+ * Refer to licenses with a link (Sam Roberts)
+
+
 2015-10-14, Version 2.14.0
 ==========================
 

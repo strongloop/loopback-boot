@@ -1,3 +1,9 @@
+2015-11-24, Version 2.14.2
+==========================
+
+ * executor: preserve RegExps in middleware paths (Miroslav Bajtoš)
+
+
 2015-11-24, Version 2.14.1
 ==========================
 

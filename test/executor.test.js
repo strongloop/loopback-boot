@@ -362,6 +362,11 @@ describe('executor', function() {
       }));
     }
 
+    it('should apply env passed in option object', function() {
+      boot.execute(app, someInstructions({ env: 'custom_env' }));
+      expect(app.get('env')).to.equal('custom_env');
+    });
+
     it('should honor host and port', function() {
       function assertHonored(portKey, hostKey) {
         process.env[hostKey] = randomPort();
@@ -853,6 +858,9 @@ function someInstructions(values) {
       boot: []
     }
   };
+
+  if (values.env)
+    result.env = values.env;
 
   if (values.files) {
     for (var k in values.files)

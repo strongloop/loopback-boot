@@ -1,3 +1,11 @@
+2015-12-04, Version 2.15.0
+==========================
+
+ * Bluemix prefers HOST/PORT over VCAP_APP_XXXX (Sai Vennam)
+
+ * Set app env if it is supplied in options object (Amir Jafarian)
+
+
 2015-11-24, Version 2.14.2
 ==========================
 

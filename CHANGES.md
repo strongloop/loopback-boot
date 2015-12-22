@@ -1,3 +1,9 @@
+2015-12-22, Version 2.16.0
+==========================
+
+ * executor: allow loopback versions >= 3.0.0-alpha (Miroslav Bajtoš)
+
+
 2015-12-04, Version 2.15.0
 ==========================
 

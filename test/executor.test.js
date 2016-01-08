@@ -756,6 +756,24 @@ describe('executor', function() {
       appdir.resolve('components/test-component/index.js'));
   });
 
+  it('disable component if overrided by production configuration', function() {
+    appdir.writeConfigFileSync('component-config.json', {
+      './components/test-component': {}
+    });
+    appdir.writeConfigFileSync('component-config.production.json', {
+      './components/test-component': null
+    });
+
+    appdir.writeFileSync('components/test-component/index.js',
+      'module.exports = ' +
+      'function(app, options) { app.componentOptions = options; }');
+
+    boot(app, { appRootDir: appdir.PATH, env: 'production' });
+
+    expect(Object.keys(require.cache)).to.not.include(
+      appdir.resolve('components/test-component/index.js'));
+  });
+
   it('configures middleware (that requires `this`)', function(done) {
     var passportPath = require.resolve('./fixtures/passport');
 

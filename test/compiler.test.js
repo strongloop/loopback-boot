@@ -1595,6 +1595,39 @@ describe('compiler', function() {
         sourceFileForUrlNotFound);
     });
 
+    it('supports `middlewareRootDir` option', function() {
+      var middlewareJson = {
+        initial: {},
+        custom: {
+          'loopback/server/middleware/url-not-found': {
+            params: 'some-config-data',
+          },
+        },
+      };
+      var customDir = path.resolve(appdir.PATH, 'custom');
+      fs.mkdirsSync(customDir);
+      fs.writeJsonSync(path.resolve(customDir, 'middleware.json'),
+        middlewareJson);
+
+      var instructions = boot.compile({
+        appRootDir: appdir.PATH,
+        middlewareRootDir: path.resolve(appdir.PATH, 'custom'),
+      });
+
+      expect(instructions.middleware).to.eql({
+        phases: ['initial', 'custom'],
+        middleware: [
+          {
+            sourceFile: sourceFileForUrlNotFound,
+            config: {
+              phase: 'custom',
+              params: 'some-config-data',
+            },
+          },
+        ],
+      });
+    });
+
     it('fails when a module middleware cannot be resolved', function() {
       appdir.writeConfigFileSync('middleware.json', {
         final: {
@@ -2234,6 +2267,30 @@ describe('compiler', function() {
           option: 'value',
           local: 'applied',
           env: 'applied',
+        },
+      });
+    });
+
+    it('supports `componentRootDir` option', function() {
+      var componentJson = {
+        debug: {
+          option: 'value',
+        },
+      };
+      var customDir = path.resolve(appdir.PATH, 'custom');
+      fs.mkdirsSync(customDir);
+      fs.writeJsonSync(
+        path.resolve(customDir, 'component-config.json'), componentJson);
+
+      var instructions = boot.compile({
+        appRootDir: appdir.PATH,
+        componentRootDir: path.resolve(appdir.PATH, 'custom'),
+      });
+      var component = instructions.components[0];
+      expect(component).to.eql({
+        sourceFile: require.resolve('debug'),
+        config: {
+          option: 'value',
         },
       });
     });

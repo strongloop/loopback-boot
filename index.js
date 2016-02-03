@@ -110,6 +110,10 @@ var addInstructionsToBrowserify = require('./lib/bundler');
  * `model-config.json`. Defaults to `appRootDir`.
  * @property {String} [dsRootDir] Directory to use when loading
  * `datasources.json`. Defaults to `appRootDir`.
+ * @property {String} [middlewareRootDir] Directory to use when loading
+ * `middleware.json`. Defaults to `appRootDir`.
+ * @property {String} [componentRootDir] Directory to use when loading
+ * `component-config.json`. Defaults to `appRootDir`.
  * @property {String} [env] Environment type, defaults to `process.env.NODE_ENV`
  * or `development`. Common values are `development`, `staging` and
  * `production`; however the applications are free to use any names.

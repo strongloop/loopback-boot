@@ -1546,7 +1546,8 @@ describe('compiler', function() {
 
   describe('for middleware', function() {
 
-    function testMiddlewareRegistration(middlewareId, sourceFile) {
+    function testMiddlewareRegistration(middlewareId, sourceFile,
+                                        alternativeDirTest) {
       var json = {
         initial: {
         },
@@ -1560,7 +1561,21 @@ describe('compiler', function() {
 
       appdir.writeConfigFileSync('middleware.json', json);
 
-      var instructions = boot.compile(appdir.PATH);
+      var instructions;
+
+      if (alternativeDirTest === true) {
+        var customDir = path.resolve(appdir.PATH, 'custom');
+        fs.mkdirsSync(customDir);
+        fs.renameSync(
+          path.resolve(appdir.PATH, 'middleware.json'),
+          path.resolve(customDir, 'middleware.json'));
+        instructions = boot.compile({
+          appRootDir: appdir.PATH,
+          middlewareRootDir: path.resolve(appdir.PATH, 'custom')
+        });
+      } else {
+        instructions = boot.compile(appdir.PATH);
+      }
 
       expect(instructions.middleware).to.eql({
         phases: ['initial', 'custom'],
@@ -1588,9 +1603,21 @@ describe('compiler', function() {
         sourceFileForUrlNotFound);
     });
 
+    it('Suports `middlewareRootDir` Option And ' +
+      'emits middleware instructions', function() {
+      testMiddlewareRegistration('loopback/server/middleware/url-not-found',
+        sourceFileForUrlNotFound, true);
+    });
+
     it('emits middleware instructions for fragment', function() {
       testMiddlewareRegistration('loopback#url-not-found',
         sourceFileForUrlNotFound);
+    });
+
+    it('Suports `middlewareRootDir` Option And ' +
+      'emits middleware instructions for fragment', function() {
+      testMiddlewareRegistration('loopback#url-not-found',
+        sourceFileForUrlNotFound, true);
     });
 
     it('fails when a module middleware cannot be resolved', function() {
@@ -2209,21 +2236,46 @@ describe('compiler', function() {
   });
 
   describe('for components', function() {
-    it('loads component configs from multiple files', function() {
+    // Validate merging of component configuration from different locations
+    function testComponentConfigsMerge(alternativeDirTest) {
       appdir.createConfigFilesSync();
       appdir.writeConfigFileSync('component-config.json', {
         debug: { option: 'value' }
       });
       appdir.writeConfigFileSync('component-config.local.json', {
-        debug: { local: 'applied' }
+        debug: {local: 'applied'}
       });
 
       var env = process.env.NODE_ENV || 'development';
       appdir.writeConfigFileSync('component-config.' + env + '.json', {
-        debug: { env: 'applied' }
+        debug: {env: 'applied'}
       });
 
-      var instructions = boot.compile(appdir.PATH);
+      var instructions;
+
+      if (alternativeDirTest === true) {
+        var customDir = path.resolve(appdir.PATH, 'custom');
+        fs.mkdirsSync(customDir);
+
+        fs.renameSync(
+          path.resolve(appdir.PATH, 'component-config.json'),
+          path.resolve(customDir, 'component-config.json'));
+
+        fs.renameSync(
+          path.resolve(appdir.PATH, 'component-config.local.json'),
+          path.resolve(customDir, 'component-config.local.json'));
+
+        fs.renameSync(
+          path.resolve(appdir.PATH, 'component-config.' + env + '.json'),
+          path.resolve(customDir, 'component-config.' + env + '.json'));
+
+        instructions = boot.compile({
+          appRootDir: appdir.PATH,
+          componentRootDir: path.resolve(appdir.PATH, 'custom')
+        });
+      } else {
+        instructions = boot.compile(appdir.PATH);
+      }
 
       var component = instructions.components[0];
       expect(component).to.eql({
@@ -2234,6 +2286,15 @@ describe('compiler', function() {
           env: 'applied'
         }
       });
+    }
+
+    it('loads component configs from multiple files', function() {
+      testComponentConfigsMerge();
+    });
+
+    it('Suports `componentRootDir` Option And ' +
+      'loads component configs from multiple files', function() {
+      testComponentConfigsMerge(true);
     });
 
     it('loads component relative to appRootDir', function() {

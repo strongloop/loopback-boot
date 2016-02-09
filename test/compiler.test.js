@@ -2243,12 +2243,12 @@ describe('compiler', function() {
         debug: { option: 'value' }
       });
       appdir.writeConfigFileSync('component-config.local.json', {
-        debug: {local: 'applied'}
+        debug: { local: 'applied' }
       });
 
       var env = process.env.NODE_ENV || 'development';
       appdir.writeConfigFileSync('component-config.' + env + '.json', {
-        debug: {env: 'applied'}
+        debug: { env: 'applied' }
       });
 
       var instructions;

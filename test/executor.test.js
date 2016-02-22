@@ -66,14 +66,14 @@ describe('executor', function() {
       });
     });
 
-    it('should emit the `booted` event', function(done) {
+    it('should emit the `booted` event in the next tick', function(done) {
+      boot.execute(app, dummyInstructions, function(err) {
+        expect(err).to.be.undefined();
+      });
       app.on('booted', function() {
         // This test fails with a timeout when the `booted` event has not been
         // emitted correctly
         done();
-      });
-      boot.execute(app, dummyInstructions, function(err) {
-        expect(err).to.be.undefined();
       });
     });
 

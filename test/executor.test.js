@@ -442,6 +442,10 @@ describe('executor', function() {
   });
 
   describe('with middleware.json', function() {
+    beforeEach(function() {
+      delete process.env.restApiRoot;
+    });
+
     it('should parse a simple config variable', function(done) {
       boot.execute(app, simpleMiddlewareConfig('routes',
         { path: '${restApiRoot}' }
@@ -450,6 +454,36 @@ describe('executor', function() {
       supertest(app).get('/').end(function(err, res) {
         if (err) return done(err);
         expect(res.body.path).to.equal(app.get('restApiRoot'));
+        done();
+      });
+    });
+
+    it('should parse simple config variable from env var', function(done) {
+      process.env.restApiRoot = '/url-from-env-var';
+      boot.execute(app, simpleMiddlewareConfig('routes',
+        { path: '${restApiRoot}' }
+      ));
+
+      supertest(app).get('/url-from-env-var').end(function(err, res) {
+        if (err) return done(err);
+        expect(res.body.path).to.equal('/url-from-env-var');
+        done();
+      });
+    });
+
+    it('dynamic variable from `env var` should have' +
+    ' precedence over app.get()', function(done) {
+      process.env.restApiRoot = '/url-from-env-var';
+      var bootInstructions;
+      bootInstructions = simpleMiddlewareConfig('routes',
+        { path: '${restApiRoot}' });
+      bootInstructions.config = { restApiRoot: '/url-from-config' };
+      boot.execute(app, someInstructions(bootInstructions));
+
+      supertest(app).get('/url-from-env-var').end(function(err, res) {
+        if (err) return done(err);
+        expect(app.get('restApiRoot')).to.equal('/url-from-config');
+        expect(res.body.path).to.equal('/url-from-env-var');
         done();
       });
     });
@@ -556,6 +590,11 @@ describe('executor', function() {
   });
 
   describe('with component-config.json', function() {
+    beforeEach(function() {
+      delete process.env.DYNAMIC_ENVVAR;
+      delete process.env.DYNAMIC_VARIABLE;
+    });
+
     it('should parse a simple config variable', function(done) {
       boot.execute(app, simpleComponentConfig(
         { path: '${restApiRoot}' }
@@ -564,6 +603,46 @@ describe('executor', function() {
       supertest(app).get('/component').end(function(err, res) {
         if (err) return done(err);
         expect(res.body.path).to.equal(app.get('restApiRoot'));
+        done();
+      });
+    });
+
+    it('should parse config from `env-var` and `config`', function(done) {
+      var bootInstructions = simpleComponentConfig(
+        {
+          path: '${restApiRoot}',
+          fromConfig: '${DYNAMIC_CONFIG}',
+          fromEnvVar: '${DYNAMIC_ENVVAR}',
+        }
+      );
+
+      // result should get value from config.json
+      bootInstructions.config['DYNAMIC_CONFIG'] = 'FOOBAR-CONFIG';
+      // result should get value from env var
+      process.env.DYNAMIC_ENVVAR = 'FOOBAR-ENVVAR';
+
+      boot.execute(app, bootInstructions);
+      supertest(app).get('/component').end(function(err, res) {
+        if (err) return done(err);
+        expect(res.body.fromConfig).to.equal('FOOBAR-CONFIG');
+        expect(res.body.fromEnvVar).to.equal('FOOBAR-ENVVAR');
+        done();
+      });
+    });
+
+    it('`env-var` should have precedence over `config`', function(done) {
+      var key = 'DYNAMIC_VARIABLE';
+      var bootInstructions = simpleComponentConfig({
+        path: '${restApiRoot}',
+        isDynamic: '${' + key + '}',
+      });
+      bootInstructions.config[key] = 'should be overwritten';
+      process.env[key] = 'successfully overwritten';
+
+      boot.execute(app, bootInstructions);
+      supertest(app).get('/component').end(function(err, res) {
+        if (err) return done(err);
+        expect(res.body.isDynamic).to.equal('successfully overwritten');
         done();
       });
     });
@@ -805,6 +884,77 @@ describe('executor', function() {
         if (err) return done(err);
         expect(app.booting).to.be.false();
         expect(process.bootFlags).to.not.have.property('barLoadedInTest');
+        done();
+      });
+    });
+  });
+
+  describe('dynamic configuration for datasources.json', function() {
+    beforeEach(function() {
+      delete process.env.DYNAMIC_HOST;
+      delete process.env.DYNAMIC_PORT;
+    });
+
+    it('should convert dynamic variable for datasource', function(done) {
+      var datasource = {
+        mydb: {
+          host: '${DYNAMIC_HOST}',
+          port: '${DYNAMIC_PORT}',
+        },
+      };
+      var bootInstructions = { dataSources: datasource };
+
+      process.env.DYNAMIC_PORT = '10007';
+      process.env.DYNAMIC_HOST = '123.321.123.132';
+
+      boot.execute(app, someInstructions(bootInstructions), function() {
+        expect(app.datasources.mydb.settings.host).to.equal('123.321.123.132');
+        expect(app.datasources.mydb.settings.port).to.equal('10007');
+        done();
+      });
+    });
+
+    it('should resolve dynamic config via app.get()', function(done) {
+      var datasource = {
+        mydb: { host: '${DYNAMIC_HOST}' },
+      };
+      var bootInstructions = {
+        config: { DYNAMIC_HOST: '127.0.0.4' },
+        dataSources: datasource,
+      };
+      boot.execute(app, someInstructions(bootInstructions), function() {
+        expect(app.get('DYNAMIC_HOST')).to.equal('127.0.0.4');
+        expect(app.datasources.mydb.settings.host).to.equal(
+          '127.0.0.4');
+        done();
+      });
+    });
+
+    it('should take ENV precedence over config.json', function(done) {
+      process.env.DYNAMIC_HOST = '127.0.0.2';
+      var datasource = {
+        mydb: { host: '${DYNAMIC_HOST}' },
+      };
+      var bootInstructions = {
+        config: { DYNAMIC_HOST: '127.0.0.3' },
+        dataSources: datasource,
+      };
+      boot.execute(app, someInstructions(bootInstructions), function() {
+        expect(app.get('DYNAMIC_HOST')).to.equal('127.0.0.3');
+        expect(app.datasources.mydb.settings.host).to.equal('127.0.0.2');
+        done();
+      });
+    });
+
+    it('empty dynamic conf should resolve as `undefined`', function(done) {
+      var datasource = {
+        mydb: { host: '${DYNAMIC_HOST}' },
+      };
+      var bootInstructions = { dataSources: datasource };
+
+      boot.execute(app, someInstructions(bootInstructions), function() {
+        expect(app.get('DYNAMIC_HOST')).to.be.undefined();
+        expect(app.datasources.mydb.settings.host).to.be.undefined();
         done();
       });
     });

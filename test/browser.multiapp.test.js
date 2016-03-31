@@ -22,14 +22,14 @@ describe('browser support for multiple apps', function() {
       {
         appDir: app1Dir,
         appFile: './app.js',
-        moduleName: 'browser-app'
+        moduleName: 'browser-app',
       },
       {
         appDir: app2Dir,
         appFile: './app.js',
         moduleName: 'browser-app2',
-        appId: 'browserApp2'
-      }
+        appId: 'browserApp2',
+      },
     ];
 
     browserifyTestApps(apps, function(err, bundlePath) {
@@ -55,7 +55,7 @@ describe('browser support for multiple apps', function() {
 
 function browserifyTestApps(apps, next) {
   var b = browserify({
-    debug: true
+    debug: true,
   });
 
   for (var i in apps) {
@@ -65,13 +65,13 @@ function browserifyTestApps(apps, next) {
     var appId = apps[i].appId;
 
     appFile = path.join(appDir, appFile);
-    b.require(appFile, {expose: moduleName});
+    b.require(appFile, { expose: moduleName });
 
     var opts = appDir;
     if (appId) {
       opts = {
         appId: appId,
-        appRootDir: appDir
+        appRootDir: appDir,
       };
     }
     boot.compileToBrowserify(opts, b);

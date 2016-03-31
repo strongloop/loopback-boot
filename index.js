@@ -154,7 +154,7 @@ exports.compileToBrowserify = function(options, bundler) {
   addInstructionsToBrowserify(compile(options), bundler);
 };
 
-/*-- undocumented low-level API --*/
+/* -- undocumented low-level API -- */
 
 exports.ConfigLoader = ConfigLoader;
 exports.compile = compile;

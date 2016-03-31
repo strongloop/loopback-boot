@@ -37,22 +37,22 @@ describe('executor', function() {
       host: '127.0.0.1',
       restApiRoot: '/rest-api',
       foo: { bar: 'bat' },
-      baz: true
+      baz: true,
     },
     models: [
       {
         name: 'User',
         config: {
-          dataSource: 'the-db'
-        }
-      }
+          dataSource: 'the-db',
+        },
+      },
     ],
     dataSources: {
       'the-db': {
         connector: 'memory',
-        defaultForType: 'db'
-      }
-    }
+        defaultForType: 'db',
+      },
+    },
   });
 
   describe('when booting', function() {
@@ -109,9 +109,9 @@ describe('executor', function() {
             name: 'Customer',
             base: 'User',
           },
-          sourceFile: path.resolve(appdir.PATH, 'models', 'Customer.js')
-        }
-      ]
+          sourceFile: path.resolve(appdir.PATH, 'models', 'Customer.js'),
+        },
+      ],
     }));
 
     expect(app.models.Customer).to.exist();
@@ -127,9 +127,9 @@ describe('executor', function() {
           name: 'Vehicle',
           config: undefined,
           definition: {
-            name: 'Vehicle'
+            name: 'Vehicle',
           },
-          sourceFile: undefined
+          sourceFile: undefined,
         },
         {
           name: 'Car',
@@ -138,9 +138,9 @@ describe('executor', function() {
             name: 'Car',
             base: 'Vehicle',
           },
-          sourceFile: undefined
+          sourceFile: undefined,
         },
-      ]
+      ],
     }));
 
     expect(Object.keys(app.models)).to.eql(['Car']);
@@ -166,15 +166,15 @@ describe('executor', function() {
           name: 'Customer',
           config: { dataSource: 'db' },
           definition: { name: 'Customer' },
-          sourceFile: path.resolve(appdir.PATH, 'models', 'Customer.js')
+          sourceFile: path.resolve(appdir.PATH, 'models', 'Customer.js'),
         },
         {
           name: 'UniqueName',
           config: { dataSource: 'db' },
           definition: { name: 'UniqueName' },
-          sourceFile: undefined
-        }
-      ]
+          sourceFile: undefined,
+        },
+      ],
     }));
 
     expect(app.models.Customer._modelsWhenAttached).to.include('UniqueName');
@@ -188,9 +188,9 @@ describe('executor', function() {
           name: 'LocalCustomer',
           config: { dataSource: 'db' },
           definition: { name: 'LocalCustomer' },
-          sourceFile: undefined
-        }
-      ]
+          sourceFile: undefined,
+        },
+      ],
     }));
 
     expect(Object.keys(loopback.registry.modelBuilder.models), 'global models')
@@ -204,7 +204,7 @@ describe('executor', function() {
       'require("doesnt-exist"); module.exports = {};');
 
     function doBoot() {
-      boot.execute(app, someInstructions({ files: { boot: [file] } }));
+      boot.execute(app, someInstructions({ files: { boot: [file] }}));
     }
 
     expect(doBoot).to.throw(/Cannot find module \'doesnt-exist\'/);
@@ -236,7 +236,7 @@ describe('executor', function() {
         require.resolve('loopback/common/models/user.json')
       ),
       config: { dataSource: 'db' },
-      sourceFile: require.resolve('loopback/common/models/user.js')
+      sourceFile: require.resolve('loopback/common/models/user.js'),
     };
     builtinModel.definition.redefined = true;
 
@@ -260,7 +260,7 @@ describe('executor', function() {
         'barLoaded',
         'barSyncLoaded',
         'fooLoaded',
-        'barStarted'
+        'barStarted',
       ]);
 
       // bar finished happens in the next tick
@@ -272,7 +272,7 @@ describe('executor', function() {
           'fooLoaded',
           'barStarted',
           'barFinished',
-          'barSyncExecuted'
+          'barSyncExecuted',
         ]);
         done();
       }, 10);
@@ -288,7 +288,7 @@ describe('executor', function() {
           'fooLoaded',
           'barStarted',
           'barFinished',
-          'barSyncExecuted'
+          'barSyncExecuted',
         ]);
         done();
       });
@@ -306,11 +306,11 @@ describe('executor', function() {
           'function(Model, options) {}');
 
         appdir.writeConfigFileSync('custom-mixins/time-stamps.json', {
-          name: 'Timestamping'
+          name: 'Timestamping',
         });
 
         options = {
-          appRootDir: appdir.PATH
+          appRootDir: appdir.PATH,
         };
       });
 
@@ -357,8 +357,8 @@ describe('executor', function() {
       boot.execute(app, someInstructions({
         config: {
           port: undefined,
-          host: undefined
-        }
+          host: undefined,
+        },
       }));
     }
 
@@ -388,6 +388,7 @@ describe('executor', function() {
 
     it('should prioritize host sources', function() {
       // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
+      /*eslint-disable camelcase*/
       process.env.npm_config_host = randomHost();
       process.env.OPENSHIFT_SLS_IP = randomHost();
       process.env.OPENSHIFT_NODEJS_IP = randomHost();
@@ -397,9 +398,11 @@ describe('executor', function() {
 
       bootWithDefaults();
       assert.equal(app.get('host'), process.env.npm_config_host);
+      /*eslint-enable camelcase*/
     });
 
     it('should prioritize port sources', function() {
+      /*eslint-disable camelcase*/
       process.env.npm_config_port = randomPort();
       process.env.OPENSHIFT_SLS_PORT = randomPort();
       process.env.OPENSHIFT_NODEJS_PORT = randomPort();
@@ -409,6 +412,7 @@ describe('executor', function() {
 
       bootWithDefaults();
       assert.equal(app.get('port'), process.env.npm_config_port);
+      /*eslint-enable camelcase*/
     });
 
     function randomHost() {
@@ -420,19 +424,19 @@ describe('executor', function() {
     }
 
     it('should honor 0 for free port', function() {
-      boot.execute(app, someInstructions({ config: { port: 0 } }));
+      boot.execute(app, someInstructions({ config: { port: 0 }}));
       assert.equal(app.get('port'), 0);
     });
 
     it('should default to port 3000', function() {
-      boot.execute(app, someInstructions({ config: { port: undefined } }));
+      boot.execute(app, someInstructions({ config: { port: undefined }}));
       assert.equal(app.get('port'), 3000);
     });
 
     it('should respect named pipes port values in ENV', function() {
       var NAMED_PORT = '\\.\\pipe\\test';
       process.env.PORT = NAMED_PORT;
-      boot.execute(app, someInstructions({ config: { port: 3000 } }));
+      boot.execute(app, someInstructions({ config: { port: 3000 }}));
       assert.equal(app.get('port'), NAMED_PORT);
     });
   });
@@ -479,13 +483,13 @@ describe('executor', function() {
 
     it('should parse config variables in an object', function(done) {
       boot.execute(app, simpleMiddlewareConfig('routes',
-        { info: { path: '${restApiRoot}' } }
+        { info: { path: '${restApiRoot}' }}
       ));
 
       supertest(app).get('/').end(function(err, res) {
         if (err) return done(err);
         expect(res.body.info).to.eql({
-          path: app.get('restApiRoot')
+          path: app.get('restApiRoot'),
         });
         done();
       });
@@ -493,13 +497,13 @@ describe('executor', function() {
 
     it('should parse config variables in a nested object', function(done) {
       boot.execute(app, simpleMiddlewareConfig('routes',
-        { nested: { info: { path: '${restApiRoot}' } } }
+        { nested: { info: { path: '${restApiRoot}' }}}
       ));
 
       supertest(app).get('/').end(function(err, res) {
         if (err) return done(err);
         expect(res.body.nested).to.eql({
-          info: { path: app.get('restApiRoot') }
+          info: { path: app.get('restApiRoot') },
         });
         done();
       });
@@ -509,7 +513,7 @@ describe('executor', function() {
       var invalidDataTypes = [undefined, function() {}];
       async.each(invalidDataTypes, function(invalidDataType, cb) {
         var config = simpleMiddlewareConfig('routes', {
-          path: invalidDataType
+          path: invalidDataType,
         });
         boot.execute(app, config);
 
@@ -525,7 +529,7 @@ describe('executor', function() {
 
     it('should parse valid config variables', function(done) {
       var config = simpleMiddlewareConfig('routes', {
-        props: ['a', '${vVar}', 1, true, function() {}, {x:1, y: '${y}'}]
+        props: ['a', '${vVar}', 1, true, function() {}, { x: 1, y: '${y}' }],
       });
       boot.execute(app, config);
 
@@ -552,7 +556,6 @@ describe('executor', function() {
   });
 
   describe('with component-config.json', function() {
-
     it('should parse a simple config variable', function(done) {
       boot.execute(app, simpleComponentConfig(
         { path: '${restApiRoot}' }
@@ -594,13 +597,13 @@ describe('executor', function() {
 
     it('should parse config variables in an object', function(done) {
       boot.execute(app, simpleComponentConfig(
-        { info: { path: '${restApiRoot}' } }
+        { info: { path: '${restApiRoot}' }}
       ));
 
       supertest(app).get('/component').end(function(err, res) {
         if (err) return done(err);
         expect(res.body.info).to.eql({
-          path: app.get('restApiRoot')
+          path: app.get('restApiRoot'),
         });
         done();
       });
@@ -608,18 +611,17 @@ describe('executor', function() {
 
     it('should parse config variables in a nested object', function(done) {
       boot.execute(app, simpleComponentConfig(
-        { nested: { info: { path: '${restApiRoot}' } } }
+        { nested: { info: { path: '${restApiRoot}' }}}
       ));
 
       supertest(app).get('/component').end(function(err, res) {
         if (err) return done(err);
         expect(res.body.nested).to.eql({
-          info: { path: app.get('restApiRoot') }
+          info: { path: app.get('restApiRoot') },
         });
         done();
       });
     });
-
   });
 
   it('calls function exported by boot/init.js', function() {
@@ -627,7 +629,7 @@ describe('executor', function() {
       'module.exports = function(app) { app.fnCalled = true; };');
 
     delete app.fnCalled;
-    boot.execute(app, someInstructions({ files: { boot: [file] } }));
+    boot.execute(app, someInstructions({ files: { boot: [file] }}));
     expect(app.fnCalled, 'exported fn was called').to.be.true();
   });
 
@@ -642,33 +644,33 @@ describe('executor', function() {
             sourceFile: pushNamePath,
             config: {
               phase: 'initial',
-              params: 'initial'
-            }
+              params: 'initial',
+            },
           },
           {
             sourceFile: pushNamePath,
             config: {
               phase: 'custom',
-              params: 'custom'
-            }
+              params: 'custom',
+            },
           },
           {
             sourceFile: pushNamePath,
             config: {
               phase: 'routes',
-              params: 'routes'
-            }
+              params: 'routes',
+            },
           },
           {
             sourceFile: pushNamePath,
             config: {
               phase: 'routes',
               enabled: false,
-              params: 'disabled'
-            }
-          }
-        ]
-      }
+              params: 'disabled',
+            },
+          },
+        ],
+      },
     }));
 
     supertest(app)
@@ -682,7 +684,6 @@ describe('executor', function() {
   });
 
   it('configures middleware using shortform', function(done) {
-
     boot.execute(app, someInstructions({
       middleware: {
         middleware: [
@@ -691,11 +692,11 @@ describe('executor', function() {
             fragment: 'static',
             config: {
               phase: 'files',
-              params: path.join(__dirname, './fixtures/simple-app/client/')
-            }
-          }
-        ]
-      }
+              params: path.join(__dirname, './fixtures/simple-app/client/'),
+            },
+          },
+        ],
+      },
     }));
 
     supertest(app)
@@ -725,8 +726,8 @@ describe('executor', function() {
   it('configures components', function() {
     appdir.writeConfigFileSync('component-config.json', {
       './components/test-component': {
-        option: 'value'
-      }
+        option: 'value',
+      },
     });
 
     appdir.writeFileSync('components/test-component/index.js',
@@ -743,7 +744,7 @@ describe('executor', function() {
 
   it('disables component when configuration is not set', function() {
     appdir.writeConfigFileSync('component-config.json', {
-      './components/test-component': false
+      './components/test-component': false,
     });
 
     appdir.writeFileSync('components/test-component/index.js',
@@ -758,10 +759,10 @@ describe('executor', function() {
 
   it('disable component if overrided by production configuration', function() {
     appdir.writeConfigFileSync('component-config.json', {
-      './components/test-component': {}
+      './components/test-component': {},
     });
     appdir.writeConfigFileSync('component-config.production.json', {
-      './components/test-component': null
+      './components/test-component': null,
     });
 
     appdir.writeFileSync('components/test-component/index.js',
@@ -785,11 +786,11 @@ describe('executor', function() {
             sourceFile: passportPath,
             fragment: 'initialize',
             config: {
-              phase: 'auth:before'
-            }
-          }
-        ]
-      }
+              phase: 'auth:before',
+            },
+          },
+        ],
+      },
     }));
 
     supertest(app)
@@ -808,7 +809,6 @@ describe('executor', function() {
       });
     });
   });
-
 });
 
 function simpleMiddlewareConfig(phase, paths, params) {
@@ -819,7 +819,7 @@ function simpleMiddlewareConfig(phase, paths, params) {
 
   var config = {
     phase: phase,
-    params: params
+    params: params,
   };
 
   if (paths) config.paths = paths;
@@ -831,9 +831,9 @@ function simpleMiddlewareConfig(phase, paths, params) {
         {
           sourceFile: path.join(__dirname, './fixtures/simple-middleware.js'),
           config: config,
-        }
-      ]
-    }
+        },
+      ],
+    },
   });
 }
 
@@ -842,9 +842,9 @@ function simpleComponentConfig(config) {
     components: [
       {
         sourceFile: path.join(__dirname, './fixtures/simple-component.js'),
-        config: config
-      }
-    ]
+        config: config,
+      },
+    ],
   });
 }
 
@@ -869,12 +869,12 @@ function someInstructions(values) {
   var result = {
     config: values.config || {},
     models: values.models || [],
-    dataSources: values.dataSources || { db: { connector: 'memory' } },
+    dataSources: values.dataSources || { db: { connector: 'memory' }},
     middleware: values.middleware || { phases: [], middleware: [] },
     components: values.components || [],
     files: {
-      boot: []
-    }
+      boot: [],
+    },
   };
 
   if (values.env)
@@ -898,6 +898,6 @@ function envAppInstructions() {
   fs.copySync(ENV_APP, appdir.PATH);
   return boot.compile({
     appRootDir: appdir.PATH,
-    env: 'test'
+    env: 'test',
   });
 }

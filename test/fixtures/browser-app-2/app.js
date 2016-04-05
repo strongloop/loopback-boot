@@ -5,5 +5,5 @@ var app = module.exports = loopback();
 
 boot(app, {
   appId: 'browserApp2',
-  appRootDir: __dirname
+  appRootDir: __dirname,
 });

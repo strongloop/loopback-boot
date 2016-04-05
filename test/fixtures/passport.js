@@ -5,7 +5,7 @@ var framework = {
       res.setHeader('passport', 'initialized');
       next();
     };
-  }
+  },
 };
 
 var Passport = function() {

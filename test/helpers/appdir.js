@@ -27,8 +27,8 @@ appdir.createConfigFilesSync = function(appConfig, dataSources, models) {
   dataSources = extend({
     db: {
       connector: 'memory',
-      defaultForType: 'db'
-    }
+      defaultForType: 'db',
+    },
   }, dataSources);
   appdir.writeConfigFileSync ('datasources.json', dataSources);
 

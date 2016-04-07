@@ -1,3 +1,11 @@
+2016-04-07, Version 2.18.0
+==========================
+
+ * Dynamic datasources.json from ENV and config.json (David Cheung)
+
+ * Use eslint with loopback config (Miroslav Bajtoš)
+
+
 2016-02-23, Version 2.17.0
 ==========================
 

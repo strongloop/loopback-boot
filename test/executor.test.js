@@ -543,6 +543,23 @@ describe('executor', function() {
       });
     });
 
+    it('should parse config variables with null values', function(done) {
+      boot.execute(app, simpleMiddlewareConfig('routes',
+        { nested: { info: { path: '${restApiRoot}', some: null }}}
+      ));
+
+      supertest(app).get('/').end(function(err, res) {
+        if (err) return done(err);
+        expect(res.body.nested).to.eql({
+          info: {
+            path: app.get('restApiRoot'),
+            some: null,
+          },
+        });
+        done();
+      });
+    });
+
     it('should not parse invalid config variables', function(done) {
       var invalidDataTypes = [undefined, function() {}];
       async.each(invalidDataTypes, function(invalidDataType, cb) {

@@ -1,3 +1,9 @@
+2016-04-13, Version 2.18.1
+==========================
+
+ * parse config: should ignore null values (Loïc Mahieu)
+
+
 2016-04-07, Version 2.18.0
 ==========================
 

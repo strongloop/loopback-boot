@@ -4,14 +4,11 @@
 // License text available at https://opensource.org/licenses/MIT
 
 // Strong globalize
-var SG = require('strong-globalize');
-SG.SetRootDir(__dirname);
+var g = require('./lib/globalize');
 
-var ConfigLoader = require('./lib/config-loader');
-var compile = require('./lib/compiler');
-var execute = require('./lib/executor');
+var PluginBase = require('./lib/plugin-base');
+var Bootstrapper = require('./lib/bootstrapper');
 var addInstructionsToBrowserify = require('./lib/bundler');
-var utils = require('./lib/utils');
 
 /**
  * Initialize an application from an options object or
@@ -147,11 +144,29 @@ var utils = require('./lib/utils');
  */
 
 exports = module.exports = function bootLoopBackApp(app, options, callback) {
+  if (typeof options === 'function' && callback === undefined) {
+    callback = options;
+    options = {};
+  }
+  options = options || {};
   // backwards compatibility with loopback's app.boot
   options.env = options.env || app.get('env');
 
-  var instructions = compile(options);
-  execute(app, instructions, callback);
+  var bootstrapper = new Bootstrapper(options);
+
+  var context = {
+    bootstrapper: bootstrapper,
+    app: app,
+  };
+
+  return bootstrapper.run(context, callback);
+};
+
+exports.compile = function(options, done) {
+  var bootstrapper = new Bootstrapper(options);
+  bootstrapper.phases = ['load', 'compile'];
+  var context = {};
+  return bootstrapper.run(context, done);
 };
 
 /**
@@ -164,14 +179,25 @@ exports = module.exports = function bootLoopBackApp(app, options, callback) {
  *
  * @header boot.compileToBrowserify(options, bundler)
  */
-exports.compileToBrowserify = function(options, bundler) {
-  addInstructionsToBrowserify(compile(options), bundler);
+exports.compileToBrowserify = function(options, bundler, done) {
+  return exports.compile(options, function(err, context) {
+    if (err) return done(err);
+    addInstructionsToBrowserify({ instructions: context.instructions },
+      bundler);
+    done();
+  });
 };
 
-/* -- undocumented low-level API -- */
-
-exports.ConfigLoader = ConfigLoader;
-exports.compile = compile;
-exports.execute = execute;
-exports.utils = utils;
 exports.addInstructionsToBrowserify = addInstructionsToBrowserify;
+exports.Bootstrapper = Bootstrapper;
+exports.PluginBase = PluginBase;
+
+exports.execute = function(app, instructions, done) {
+  var bootstrapper = new Bootstrapper(
+    { phases: ['starting', 'start', 'started'] });
+  var context = {
+    app: app,
+    instructions: instructions,
+  };
+  return bootstrapper.run(context, done);
+};

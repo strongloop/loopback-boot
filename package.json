@@ -27,24 +27,26 @@
   },
   "license": "MIT",
   "dependencies": {
-    "async": "~0.9.0",
-    "commondir": "0.0.1",
-    "debug": "^2.0.0",
-    "lodash": "^3.6.0",
-    "semver": "^4.1.0",
-    "strong-globalize": "^2.6.2",
-    "toposort": "^0.2.10"
+    "async": "^1.5.2",
+    "bluebird": "^3.4.0",
+    "commondir": "^1.0.1",
+    "debug": "^2.2.0",
+    "lodash": "^4.13.1",
+    "semver": "^5.1.0",
+    "strong-globalize": "^2.7.0",
+    "toposort": "^1.0.0"
   },
   "devDependencies": {
-    "browserify": "^4.1.8",
-    "chai": "^1.10.0",
-    "coffee-script": "^1.8.0",
-    "coffeeify": "^0.7.0",
-    "eslint": "^2.5.3",
+    "browserify": "^4.2.3",
+    "chai": "^3.5.0",
+    "coffee-script": "^1.10.0",
+    "coffeeify": "^2.0.1",
+    "dirty-chai": "^1.2.2",
+    "eslint": "^2.11.1",
     "eslint-config-loopback": "^1.0.0",
-    "fs-extra": "^0.12.0",
+    "fs-extra": "^0.30.0",
     "loopback": "^3.0.0",
-    "mocha": "^1.19.0",
-    "supertest": "^0.14.0"
+    "mocha": "^2.5.3",
+    "supertest": "^1.2.0"
   }
 }

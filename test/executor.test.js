@@ -37,7 +37,7 @@ describe('executor', function() {
   });
 
   var dummyInstructions = someInstructions({
-    config: {
+    application: {
       port: 0,
       host: '127.0.0.1',
       restApiRoot: '/rest-api',
@@ -62,18 +62,18 @@ describe('executor', function() {
 
   describe('when booting', function() {
     it('should set the `booting` flag during execution', function(done) {
-      expect(app.booting).to.be.undefined();
+      expect(app.booting).to.be.undefined;
       boot.execute(app, simpleAppInstructions(), function(err) {
-        expect(err).to.be.undefined();
-        expect(process.bootingFlagSet).to.be.true();
-        expect(app.booting).to.be.false();
+        expect(err).to.be.undefined;
+        expect(process.bootingFlagSet).to.be.true;
+        expect(app.booting).to.be.false;
         done();
       });
     });
 
     it('should emit the `booted` event in the next tick', function(done) {
       boot.execute(app, dummyInstructions, function(err) {
-        expect(err).to.be.undefined();
+        expect(err).to.be.undefined;
       });
       app.on('booted', function() {
         // This test fails with a timeout when the `booted` event has not been
@@ -119,7 +119,7 @@ describe('executor', function() {
       ],
     }));
 
-    expect(app.models.Customer).to.exist();
+    expect(app.models.Customer).to.exist;
     expect(app.models.Customer.settings._customized).to.be.equal('Customer');
     var UserModel = app.registry.getModel('User');
     expect(UserModel.settings._customized).to.equal('Base');
@@ -209,7 +209,7 @@ describe('executor', function() {
       'require("doesnt-exist"); module.exports = {};');
 
     function doBoot() {
-      boot.execute(app, someInstructions({ files: { boot: [file] }}));
+      boot.execute(app, someInstructions({ bootScripts: [file] }));
     }
 
     expect(doBoot).to.throw(/Cannot find module \'doesnt-exist\'/);
@@ -237,7 +237,7 @@ describe('executor', function() {
   it('skips definition of already defined LoopBack models', function() {
     var builtinModel = {
       name: 'User',
-      definition: fs.readJsonFileSync(
+      definition: fs.readJsonSync(
         require.resolve('loopback/common/models/user.json')
       ),
       config: { dataSource: 'db' },
@@ -360,7 +360,7 @@ describe('executor', function() {
     function bootWithDefaults() {
       app = loopback();
       boot.execute(app, someInstructions({
-        config: {
+        application: {
           port: undefined,
           host: undefined,
         },
@@ -429,19 +429,19 @@ describe('executor', function() {
     }
 
     it('should honor 0 for free port', function() {
-      boot.execute(app, someInstructions({ config: { port: 0 }}));
+      boot.execute(app, someInstructions({ application: { port: 0 }}));
       assert.equal(app.get('port'), 0);
     });
 
     it('should default to port 3000', function() {
-      boot.execute(app, someInstructions({ config: { port: undefined }}));
+      boot.execute(app, someInstructions({ application: { port: undefined }}));
       assert.equal(app.get('port'), 3000);
     });
 
     it('should respect named pipes port values in ENV', function() {
       var NAMED_PORT = '\\.\\pipe\\test';
       process.env.PORT = NAMED_PORT;
-      boot.execute(app, someInstructions({ config: { port: 3000 }}));
+      boot.execute(app, someInstructions({ application: { port: 3000 }}));
       assert.equal(app.get('port'), NAMED_PORT);
     });
   });
@@ -482,7 +482,7 @@ describe('executor', function() {
       var bootInstructions;
       bootInstructions = simpleMiddlewareConfig('routes',
         { path: '${restApiRoot}' });
-      bootInstructions.config = { restApiRoot: '/url-from-config' };
+      bootInstructions.application = { restApiRoot: '/url-from-config' };
       boot.execute(app, someInstructions(bootInstructions));
 
       supertest(app).get('/url-from-env-var').end(function(err, res) {
@@ -576,8 +576,8 @@ describe('executor', function() {
         supertest(app)
           .get('/')
           .end(function(err, res) {
-            expect(err).to.be.null();
-            expect(res.body.path).to.be.undefined();
+            expect(err).to.be.null;
+            expect(res.body.path).to.be.undefined;
             cb();
           });
       }, done);
@@ -592,7 +592,7 @@ describe('executor', function() {
       supertest(app)
         .get('/')
         .end(function(err, res) {
-          expect(err).to.be.null();
+          expect(err).to.be.null;
           done();
         });
     });
@@ -639,7 +639,7 @@ describe('executor', function() {
       );
 
       // result should get value from config.json
-      bootInstructions.config['DYNAMIC_CONFIG'] = 'FOOBAR-CONFIG';
+      bootInstructions.application['DYNAMIC_CONFIG'] = 'FOOBAR-CONFIG';
       // result should get value from env var
       process.env.DYNAMIC_ENVVAR = 'FOOBAR-ENVVAR';
 
@@ -658,7 +658,7 @@ describe('executor', function() {
         path: '${restApiRoot}',
         isDynamic: '${' + key + '}',
       });
-      bootInstructions.config[key] = 'should be overwritten';
+      bootInstructions.application[key] = 'should be overwritten';
       process.env[key] = 'successfully overwritten';
 
       boot.execute(app, bootInstructions);
@@ -730,8 +730,8 @@ describe('executor', function() {
       'module.exports = function(app) { app.fnCalled = true; };');
 
     delete app.fnCalled;
-    boot.execute(app, someInstructions({ files: { boot: [file] }}));
-    expect(app.fnCalled, 'exported fn was called').to.be.true();
+    boot.execute(app, someInstructions({ bootScripts: [file] }));
+    expect(app.fnCalled, 'exported fn was called').to.be.true;
   });
 
   it('configures middleware', function(done) {
@@ -901,10 +901,10 @@ describe('executor', function() {
 
   describe('when booting with env', function() {
     it('should set the `booting` flag during execution', function(done) {
-      expect(app.booting).to.be.undefined();
+      expect(app.booting).to.be.undefined;
       boot.execute(app, envAppInstructions(), function(err) {
         if (err) return done(err);
-        expect(app.booting).to.be.false();
+        expect(app.booting).to.be.false;
         expect(process.bootFlags).to.not.have.property('barLoadedInTest');
         done();
       });
@@ -997,7 +997,7 @@ describe('executor', function() {
         mydb: { host: '${DYNAMIC_HOST}' },
       };
       var bootInstructions = {
-        config: { DYNAMIC_HOST: '127.0.0.4' },
+        application: { DYNAMIC_HOST: '127.0.0.4' },
         dataSources: datasource,
       };
       boot.execute(app, someInstructions(bootInstructions), function() {
@@ -1014,7 +1014,7 @@ describe('executor', function() {
         mydb: { host: '${DYNAMIC_HOST}' },
       };
       var bootInstructions = {
-        config: { DYNAMIC_HOST: '127.0.0.3' },
+        application: { DYNAMIC_HOST: '127.0.0.3' },
         dataSources: datasource,
       };
       boot.execute(app, someInstructions(bootInstructions), function() {
@@ -1031,8 +1031,8 @@ describe('executor', function() {
       var bootInstructions = { dataSources: datasource };
 
       boot.execute(app, someInstructions(bootInstructions), function() {
-        expect(app.get('DYNAMIC_HOST')).to.be.undefined();
-        expect(app.datasources.mydb.settings.host).to.be.undefined();
+        expect(app.get('DYNAMIC_HOST')).to.be.undefined;
+        expect(app.datasources.mydb.settings.host).to.be.undefined;
         done();
       });
     });
@@ -1095,14 +1095,12 @@ assert.isFunc = function(obj, name) {
 
 function someInstructions(values) {
   var result = {
-    config: values.config || {},
+    application: values.application || {},
     models: values.models || [],
     dataSources: values.dataSources || { db: { connector: 'memory' }},
     middleware: values.middleware || { phases: [], middleware: [] },
     components: values.components || [],
-    files: {
-      boot: [],
-    },
+    bootScripts: values.bootScripts || [],
   };
 
   if (values.env)

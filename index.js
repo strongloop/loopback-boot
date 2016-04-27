@@ -7,9 +7,8 @@
 var SG = require('strong-globalize');
 SG.SetRootDir(__dirname);
 
-var ConfigLoader = require('./lib/config-loader');
-var compile = require('./lib/compiler');
-var execute = require('./lib/executor');
+var PluginBase = require('./lib/plugin-base');
+var Bootstrapper = require('./lib/bootstrapper').Bootstrapper;
 var addInstructionsToBrowserify = require('./lib/bundler');
 var utils = require('./lib/utils');
 
@@ -150,8 +149,24 @@ exports = module.exports = function bootLoopBackApp(app, options, callback) {
   // backwards compatibility with loopback's app.boot
   options.env = options.env || app.get('env');
 
-  var instructions = compile(options);
-  execute(app, instructions, callback);
+  var bootstrapper = require('./lib/bootstrapper')(options);
+
+  var context = {
+    bootstrapper: bootstrapper,
+    app: app,
+  };
+
+  bootstrapper.run(context, callback);
+};
+
+exports.compile = function(options) {
+  var bootstrapper = new Bootstrapper(options);
+  bootstrapper.phases = ['load', 'compile'];
+  var context = {};
+  bootstrapper.run(context, function(err) {
+    if (err) throw err;
+  });
+  return context.instructions;
 };
 
 /**
@@ -165,7 +180,8 @@ exports = module.exports = function bootLoopBackApp(app, options, callback) {
  * @header boot.compileToBrowserify(options, bundler)
  */
 exports.compileToBrowserify = function(options, bundler) {
-  addInstructionsToBrowserify(compile(options), bundler);
+  var instructions = exports.compile(options);
+  addInstructionsToBrowserify({ instructions: instructions }, bundler);
 };
 
 /* -- undocumented low-level API -- */
@@ -175,3 +191,20 @@ exports.compile = compile;
 exports.execute = execute;
 exports.utils = utils;
 exports.addInstructionsToBrowserify = addInstructionsToBrowserify;
+
+exports.Bootstrapper = Bootstrapper;
+exports.PluginBase = PluginBase;
+
+exports.execute = function(app, instructions, done) {
+  var bootstrapper = new Bootstrapper(
+    { phases: ['starting', 'start', 'started'] });
+  var context = {
+    app: app,
+    instructions: instructions,
+  };
+  bootstrapper.run(context, function(err) {
+    if (err) throw err;
+    if (done) done(err);
+  });
+  return context;
+};

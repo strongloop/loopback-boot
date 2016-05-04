@@ -19,10 +19,28 @@ describe('compiler', function() {
   beforeEach(sandbox.reset);
   beforeEach(appdir.init);
 
+  function expectToThrow(err, done, options) {
+    boot.compile(options || appdir.PATH, function(err) {
+      expect(function() {
+        if (err) throw err;
+      }).to.throw(err);
+      done();
+    });
+  }
+
+  function expectToNotThrow(done, options) {
+    boot.compile(options || appdir.PATH, function(err) {
+      expect(function() {
+        if (err) throw err;
+      }).to.not.throw();
+      done();
+    });
+  }
+
   describe('from options', function() {
     var options, instructions, appConfig;
 
-    beforeEach(function() {
+    beforeEach(function(done) {
       options = {
         application: {
           port: 3000,
@@ -43,8 +61,12 @@ describe('compiler', function() {
           },
         },
       };
-      instructions = boot.compile(options);
-      appConfig = instructions.application;
+      boot.compile(options, function(err, context) {
+        if (err) return done(err);
+        appConfig = context.instructions.application;
+        instructions = context.instructions;
+        done();
+      });
     });
 
     it('has port setting', function() {
@@ -82,12 +104,12 @@ describe('compiler', function() {
       expect(instructions.dataSources).to.eql(options.dataSources);
     });
 
-    describe('with custom model definitions', function() {
+    describe('with custom model definitions', function(done) {
       var dataSources = {
         'the-db': { connector: 'memory' },
       };
 
-      it('loads model without definition', function() {
+      it('loads model without definition', function(done) {
         var instruction = boot.compile({
           appRootDir: appdir.PATH,
           models: {
@@ -97,17 +119,21 @@ describe('compiler', function() {
           },
           modelDefinitions: [],
           dataSources: dataSources,
+        }, function(err, context) {
+          if (err) return done(err);
+          var instructions = context.instructions;
+          expect(instructions.models[0].name)
+            .to.equal('model-without-definition');
+          expect(instructions.models[0].definition).to.equal(undefined);
+          expect(instructions.models[0].sourceFile).to.equal(undefined);
+          done();
         });
-        expect(instruction.models[0].name)
-          .to.equal('model-without-definition');
-        expect(instruction.models[0].definition).to.equal(undefined);
-        expect(instruction.models[0].sourceFile).to.equal(undefined);
       });
 
-      it('loads coffeescript models', function() {
+      it('loads coffeescript models', function(done) {
         var modelScript = appdir.writeFileSync(
           'custom-models/coffee-model-with-definition.coffee', '');
-        var instruction = boot.compile({
+        boot.compile({
           appRootDir: appdir.PATH,
           models: {
             'coffee-model-with-definition': {
@@ -123,20 +149,24 @@ describe('compiler', function() {
             },
           ],
           dataSources: dataSources,
+        }, function(err, context) {
+          if (err) return done(err);
+          var instructions = context.instructions;
+          expect(instructions.models[0].name)
+            .to.equal('coffee-model-with-definition');
+          expect(instructions.models[0].definition).to.eql({
+            name: 'coffee-model-with-definition',
+          });
+          expect(instructions.models[0].sourceFile).to.equal(modelScript);
+          done();
         });
-        expect(instruction.models[0].name)
-          .to.equal('coffee-model-with-definition');
-        expect(instruction.models[0].definition).to.eql({
-          name: 'coffee-model-with-definition',
-        });
-        expect(instruction.models[0].sourceFile).to.equal(modelScript);
       });
 
-      it('handles sourceFile path without extension (.js)', function() {
+      it('handles sourceFile path without extension (.js)', function(done) {
         var modelScript = appdir.writeFileSync(
           'custom-models/model-without-ext.coffee',
           '');
-        var instruction = boot.compile({
+        boot.compile({
           appRootDir: appdir.PATH,
           models: {
             'model-without-ext': {
@@ -150,16 +180,20 @@ describe('compiler', function() {
             sourceFile: pathWithoutExtension(modelScript),
           }],
           dataSources: dataSources,
+        }, function(err, context) {
+          if (err) return done(err);
+          var instructions = context.instructions;
+          expect(instructions.models[0].name).to.equal('model-without-ext');
+          expect(instructions.models[0].sourceFile).to.equal(modelScript);
+          done();
         });
-        expect(instruction.models[0].name).to.equal('model-without-ext');
-        expect(instruction.models[0].sourceFile).to.equal(modelScript);
       });
 
-      it('handles sourceFile path without extension (.coffee)', function() {
+      it('handles sourceFile path without extension (.coffee)', function(done) {
         var modelScript = appdir.writeFileSync(
           'custom-models/model-without-ext.coffee',
           '');
-        var instruction = boot.compile({
+        boot.compile({
           appRootDir: appdir.PATH,
           models: {
             'model-without-ext': {
@@ -173,16 +207,20 @@ describe('compiler', function() {
             sourceFile: pathWithoutExtension(modelScript),
           }],
           dataSources: dataSources,
+        }, function(err, context) {
+          if (err) return done(err);
+          var instructions = context.instructions;
+          expect(instructions.models[0].name).to.equal('model-without-ext');
+          expect(instructions.models[0].sourceFile).to.equal(modelScript);
+          done();
         });
-        expect(instruction.models[0].name).to.equal('model-without-ext');
-        expect(instruction.models[0].sourceFile).to.equal(modelScript);
       });
 
-      it('sets source file path if the file exist', function() {
+      it('sets source file path if the file exist', function(done) {
         var modelScript = appdir.writeFileSync(
           'custom-models/model-with-definition.js',
           '');
-        var instruction = boot.compile({
+        boot.compile({
           appRootDir: appdir.PATH,
           models: {
             'model-with-definition': {
@@ -198,65 +236,77 @@ describe('compiler', function() {
             },
           ],
           dataSources: dataSources,
+        }, function(err, context) {
+          if (err) return done(err);
+          var instructions = context.instructions;
+          expect(instructions.models[0].name).to.equal('model-with-definition');
+          expect(instructions.models[0].definition).not.to.equal(undefined);
+          expect(instructions.models[0].sourceFile).to.equal(modelScript);
+          done();
         });
-        expect(instruction.models[0].name).to.equal('model-with-definition');
-        expect(instruction.models[0].definition).not.to.equal(undefined);
-        expect(instruction.models[0].sourceFile).to.equal(modelScript);
       });
 
       it('does not set source file path if the file does not exist.',
-      function() {
-        var instruction = boot.compile({
-          appRootDir: appdir.PATH,
-          models: {
-            'model-with-definition-with-falsey-source-file': {
-              dataSource: 'the-db',
-            },
-          },
-          modelDefinitions: [
-            {
-              definition: {
-                name: 'model-with-definition-with-falsey-source-file',
+        function(done) {
+          boot.compile({
+            appRootDir: appdir.PATH,
+            models: {
+              'model-with-definition-with-falsey-source-file': {
+                dataSource: 'the-db',
               },
-              sourceFile: appdir.resolve('custom-models',
-                'file-does-not-exist.js'),
             },
-          ],
-          dataSources: dataSources,
+            modelDefinitions: [
+              {
+                definition: {
+                  name: 'model-with-definition-with-falsey-source-file',
+                },
+                sourceFile: appdir.resolve('custom-models',
+                  'file-does-not-exist.js'),
+              },
+            ],
+            dataSources: dataSources,
+          }, function(err, context) {
+            if (err) return done(err);
+            var instructions = context.instructions;
+            expect(instructions.models[0].name)
+              .to.equal('model-with-definition-with-falsey-source-file');
+            expect(instructions.models[0].definition).not.to.equal(undefined);
+            expect(instructions.models[0].sourceFile).to.equal(undefined);
+            done();
+          });
         });
-        expect(instruction.models[0].name)
-          .to.equal('model-with-definition-with-falsey-source-file');
-        expect(instruction.models[0].definition).not.to.equal(undefined);
-        expect(instruction.models[0].sourceFile).to.equal(undefined);
-      });
 
       it('does not set source file path if no source file supplied.',
-      function() {
-        var instruction = boot.compile({
-          appRootDir: appdir.PATH,
-          models: {
-            'model-with-definition-without-source-file-property': {
-              dataSource: 'the-db',
-            },
-          },
-          modelDefinitions: [
-            {
-              definition: {
-                name: 'model-with-definition-without-source-file-property',
+        function(done) {
+          boot.compile({
+            appRootDir: appdir.PATH,
+            models: {
+              'model-with-definition-without-source-file-property': {
+                dataSource: 'the-db',
               },
-              // sourceFile is not set
             },
-          ],
-          dataSources: dataSources,
+            modelDefinitions: [
+              {
+                definition: {
+                  name: 'model-with-definition-without-source-file-property',
+                },
+                // sourceFile is not set
+              },
+            ],
+            dataSources: dataSources,
+          }, function(err, context) {
+            if (err) return done(err);
+            var instructions = context.instructions;
+            expect(instructions.models[0].name)
+              .to.equal('model-with-definition-without-source-file-property');
+            expect(instructions.models[0].definition).not.to.equal(undefined);
+            expect(instructions.models[0].sourceFile).to.equal(undefined);
+            done();
+          });
         });
-        expect(instruction.models[0].name)
-          .to.equal('model-with-definition-without-source-file-property');
-        expect(instruction.models[0].definition).not.to.equal(undefined);
-        expect(instruction.models[0].sourceFile).to.equal(undefined);
-      });
 
-      it('loads models defined in `models` only.', function() {
-        var instruction = boot.compile({
+      it('loads models defined in `models` only.', function(done) {
+        boot.compile({
           appRootDir: appdir.PATH,
           models: {
             'some-model': {
@@ -276,30 +326,37 @@ describe('compiler', function() {
             },
           ],
           dataSources: dataSources,
+        }, function(err, context) {
+          if (err) return done(err);
+          var instructions = context.instructions;
+          expect(instructions.models.map(getNameProperty))
+            .to.eql(['some-model']);
+          done();
         });
-
-        expect(instruction.models.map(getNameProperty))
-          .to.eql(['some-model']);
       });
     });
   });
 
-  describe('from directory', function() {
-    it('loads config files', function() {
-      var instructions = boot.compile(SIMPLE_APP);
+  describe('from directory', function(done) {
+    it('loads config files', function(done) {
+      boot.compile(SIMPLE_APP, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      expect(instructions.models).to.have.length(1);
-      expect(instructions.models[0]).to.eql({
-        name: 'User',
-        config: {
-          dataSource: 'db',
-        },
-        definition: undefined,
-        sourceFile: undefined,
+        expect(instructions.models).to.have.length(1);
+        expect(instructions.models[0]).to.eql({
+          name: 'User',
+          config: {
+            dataSource: 'db',
+          },
+          definition: undefined,
+          sourceFile: undefined,
+        });
+        done();
       });
     });
 
-    it('merges datasource configs from multiple files', function() {
+    it('merges datasource configs from multiple files', function(done) {
       appdir.createConfigFilesSync();
       appdir.writeConfigFileSync('datasources.local.json', {
         db: { local: 'applied' },
@@ -310,46 +367,58 @@ describe('compiler', function() {
         db: { env: 'applied' },
       });
 
-      var instructions = boot.compile(appdir.PATH);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      var db = instructions.dataSources.db;
-      expect(db).to.have.property('local', 'applied');
-      expect(db).to.have.property('env', 'applied');
+        var db = instructions.dataSources.db;
+        expect(db).to.have.property('local', 'applied');
+        expect(db).to.have.property('env', 'applied');
 
-      var expectedLoadOrder = ['local', 'env'];
-      var actualLoadOrder = Object.keys(db).filter(function(k) {
-        return expectedLoadOrder.indexOf(k) !== -1;
+        var expectedLoadOrder = ['local', 'env'];
+        var actualLoadOrder = Object.keys(db).filter(function(k) {
+          return expectedLoadOrder.indexOf(k) !== -1;
+        });
+
+        expect(actualLoadOrder, 'load order').to.eql(expectedLoadOrder);
+        done();
       });
-
-      expect(actualLoadOrder, 'load order').to.eql(expectedLoadOrder);
     });
 
-    it('supports .js for custom datasource config files', function() {
+    it('supports .js for custom datasource config files', function(done) {
       appdir.createConfigFilesSync();
       appdir.writeFileSync('datasources.local.js',
         'module.exports = { db: { fromJs: true } };');
 
-      var instructions = boot.compile(appdir.PATH);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      var db = instructions.dataSources.db;
-      expect(db).to.have.property('fromJs', true);
+        var db = instructions.dataSources.db;
+        expect(db).to.have.property('fromJs', true);
+        done();
+      });
     });
 
-    it('merges new Object values', function() {
+    it('merges new Object values', function(done) {
       var objectValue = { key: 'value' };
       appdir.createConfigFilesSync();
       appdir.writeConfigFileSync('datasources.local.json', {
         db: { nested: objectValue },
       });
 
-      var instructions = boot.compile(appdir.PATH);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      var db = instructions.dataSources.db;
-      expect(db).to.have.property('nested');
-      expect(db.nested).to.eql(objectValue);
+        var db = instructions.dataSources.db;
+        expect(db).to.have.property('nested');
+        expect(db.nested).to.eql(objectValue);
+        done();
+      });
     });
 
-    it('deeply merges Object values', function() {
+    it('deeply merges Object values', function(done) {
       appdir.createConfigFilesSync({}, {
         email: {
           transport: {
@@ -366,12 +435,16 @@ describe('compiler', function() {
         },
       });
 
-      var instructions = boot.compile(appdir.PATH);
-      var email = instructions.dataSources.email;
-      expect(email.transport.host).to.equal('mail.example.com');
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
+        var email = instructions.dataSources.email;
+        expect(email.transport.host).to.equal('mail.example.com');
+        done();
+      });
     });
 
-    it('deeply merges Array values of the same length', function() {
+    it('deeply merges Array values of the same length', function(done) {
       appdir.createConfigFilesSync({}, {
         rest: {
           operations: [
@@ -397,70 +470,90 @@ describe('compiler', function() {
         },
       });
 
-      var instructions = boot.compile(appdir.PATH);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      var rest = instructions.dataSources.rest;
-      expect(rest.operations[0].template).to.eql({
-        method: 'POST', // the value from datasources.json
-        url: 'http://api.example.com', // overriden in datasources.local.json
+        var rest = instructions.dataSources.rest;
+        expect(rest.operations[0].template).to.eql({
+          method: 'POST', // the value from datasources.json
+          url: 'http://api.example.com', // overriden in datasources.local.json
+        });
+        done();
       });
     });
 
-    it('merges Array properties', function() {
+    it('merges Array properties', function(done) {
       var arrayValue = ['value'];
       appdir.createConfigFilesSync();
       appdir.writeConfigFileSync('datasources.local.json', {
         db: { nested: arrayValue },
       });
 
-      var instructions = boot.compile(appdir.PATH);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      var db = instructions.dataSources.db;
-      expect(db).to.have.property('nested');
-      expect(db.nested).to.eql(arrayValue);
+        var db = instructions.dataSources.db;
+        expect(db).to.have.property('nested');
+        expect(db.nested).to.eql(arrayValue);
+        done();
+      });
     });
 
-    it('allows env specific model-config json', function() {
+    it('allows env specific model-config json', function(done) {
       appdir.createConfigFilesSync();
       appdir.writeConfigFileSync('model-config.local.json', {
         foo: { dataSource: 'db' },
       });
 
-      var instructions = boot.compile(appdir.PATH);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      expect(instructions.models).to.have.length(1);
-      expect(instructions.models[0]).to.have.property('name', 'foo');
+        expect(instructions.models).to.have.length(1);
+        expect(instructions.models[0]).to.have.property('name', 'foo');
+        done();
+      });
     });
 
-    it('allows env specific model-config json to be merged', function() {
+    it('allows env specific model-config json to be merged', function(done) {
       appdir.createConfigFilesSync(null, null,
         { foo: { dataSource: 'mongo', public: false }});
       appdir.writeConfigFileSync('model-config.local.json', {
         foo: { dataSource: 'db' },
       });
 
-      var instructions = boot.compile(appdir.PATH);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      expect(instructions.models).to.have.length(1);
-      expect(instructions.models[0]).to.have.property('name', 'foo');
-      expect(instructions.models[0].config).to.eql({
-        dataSource: 'db',
-        public: false,
+        expect(instructions.models).to.have.length(1);
+        expect(instructions.models[0]).to.have.property('name', 'foo');
+        expect(instructions.models[0].config).to.eql({
+          dataSource: 'db',
+          public: false,
+        });
+        done();
       });
     });
 
-    it('allows env specific model-config js', function() {
+    it('allows env specific model-config js', function(done) {
       appdir.createConfigFilesSync();
       appdir.writeFileSync('model-config.local.js',
         'module.exports = { foo: { dataSource: \'db\' } };');
 
-      var instructions = boot.compile(appdir.PATH);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      expect(instructions.models).to.have.length(1);
-      expect(instructions.models[0]).to.have.property('name', 'foo');
+        expect(instructions.models).to.have.length(1);
+        expect(instructions.models[0]).to.have.property('name', 'foo');
+        done();
+      });
     });
 
-    it('refuses to merge Array properties of different length', function() {
+    it('refuses to merge Array properties of different length', function(done) {
       appdir.createConfigFilesSync({
         nest: {
           array: [],
@@ -477,11 +570,10 @@ describe('compiler', function() {
         },
       });
 
-      expect(function() { boot.compile(appdir.PATH); })
-        .to.throw(/array values of different length.*nest\.array/);
+      expectToThrow(/array values of different length.*nest\.array/, done);
     });
 
-    it('refuses to merge Array of different length in Array', function() {
+    it('refuses to merge Array of different length in Array', function(done) {
       appdir.createConfigFilesSync({
         key: [[]],
       });
@@ -490,11 +582,10 @@ describe('compiler', function() {
         key: [['value']],
       });
 
-      expect(function() { boot.compile(appdir.PATH); })
-        .to.throw(/array values of different length.*key\[0\]/);
+      expectToThrow(/array values of different length.*key\[0\]/, done);
     });
 
-    it('returns full key of an incorrect Array value', function() {
+    it('returns full key of an incorrect Array value', function(done) {
       appdir.createConfigFilesSync({
         toplevel: [
           {
@@ -511,11 +602,11 @@ describe('compiler', function() {
         ],
       });
 
-      expect(function() { boot.compile(appdir.PATH); })
-        .to.throw(/array values of different length.*toplevel\[0\]\.nested/);
+      expectToThrow(/array values of different length.*toplevel\[0\]\.nested/,
+        done);
     });
 
-    it('refuses to merge incompatible object properties', function() {
+    it('refuses to merge incompatible object properties', function(done) {
       appdir.createConfigFilesSync({
         key: [],
       });
@@ -523,11 +614,10 @@ describe('compiler', function() {
         key: {},
       });
 
-      expect(function() { boot.compile(appdir.PATH); })
-        .to.throw(/incompatible types.*key/);
+      expectToThrow(/incompatible types.*key/, done);
     });
 
-    it('refuses to merge incompatible array items', function() {
+    it('refuses to merge incompatible array items', function(done) {
       appdir.createConfigFilesSync({
         key: [[]],
       });
@@ -535,11 +625,10 @@ describe('compiler', function() {
         key: [{}],
       });
 
-      expect(function() { boot.compile(appdir.PATH); })
-        .to.throw(/incompatible types.*key\[0\]/);
+      expectToThrow(/incompatible types.*key\[0\]/, done);
     });
 
-    it('merges app configs from multiple files', function() {
+    it('merges app configs from multiple files', function(done) {
       appdir.createConfigFilesSync();
 
       appdir.writeConfigFileSync('config.local.json', { cfgLocal: 'applied' });
@@ -548,32 +637,40 @@ describe('compiler', function() {
       appdir.writeConfigFileSync('config.' + env + '.json',
         { cfgEnv: 'applied' });
 
-      var instructions = boot.compile(appdir.PATH);
-      var appConfig = instructions.application;
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
+        var appConfig = instructions.application;
 
-      expect(appConfig).to.have.property('cfgLocal', 'applied');
-      expect(appConfig).to.have.property('cfgEnv', 'applied');
+        expect(appConfig).to.have.property('cfgLocal', 'applied');
+        expect(appConfig).to.have.property('cfgEnv', 'applied');
 
-      var expectedLoadOrder = ['cfgLocal', 'cfgEnv'];
-      var actualLoadOrder = Object.keys(appConfig).filter(function(k) {
-        return expectedLoadOrder.indexOf(k) !== -1;
+        var expectedLoadOrder = ['cfgLocal', 'cfgEnv'];
+        var actualLoadOrder = Object.keys(appConfig).filter(function(k) {
+          return expectedLoadOrder.indexOf(k) !== -1;
+        });
+
+        expect(actualLoadOrder, 'load order').to.eql(expectedLoadOrder);
+        done();
       });
-
-      expect(actualLoadOrder, 'load order').to.eql(expectedLoadOrder);
     });
 
-    it('supports .js for custom app config files', function() {
+    it('supports .js for custom app config files', function(done) {
       appdir.createConfigFilesSync();
       appdir.writeFileSync('config.local.js',
         'module.exports = { fromJs: true };');
 
-      var instructions = boot.compile(appdir.PATH);
-      var appConfig = instructions.application;
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
+        var appConfig = instructions.application;
 
-      expect(appConfig).to.have.property('fromJs', true);
+        expect(appConfig).to.have.property('fromJs', true);
+        done();
+      });
     });
 
-    it('supports `appConfigRootDir` option', function() {
+    it('supports `appConfigRootDir` option', function(done) {
       appdir.createConfigFilesSync({ port: 3000 });
 
       var customDir = path.resolve(appdir.PATH, 'custom');
@@ -582,15 +679,19 @@ describe('compiler', function() {
         path.resolve(appdir.PATH, 'config.json'),
         path.resolve(customDir, 'config.json'));
 
-      var instructions = boot.compile({
+      boot.compile({
         appRootDir: appdir.PATH,
         appConfigRootDir: path.resolve(appdir.PATH, 'custom'),
-      });
+      }, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      expect(instructions.application).to.have.property('port');
+        expect(instructions.application).to.have.property('port');
+        done();
+      });
     });
 
-    it('supports `dsRootDir` option', function() {
+    it('supports `dsRootDir` option', function(done) {
       appdir.createConfigFilesSync();
 
       var customDir = path.resolve(appdir.PATH, 'custom');
@@ -599,291 +700,377 @@ describe('compiler', function() {
         path.resolve(appdir.PATH, 'datasources.json'),
         path.resolve(customDir, 'datasources.json'));
 
-      var instructions = boot.compile({
+      boot.compile({
         appRootDir: appdir.PATH,
         dsRootDir: path.resolve(appdir.PATH, 'custom'),
-      });
+      }, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      expect(instructions.dataSources).to.have.property('db');
+        expect(instructions.dataSources).to.have.property('db');
+        done();
+      });
     });
 
-    it('supports `modelsRootDir` option', function() {
+    it('supports `modelsRootDir` option', function(done) {
       appdir.createConfigFilesSync();
       appdir.writeConfigFileSync('custom/model-config.json', {
         foo: { dataSource: 'db' },
       });
 
-      var instructions = boot.compile({
+      boot.compile({
         appRootDir: appdir.PATH,
         modelsRootDir: path.resolve(appdir.PATH, 'custom'),
-      });
+      }, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      expect(instructions.models).to.have.length(1);
-      expect(instructions.models[0]).to.have.property('name', 'foo');
+        expect(instructions.models).to.have.length(1);
+        expect(instructions.models[0]).to.have.property('name', 'foo');
+        done();
+      });
     });
 
-    it('includes boot/*.js scripts', function() {
+    it('includes boot/*.js scripts', function(done) {
       appdir.createConfigFilesSync();
       var initJs = appdir.writeFileSync('boot/init.js',
         'module.exports = function(app) { app.fnCalled = true; };');
-      var instructions = boot.compile(appdir.PATH);
-      expect(instructions.bootScripts).to.eql([initJs]);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
+        expect(instructions.bootScripts).to.eql([initJs]);
+        done();
+      });
     });
 
-    it('supports `bootDirs` option', function() {
+    it('supports `bootDirs` option', function(done) {
       appdir.createConfigFilesSync();
       var initJs = appdir.writeFileSync('custom-boot/init.js',
         'module.exports = function(app) { app.fnCalled = true; };');
-      var instructions = boot.compile({
+      boot.compile({
         appRootDir: appdir.PATH,
         bootDirs: [path.dirname(initJs)],
+      }, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
+        expect(instructions.bootScripts).to.eql([initJs]);
+        done();
       });
-      expect(instructions.bootScripts).to.eql([initJs]);
     });
 
-    it('should resolve relative path in `bootDirs`', function() {
+    it('should resolve relative path in `bootDirs`', function(done) {
       appdir.createConfigFilesSync();
       var initJs = appdir.writeFileSync('custom-boot/init.js',
         'module.exports = function(app) { app.fnCalled = true; };');
-      var instructions = boot.compile({
+      boot.compile({
         appRootDir: appdir.PATH,
         bootDirs: ['./custom-boot'],
+      }, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
+        expect(instructions.bootScripts).to.eql([initJs]);
+        done();
       });
-      expect(instructions.bootScripts).to.eql([initJs]);
     });
 
-    it('should resolve non-relative path in `bootDirs`', function() {
+    it('should resolve non-relative path in `bootDirs`', function(done) {
       appdir.createConfigFilesSync();
       var initJs = appdir.writeFileSync('custom-boot/init.js', '');
-      var instructions = boot.compile({
+      boot.compile({
         appRootDir: appdir.PATH,
         bootDirs: ['custom-boot'],
+      }, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
+        expect(instructions.bootScripts).to.eql([initJs]);
+        done();
       });
-      expect(instructions.bootScripts).to.eql([initJs]);
     });
 
-    it('ignores index.js in `bootDirs`', function() {
+    it('ignores index.js in `bootDirs`', function(done) {
       appdir.createConfigFilesSync();
       appdir.writeFileSync('custom-boot/index.js', '');
-      var instructions = boot.compile({
+      boot.compile({
         appRootDir: appdir.PATH,
         bootDirs: ['./custom-boot'],
+      }, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
+        expect(instructions.bootScripts).to.have.length(0);
+        done();
       });
-      expect(instructions.bootScripts).to.have.length(0);
     });
 
-    it('prefers coffeescript over json in `appRootDir/bootDir`', function() {
-      appdir.createConfigFilesSync();
-      var coffee = appdir.writeFileSync('./custom-boot/init.coffee', '');
-      appdir.writeFileSync('./custom-boot/init.json', {});
+    it('prefers coffeescript over json in `appRootDir/bootDir`',
+      function(done) {
+        appdir.createConfigFilesSync();
+        var coffee = appdir.writeFileSync('./custom-boot/init.coffee', '');
+        appdir.writeFileSync('./custom-boot/init.json', {});
 
-      var instructions = boot.compile({
-        appRootDir: appdir.PATH,
-        bootDirs: ['./custom-boot'],
+        boot.compile({
+          appRootDir: appdir.PATH,
+          bootDirs: ['./custom-boot'],
+        }, function(err, context) {
+          if (err) return done(err);
+          var instructions = context.instructions;
+          expect(instructions.bootScripts).to.eql([coffee]);
+          done();
+        });
       });
-      expect(instructions.bootScripts).to.eql([coffee]);
-    });
 
     it('prefers coffeescript over json in `bootDir` non-relative path',
-    function() {
-      appdir.createConfigFilesSync();
-      var coffee = appdir.writeFileSync('custom-boot/init.coffee',
-        '');
-      appdir.writeFileSync('custom-boot/init.json', '');
+      function(done) {
+        appdir.createConfigFilesSync();
+        var coffee = appdir.writeFileSync('custom-boot/init.coffee',
+          '');
+        appdir.writeFileSync('custom-boot/init.json', '');
 
-      var instructions = boot.compile({
-        appRootDir: appdir.PATH,
-        bootDirs: ['custom-boot'],
+        boot.compile({
+          appRootDir: appdir.PATH,
+          bootDirs: ['custom-boot'],
+        }, function(err, context) {
+          if (err) return done(err);
+          var instructions = context.instructions;
+          expect(instructions.bootScripts).to.eql([coffee]);
+          done();
+        });
       });
-      expect(instructions.bootScripts).to.eql([coffee]);
-    });
 
-    it('supports `bootScripts` option', function() {
+    it('supports `bootScripts` option', function(done) {
       appdir.createConfigFilesSync();
       var initJs = appdir.writeFileSync('custom-boot/init.js',
         'module.exports = function(app) { app.fnCalled = true; };');
-      var instructions = boot.compile({
+      boot.compile({
         appRootDir: appdir.PATH,
         bootScripts: [initJs],
+      }, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
+        expect(instructions.bootScripts).to.eql([initJs]);
+        done();
       });
-      expect(instructions.bootScripts).to.eql([initJs]);
     });
 
-    it('should remove duplicate scripts', function() {
+    it('should remove duplicate scripts', function(done) {
       appdir.createConfigFilesSync();
       var initJs = appdir.writeFileSync('custom-boot/init.js',
         'module.exports = function(app) { app.fnCalled = true; };');
-      var instructions = boot.compile({
+      boot.compile({
         appRootDir: appdir.PATH,
         bootDirs: [path.dirname(initJs)],
         bootScripts: [initJs],
+      }, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
+        expect(instructions.bootScripts).to.eql([initJs]);
+        done();
       });
-      expect(instructions.bootScripts).to.eql([initJs]);
     });
 
-    it('should resolve relative path in `bootScripts`', function() {
+    it('should resolve relative path in `bootScripts`', function(done) {
       appdir.createConfigFilesSync();
       var initJs = appdir.writeFileSync('custom-boot/init.js',
         'module.exports = function(app) { app.fnCalled = true; };');
-      var instructions = boot.compile({
+      boot.compile({
         appRootDir: appdir.PATH,
         bootScripts: ['./custom-boot/init.js'],
+      }, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
+        expect(instructions.bootScripts).to.eql([initJs]);
+        done();
       });
-      expect(instructions.bootScripts).to.eql([initJs]);
     });
 
-    it('should resolve non-relative path in `bootScripts`', function() {
+    it('should resolve non-relative path in `bootScripts`', function(done) {
       appdir.createConfigFilesSync();
       var initJs = appdir.writeFileSync('custom-boot/init.js', '');
-      var instructions = boot.compile({
+      boot.compile({
         appRootDir: appdir.PATH,
         bootScripts: ['custom-boot/init.js'],
+      }, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
+        expect(instructions.bootScripts).to.eql([initJs]);
+        done();
       });
-      expect(instructions.bootScripts).to.eql([initJs]);
     });
 
-    it('resolves missing extensions in `bootScripts`', function() {
+    it('resolves missing extensions in `bootScripts`', function(done) {
       appdir.createConfigFilesSync();
       var initJs = appdir.writeFileSync('custom-boot/init.js', '');
-      var instructions = boot.compile({
+      boot.compile({
         appRootDir: appdir.PATH,
         bootScripts: ['./custom-boot/init'],
+      }, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
+        expect(instructions.bootScripts).to.eql([initJs]);
+        done();
       });
-      expect(instructions.bootScripts).to.eql([initJs]);
     });
 
     it('resolves missing extensions in `bootScripts` in module relative path',
-    function() {
-      appdir.createConfigFilesSync();
-      var initJs = appdir.writeFileSync('node_modules/custom-boot/init.js', '');
+      function(done) {
+        appdir.createConfigFilesSync();
+        var initJs = appdir.writeFileSync(
+          'node_modules/custom-boot/init.js', '');
 
-      var instructions = boot.compile({
-        appRootDir: appdir.PATH,
-        bootScripts: ['custom-boot/init'],
+        boot.compile({
+          appRootDir: appdir.PATH,
+          bootScripts: ['custom-boot/init'],
+        }, function(err, context) {
+          if (err) return done(err);
+          var instructions = context.instructions;
+          expect(instructions.bootScripts).to.eql([initJs]);
+          done();
+        });
       });
-      expect(instructions.bootScripts).to.eql([initJs]);
-    });
 
-    it('resolves module relative path for `bootScripts`', function() {
+    it('resolves module relative path for `bootScripts`', function(done) {
       appdir.createConfigFilesSync();
       var initJs = appdir.writeFileSync('node_modules/custom-boot/init.js', '');
-      var instructions = boot.compile({
+      boot.compile({
         appRootDir: appdir.PATH,
         bootScripts: ['custom-boot/init.js'],
+      }, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
+        expect(instructions.bootScripts).to.eql([initJs]);
+        done();
       });
-      expect(instructions.bootScripts).to.eql([initJs]);
     });
 
-    it('explores `bootScripts` in app relative path', function() {
+    it('explores `bootScripts` in app relative path', function(done) {
       appdir.createConfigFilesSync();
       var appJs = appdir.writeFileSync('./custom-boot/init.js', '');
 
       appdir.writeFileSync('node_modules/custom-boot/init.js', '');
 
-      var instructions = boot.compile({
+      boot.compile({
         appRootDir: appdir.PATH,
         bootScripts: ['custom-boot/init.js'],
+      }, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
+        expect(instructions.bootScripts).to.eql([appJs]);
+        done();
       });
-      expect(instructions.bootScripts).to.eql([appJs]);
     });
 
-    it('ignores models/ subdirectory', function() {
+    it('ignores models/ subdirectory', function(done) {
       appdir.createConfigFilesSync();
       appdir.writeFileSync('models/my-model.js', '');
 
-      var instructions = boot.compile(appdir.PATH);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      expect(instructions.bootScripts).to.not.have.property('models');
+        expect(instructions.bootScripts).to.not.have.property('models');
+        done();
+      });
     });
 
-    it('throws when models-config.json contains 1.x `properties`', function() {
-      appdir.createConfigFilesSync({}, {}, {
-        foo: { properties: { name: 'string' }},
+    it('throws when models-config.json contains 1.x `properties`',
+      function(done) {
+        appdir.createConfigFilesSync({}, {}, {
+          foo: { properties: { name: 'string' }},
+        });
+
+        expectToThrow(/unsupported 1\.x format/, done);
       });
 
-      expect(function() { boot.compile(appdir.PATH); })
-        .to.throw(/unsupported 1\.x format/);
-    });
+    it('throws when model-config.json contains 1.x `options.base`',
+      function(done) {
+        appdir.createConfigFilesSync({}, {}, {
+          Customer: { options: { base: 'User' }},
+        });
 
-    it('throws when model-config.json contains 1.x `options.base`', function() {
-      appdir.createConfigFilesSync({}, {}, {
-        Customer: { options: { base: 'User' }},
+        expectToThrow(/unsupported 1\.x format/, done);
       });
 
-      expect(function() { boot.compile(appdir.PATH); })
-        .to.throw(/unsupported 1\.x format/);
-    });
-
-    it('loads models from `./models`', function() {
+    it('loads models from `./models`', function(done) {
       appdir.createConfigFilesSync({}, {}, {
         Car: { dataSource: 'db' },
       });
       appdir.writeConfigFileSync('models/car.json', { name: 'Car' });
       appdir.writeFileSync('models/car.js', '');
 
-      var instructions = boot.compile(appdir.PATH);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      expect(instructions.models).to.have.length(1);
-      expect(instructions.models[0]).to.eql({
-        name: 'Car',
-        config: {
-          dataSource: 'db',
-        },
-        definition: {
+        expect(instructions.models).to.have.length(1);
+        expect(instructions.models[0]).to.eql({
           name: 'Car',
-        },
-        sourceFile: path.resolve(appdir.PATH, 'models', 'car.js'),
+          config: {
+            dataSource: 'db',
+          },
+          definition: {
+            name: 'Car',
+          },
+          sourceFile: path.resolve(appdir.PATH, 'models', 'car.js'),
+        });
+        done();
       });
     });
 
-    it('loads coffeescript models from `./models`', function() {
+    it('loads coffeescript models from `./models`', function(done) {
       appdir.createConfigFilesSync({}, {}, {
         Car: { dataSource: 'db' },
       });
       appdir.writeConfigFileSync('models/car.json', { name: 'Car' });
       appdir.writeFileSync('models/car.coffee', '');
 
-      var instructions = boot.compile(appdir.PATH);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      expect(instructions.models).to.have.length(1);
-      expect(instructions.models[0]).to.eql({
-        name: 'Car',
-        config: {
-          dataSource: 'db',
-        },
-        definition: {
+        expect(instructions.models).to.have.length(1);
+        expect(instructions.models[0]).to.eql({
           name: 'Car',
-        },
-        sourceFile: path.resolve(appdir.PATH, 'models', 'car.coffee'),
+          config: {
+            dataSource: 'db',
+          },
+          definition: {
+            name: 'Car',
+          },
+          sourceFile: path.resolve(appdir.PATH, 'models', 'car.coffee'),
+        });
+        done();
       });
     });
 
-    it('supports `modelSources` option', function() {
+    it('supports `modelSources` option', function(done) {
       appdir.createConfigFilesSync({}, {}, {
         Car: { dataSource: 'db' },
       });
       appdir.writeConfigFileSync('custom-models/car.json', { name: 'Car' });
       appdir.writeFileSync('custom-models/car.js', '');
 
-      var instructions = boot.compile({
+      boot.compile({
         appRootDir: appdir.PATH,
         modelSources: ['./custom-models'],
-      });
+      }, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      expect(instructions.models).to.have.length(1);
-      expect(instructions.models[0]).to.eql({
-        name: 'Car',
-        config: {
-          dataSource: 'db',
-        },
-        definition: {
+        expect(instructions.models).to.have.length(1);
+        expect(instructions.models[0]).to.eql({
           name: 'Car',
-        },
-        sourceFile: path.resolve(appdir.PATH, 'custom-models', 'car.js'),
+          config: {
+            dataSource: 'db',
+          },
+          definition: {
+            name: 'Car',
+          },
+          sourceFile: path.resolve(appdir.PATH, 'custom-models', 'car.js'),
+        });
+        done();
       });
     });
 
-    it('supports `sources` option in `model-config.json`', function() {
+    it('supports `sources` option in `model-config.json`', function(done) {
       appdir.createConfigFilesSync({}, {}, {
         _meta: {
           sources: ['./custom-models'],
@@ -893,148 +1080,183 @@ describe('compiler', function() {
       appdir.writeConfigFileSync('custom-models/car.json', { name: 'Car' });
       appdir.writeFileSync('custom-models/car.js', '');
 
-      var instructions = boot.compile(appdir.PATH);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      expect(instructions.models).to.have.length(1);
-      expect(instructions.models[0]).to.eql({
-        name: 'Car',
-        config: {
-          dataSource: 'db',
-        },
-        definition: {
+        expect(instructions.models).to.have.length(1);
+        expect(instructions.models[0]).to.eql({
           name: 'Car',
-        },
-        sourceFile: path.resolve(appdir.PATH, 'custom-models', 'car.js'),
+          config: {
+            dataSource: 'db',
+          },
+          definition: {
+            name: 'Car',
+          },
+          sourceFile: path.resolve(appdir.PATH, 'custom-models', 'car.js'),
+        });
+        done();
       });
     });
 
-    it('supports sources relative to node_modules', function() {
+    it('supports sources relative to node_modules', function(done) {
       appdir.createConfigFilesSync({}, {}, {
         User: { dataSource: 'db' },
       });
 
-      var instructions = boot.compile({
+      boot.compile({
         appRootDir: appdir.PATH,
         modelSources: [
           'loopback/common/models',
           'loopback/common/dir-does-not-exist',
         ],
-      });
+      }, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      expect(instructions.models).to.have.length(1);
-      expect(instructions.models[0]).to.eql({
-        name: 'User',
-        config: {
-          dataSource: 'db',
-        },
-        definition: require('loopback/common/models/user.json'),
-        sourceFile: require.resolve('loopback/common/models/user.js'),
+        expect(instructions.models).to.have.length(1);
+        expect(instructions.models[0]).to.eql({
+          name: 'User',
+          config: {
+            dataSource: 'db',
+          },
+          definition: require('loopback/common/models/user.json'),
+          sourceFile: require.resolve('loopback/common/models/user.js'),
+        });
+        done();
       });
     });
 
-    it('resolves relative path in `modelSources` option', function() {
+    it('resolves relative path in `modelSources` option', function(done) {
       appdir.createConfigFilesSync({}, {}, {
         Car: { dataSource: 'db' },
       });
       appdir.writeConfigFileSync('custom-models/car.json', { name: 'Car' });
       var appJS = appdir.writeFileSync('custom-models/car.js', '');
 
-      var instructions = boot.compile({
+      boot.compile({
         appRootDir: appdir.PATH,
         modelSources: ['./custom-models'],
-      });
+      }, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      expect(instructions.models).to.have.length(1);
-      expect(instructions.models[0].sourceFile).to.equal(appJS);
+        expect(instructions.models).to.have.length(1);
+        expect(instructions.models[0].sourceFile).to.equal(appJS);
+        done();
+      });
     });
 
-    it('resolves module relative path in `modelSources` option', function() {
-      appdir.createConfigFilesSync({}, {}, {
-        Car: { dataSource: 'db' },
-      });
-      appdir.writeConfigFileSync('node_modules/custom-models/car.json',
-        { name: 'Car' });
-      var appJS = appdir.writeFileSync('node_modules/custom-models/car.js', '');
+    it('resolves module relative path in `modelSources` option',
+      function(done) {
+        appdir.createConfigFilesSync({}, {}, {
+          Car: { dataSource: 'db' },
+        });
+        appdir.writeConfigFileSync('node_modules/custom-models/car.json',
+          { name: 'Car' });
+        var appJS = appdir.writeFileSync(
+          'node_modules/custom-models/car.js', '');
 
-      var instructions = boot.compile({
-        appRootDir: appdir.PATH,
-        modelSources: ['custom-models'],
-      });
+        boot.compile({
+          appRootDir: appdir.PATH,
+          modelSources: ['custom-models'],
+        }, function(err, context) {
+          if (err) return done(err);
+          var instructions = context.instructions;
 
-      expect(instructions.models).to.have.length(1);
-      expect(instructions.models[0].sourceFile).to.equal(appJS);
-    });
+          expect(instructions.models).to.have.length(1);
+          expect(instructions.models[0].sourceFile).to.equal(appJS);
+          done();
+        });
+      });
 
     it('resolves relative path in `sources` option in `model-config.json`',
-    function() {
-      appdir.createConfigFilesSync({}, {}, {
-        _meta: {
-          sources: ['./custom-models'],
-        },
-        Car: { dataSource: 'db' },
+      function(done) {
+        appdir.createConfigFilesSync({}, {}, {
+          _meta: {
+            sources: ['./custom-models'],
+          },
+          Car: { dataSource: 'db' },
+        });
+        appdir.writeConfigFileSync('custom-models/car.json', { name: 'Car' });
+        var appJS = appdir.writeFileSync('custom-models/car.js', '');
+
+        boot.compile(appdir.PATH, function(err, context) {
+          if (err) return done(err);
+          var instructions = context.instructions;
+
+          expect(instructions.models).to.have.length(1);
+          expect(instructions.models[0].sourceFile).to.equal(appJS);
+          done();
+        });
       });
-      appdir.writeConfigFileSync('custom-models/car.json', { name: 'Car' });
-      var appJS = appdir.writeFileSync('custom-models/car.js', '');
-
-      var instructions = boot.compile(appdir.PATH);
-
-      expect(instructions.models).to.have.length(1);
-      expect(instructions.models[0].sourceFile).to.equal(appJS);
-    });
 
     it('resolves module relative path in `sources` option in model-config.json',
-    function() {
-      appdir.createConfigFilesSync({}, {}, {
-        _meta: {
-          sources: ['custom-models'],
-        },
-        Car: { dataSource: 'db' },
+      function(done) {
+        appdir.createConfigFilesSync({}, {}, {
+          _meta: {
+            sources: ['custom-models'],
+          },
+          Car: { dataSource: 'db' },
+        });
+        appdir.writeConfigFileSync('node_modules/custom-models/car.json',
+          { name: 'Car' });
+
+        var appJS = appdir.writeFileSync(
+          'node_modules/custom-models/car.js', '');
+
+        boot.compile(appdir.PATH, function(err, context) {
+          if (err) return done(err);
+          var instructions = context.instructions;
+
+          expect(instructions.models).to.have.length(1);
+          expect(instructions.models[0].sourceFile).to.equal(appJS);
+          done();
+        });
       });
-      appdir.writeConfigFileSync('node_modules/custom-models/car.json',
-        { name: 'Car' });
 
-      var appJS = appdir.writeFileSync('node_modules/custom-models/car.js', '');
-
-      var instructions = boot.compile(appdir.PATH);
-
-      expect(instructions.models).to.have.length(1);
-      expect(instructions.models[0].sourceFile).to.equal(appJS);
-    });
-
-    it('handles model definitions with no code', function() {
+    it('handles model definitions with no code', function(done) {
       appdir.createConfigFilesSync({}, {}, {
         Car: { dataSource: 'db' },
       });
       appdir.writeConfigFileSync('models/car.json', { name: 'Car' });
 
-      var instructions = boot.compile(appdir.PATH);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      expect(instructions.models).to.eql([{
-        name: 'Car',
-        config: {
-          dataSource: 'db',
-        },
-        definition: {
+        expect(instructions.models).to.eql([{
           name: 'Car',
-        },
-        sourceFile: undefined,
-      }]);
+          config: {
+            dataSource: 'db',
+          },
+          definition: {
+            name: 'Car',
+          },
+          sourceFile: undefined,
+        }]);
+        done();
+      });
     });
 
-    it('excludes models not listed in `model-config.json`', function() {
+    it('excludes models not listed in `model-config.json`', function(done) {
       appdir.createConfigFilesSync({}, {}, {
         Car: { dataSource: 'db' },
       });
       appdir.writeConfigFileSync('models/car.json', { name: 'Car' });
       appdir.writeConfigFileSync('models/bar.json', { name: 'Bar' });
 
-      var instructions = boot.compile(appdir.PATH);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      var models = instructions.models.map(getNameProperty);
-      expect(models).to.eql(['Car']);
+        var models = instructions.models.map(getNameProperty);
+        expect(models).to.eql(['Car']);
+        done();
+      });
     });
 
-    it('includes models used as Base models', function() {
+    it('includes models used as Base models', function(done) {
       appdir.createConfigFilesSync({}, {}, {
         Car: { dataSource: 'db' },
       });
@@ -1046,15 +1268,19 @@ describe('compiler', function() {
         name: 'Vehicle',
       });
 
-      var instructions = boot.compile(appdir.PATH);
-      var models = instructions.models;
-      var modelNames = models.map(getNameProperty);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
+        var models = instructions.models;
+        var modelNames = models.map(getNameProperty);
 
-      expect(modelNames).to.eql(['Vehicle', 'Car']);
-      expect(models[0].config).to.equal(undefined);
+        expect(modelNames).to.eql(['Vehicle', 'Car']);
+        expect(models[0].config).to.equal(undefined);
+        done();
+      });
     });
 
-    it('excludes pre-built base models', function() {
+    it('excludes pre-built base models', function(done) {
       appdir.createConfigFilesSync({}, {}, {
         Car: { dataSource: 'db' },
       });
@@ -1063,13 +1289,17 @@ describe('compiler', function() {
         base: 'Model',
       });
 
-      var instructions = boot.compile(appdir.PATH);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      var modelNames = instructions.models.map(getNameProperty);
-      expect(modelNames).to.eql(['Car']);
+        var modelNames = instructions.models.map(getNameProperty);
+        expect(modelNames).to.eql(['Car']);
+        done();
+      });
     });
 
-    it('sorts models, base models first', function() {
+    it('sorts models, base models first', function(done) {
       appdir.createConfigFilesSync({}, {}, {
         Vehicle: { dataSource: 'db' },
         FlyingCar: { dataSource: 'db' },
@@ -1087,13 +1317,17 @@ describe('compiler', function() {
         base: 'Car',
       });
 
-      var instructions = boot.compile(appdir.PATH);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      var modelNames = instructions.models.map(getNameProperty);
-      expect(modelNames).to.eql(['Vehicle', 'Car', 'FlyingCar']);
+        var modelNames = instructions.models.map(getNameProperty);
+        expect(modelNames).to.eql(['Vehicle', 'Car', 'FlyingCar']);
+        done();
+      });
     });
 
-    it('detects circular Model dependencies', function() {
+    it('detects circular Model dependencies', function(done) {
       appdir.createConfigFilesSync({}, {}, {
         Vehicle: { dataSource: 'db' },
         Car: { dataSource: 'db' },
@@ -1107,75 +1341,94 @@ describe('compiler', function() {
         base: 'Car',
       });
 
-      expect(function() { boot.compile(appdir.PATH); })
-        .to.throw(/cyclic dependency/i);
+      expectToThrow(/cyclic dependency/i, done);
     });
 
-    it('uses file name as default value for model name', function() {
+    it('uses file name as default value for model name', function(done) {
       appdir.createConfigFilesSync({}, {}, {
         Car: { dataSource: 'db' },
       });
       appdir.writeConfigFileSync('models/car.json', {});
 
-      var instructions = boot.compile(appdir.PATH);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      var modelNames = instructions.models.map(getNameProperty);
-      expect(modelNames).to.eql(['Car']);
+        var modelNames = instructions.models.map(getNameProperty);
+        expect(modelNames).to.eql(['Car']);
+        done();
+      });
     });
 
     it('uses `OrderItem` as default model name for file with name `order-item`',
-    function() {
-      appdir.createConfigFilesSync({}, {}, {
-        OrderItem: { dataSource: 'db' },
+      function(done) {
+        appdir.createConfigFilesSync({}, {}, {
+          OrderItem: { dataSource: 'db' },
+        });
+        appdir.writeConfigFileSync('models/order-item.json', {});
+
+        boot.compile(appdir.PATH, function(err, context) {
+          if (err) return done(err);
+          var instructions = context.instructions;
+
+          var modelNames = instructions.models.map(getNameProperty);
+          expect(modelNames).to.eql(['OrderItem']);
+          done();
+        });
       });
-      appdir.writeConfigFileSync('models/order-item.json', {});
-
-      var instructions = boot.compile(appdir.PATH);
-
-      var modelNames = instructions.models.map(getNameProperty);
-      expect(modelNames).to.eql(['OrderItem']);
-    });
 
     it('uses `OrderItem` as default model name for file with name `order_item`',
-    function() {
-      appdir.createConfigFilesSync({}, {}, {
-        OrderItem: { dataSource: 'db' },
+      function(done) {
+        appdir.createConfigFilesSync({}, {}, {
+          OrderItem: { dataSource: 'db' },
+        });
+        appdir.writeConfigFileSync('models/order_item.json', {});
+
+        boot.compile(appdir.PATH, function(err, context) {
+          if (err) return done(err);
+          var instructions = context.instructions;
+
+          var modelNames = instructions.models.map(getNameProperty);
+          expect(modelNames).to.eql(['OrderItem']);
+          done();
+        });
       });
-      appdir.writeConfigFileSync('models/order_item.json', {});
-
-      var instructions = boot.compile(appdir.PATH);
-
-      var modelNames = instructions.models.map(getNameProperty);
-      expect(modelNames).to.eql(['OrderItem']);
-    });
 
     it('uses `OrderItem` as default model name for file with name `order item`',
-    function() {
-      appdir.createConfigFilesSync({}, {}, {
-        OrderItem: { dataSource: 'db' },
+      function(done) {
+        appdir.createConfigFilesSync({}, {}, {
+          OrderItem: { dataSource: 'db' },
+        });
+        appdir.writeConfigFileSync('models/order item.json', {});
+
+        boot.compile(appdir.PATH, function(err, context) {
+          if (err) return done(err);
+          var instructions = context.instructions;
+
+          var modelNames = instructions.models.map(getNameProperty);
+          expect(modelNames).to.eql(['OrderItem']);
+          done();
+        });
       });
-      appdir.writeConfigFileSync('models/order item.json', {});
-
-      var instructions = boot.compile(appdir.PATH);
-
-      var modelNames = instructions.models.map(getNameProperty);
-      expect(modelNames).to.eql(['OrderItem']);
-    });
 
     it('overrides `default model name` by `name` in model definition',
-    function() {
-      appdir.createConfigFilesSync({}, {}, {
-        overrideCar: { dataSource: 'db' },
+      function(done) {
+        appdir.createConfigFilesSync({}, {}, {
+          overrideCar: { dataSource: 'db' },
+        });
+        appdir.writeConfigFileSync('models/car.json', { name: 'overrideCar' });
+
+        boot.compile(appdir.PATH, function(err, context) {
+          if (err) return done(err);
+          var instructions = context.instructions;
+
+          var modelNames = instructions.models.map(getNameProperty);
+          expect(modelNames).to.eql(['overrideCar']);
+          done();
+        });
       });
-      appdir.writeConfigFileSync('models/car.json', { name: 'overrideCar' });
 
-      var instructions = boot.compile(appdir.PATH);
-
-      var modelNames = instructions.models.map(getNameProperty);
-      expect(modelNames).to.eql(['overrideCar']);
-    });
-
-    it('overwrites model with same default name', function() {
+    it('overwrites model with same default name', function(done) {
       appdir.createConfigFilesSync({}, {}, {
         'OrderItem': { dataSource: 'db' },
       });
@@ -1194,24 +1447,28 @@ describe('compiler', function() {
       });
       var appJS = appdir.writeFileSync('models/orderItem.js', '');
 
-      var instructions = boot.compile(appdir.PATH);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      expect(instructions.models).to.eql([{
-        name: 'OrderItem',
-        config: {
-          dataSource: 'db',
-        },
-        definition: {
+        expect(instructions.models).to.eql([{
           name: 'OrderItem',
-          properties: {
-            quantity: { type: 'number' },
+          config: {
+            dataSource: 'db',
           },
-        },
-        sourceFile: appJS,
-      }]);
+          definition: {
+            name: 'OrderItem',
+            properties: {
+              quantity: { type: 'number' },
+            },
+          },
+          sourceFile: appJS,
+        }]);
+        done();
+      });
     });
 
-    it('overwrites model with same name in model definition', function() {
+    it('overwrites model with same name in model definition', function(done) {
       appdir.createConfigFilesSync({}, {}, {
         'customOrder': { dataSource: 'db' },
       });
@@ -1232,60 +1489,76 @@ describe('compiler', function() {
       });
       var appJS = appdir.writeFileSync('models/order2.js', '');
 
-      var instructions = boot.compile(appdir.PATH);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      expect(instructions.models).to.eql([{
-        name: 'customOrder',
-        config: {
-          dataSource: 'db',
-        },
-        definition: {
+        expect(instructions.models).to.eql([{
           name: 'customOrder',
-          properties: {
-            quantity: { type: 'number' },
+          config: {
+            dataSource: 'db',
           },
-        },
-        sourceFile: appJS,
-      }]);
+          definition: {
+            name: 'customOrder',
+            properties: {
+              quantity: { type: 'number' },
+            },
+          },
+          sourceFile: appJS,
+        }]);
+        done();
+      });
     });
 
-    it('returns a new copy of JSON data', function() {
+    it('returns a new copy of JSON data', function(done) {
       appdir.createConfigFilesSync();
 
-      var instructions = boot.compile(appdir.PATH);
-      instructions.application.modified = true;
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
+        instructions.application.modified = true;
 
-      instructions = boot.compile(appdir.PATH);
-      expect(instructions.application).to.not.have.property('modified');
+        boot.compile(appdir.PATH, function(err, context) {
+          if (err) return done(err);
+          var instructions = context.instructions;
+          expect(instructions.application).to.not.have.property('modified');
+          done();
+        });
+      });
     });
 
     describe('for mixins', function() {
-      describe(' - mixinDirs', function() {
-        function verifyMixinIsFoundViaMixinDirs(sourceFile, mixinDirs) {
+      describe(' - mixinDirs', function(done) {
+        function verifyMixinIsFoundViaMixinDirs(sourceFile, mixinDirs, done) {
           var appJS = appdir.writeFileSync(sourceFile, '');
 
-          var instructions = boot.compile({
+          boot.compile({
             appRootDir: appdir.PATH,
             mixinDirs: mixinDirs,
+          }, function(err, context) {
+            if (err) return done(err);
+            var instructions = context.instructions;
+            expect(instructions.mixins[0].sourceFile).to.eql(appJS);
+            done();
           });
-
-          expect(instructions.mixins[0].sourceFile).to.eql(appJS);
         }
 
-        it('supports `mixinDirs` option', function() {
+        it('supports `mixinDirs` option', function(done) {
           verifyMixinIsFoundViaMixinDirs('custom-mixins/other.js',
-            ['./custom-mixins']);
+            ['./custom-mixins'], done);
         });
 
-        it('resolves relative path in `mixinDirs` option', function() {
+        it('resolves relative path in `mixinDirs` option', function(done) {
           verifyMixinIsFoundViaMixinDirs('custom-mixins/other.js',
-            ['./custom-mixins']);
+            ['./custom-mixins'], done);
         });
 
-        it('resolves module relative path in `mixinDirs` option', function() {
-          verifyMixinIsFoundViaMixinDirs('node_modules/custom-mixins/other.js',
-            ['custom-mixins']);
-        });
+        it('resolves module relative path in `mixinDirs` option',
+          function(done) {
+            verifyMixinIsFoundViaMixinDirs(
+              'node_modules/custom-mixins/other.js',
+              ['custom-mixins'], done);
+          });
       });
 
       describe(' - mixinSources', function() {
@@ -1299,35 +1572,39 @@ describe('compiler', function() {
           });
         });
 
-        function verifyMixinIsFoundViaMixinSources(sourceFile, mixinSources) {
+        function verifyMixinIsFoundViaMixinSources(sourceFile, mixinSources,
+                                                   done) {
           var appJS = appdir.writeFileSync(sourceFile, '');
 
-          var instructions = boot.compile({
+          boot.compile({
             appRootDir: appdir.PATH,
             mixinSources: mixinSources,
+          }, function(err, context) {
+            if (err) return done(err);
+            var instructions = context.instructions;
+            expect(instructions.mixins[0].sourceFile).to.eql(appJS);
+            done();
           });
-
-          expect(instructions.mixins[0].sourceFile).to.eql(appJS);
         }
 
-        it('supports `mixinSources` option', function() {
+        it('supports `mixinSources` option', function(done) {
           verifyMixinIsFoundViaMixinSources('mixins/time-stamps.js',
-            ['./mixins']);
+            ['./mixins'], done);
         });
 
-        it('resolves relative path in `mixinSources` option', function() {
+        it('resolves relative path in `mixinSources` option', function(done) {
           verifyMixinIsFoundViaMixinSources('custom-mixins/time-stamps.js',
-            ['./custom-mixins']);
+            ['./custom-mixins'], done);
         });
 
         it('resolves module relative path in `mixinSources` option',
-        function() {
-          verifyMixinIsFoundViaMixinSources(
-            'node_modules/custom-mixins/time-stamps.js',
-            ['custom-mixins']);
-        });
+          function(done) {
+            verifyMixinIsFoundViaMixinSources(
+              'node_modules/custom-mixins/time-stamps.js',
+              ['custom-mixins'], done);
+          });
 
-        it('supports `mixins` option in `model-config.json`', function() {
+        it('supports `mixins` option in `model-config.json`', function(done) {
           appdir.createConfigFilesSync({}, {}, {
             _meta: {
               mixins: ['./custom-mixins'],
@@ -1338,85 +1615,117 @@ describe('compiler', function() {
           });
 
           var appJS = appdir.writeFileSync('custom-mixins/time-stamps.js', '');
-          var instructions = boot.compile(appdir.PATH);
-          expect(instructions.mixins[0].sourceFile).to.eql(appJS);
+          boot.compile(appdir.PATH, function(err, context) {
+            if (err) return done(err);
+            var instructions = context.instructions;
+            expect(instructions.mixins[0].sourceFile).to.eql(appJS);
+            done();
+          });
         });
 
-        it('sets by default `mixinSources` to `mixins` directory', function() {
-          var appJS = appdir.writeFileSync('mixins/time-stamps.js', '');
-          var instructions = boot.compile(appdir.PATH);
-          expect(instructions.mixins[0].sourceFile).to.eql(appJS);
-        });
+        it('sets by default `mixinSources` to `mixins` directory',
+          function(done) {
+            var appJS = appdir.writeFileSync('mixins/time-stamps.js', '');
+            boot.compile(appdir.PATH, function(err, context) {
+              if (err) return done(err);
+              var instructions = context.instructions;
+              expect(instructions.mixins[0].sourceFile).to.eql(appJS);
+              done();
+            });
+          });
 
-        it('loads only mixins used by models', function() {
+        it('loads only mixins used by models', function(done) {
           var appJS = appdir.writeFileSync('mixins/time-stamps.js', '');
           appdir.writeFileSync('mixins/foo.js', '');
 
-          var instructions = boot.compile(appdir.PATH);
-          expect(instructions.mixins).to.have.length(1);
-          expect(instructions.mixins[0].sourceFile).to.eql(appJS);
+          boot.compile(appdir.PATH, function(err, context) {
+            if (err) return done(err);
+            var instructions = context.instructions;
+            expect(instructions.mixins).to.have.length(1);
+            expect(instructions.mixins[0].sourceFile).to.eql(appJS);
+            done();
+          });
         });
 
-        it('loads mixins from model using mixin name in JSON file', function() {
-          var appJS = appdir.writeFileSync('mixins/time-stamps.js', '');
-          appdir.writeConfigFileSync('mixins/time-stamps.json', {
-            name: 'Timestamping',
-          });
+        it('loads mixins from model using mixin name in JSON file',
+          function(done) {
+            var appJS = appdir.writeFileSync('mixins/time-stamps.js', '');
+            appdir.writeConfigFileSync('mixins/time-stamps.json', {
+              name: 'Timestamping',
+            });
 
-          appdir.writeConfigFileSync('models/car.json', {
-            name: 'Car',
-            mixins: { 'Timestamping': {}},
-          });
+            appdir.writeConfigFileSync('models/car.json', {
+              name: 'Car',
+              mixins: { 'Timestamping': {}},
+            });
 
-          var instructions = boot.compile(appdir.PATH);
-          expect(instructions.mixins).to.have.length(1);
-          expect(instructions.mixins[0].sourceFile).to.eql(appJS);
-        });
+            boot.compile(appdir.PATH, function(err, context) {
+              if (err) return done(err);
+              var instructions = context.instructions;
+              expect(instructions.mixins).to.have.length(1);
+              expect(instructions.mixins[0].sourceFile).to.eql(appJS);
+              done();
+            });
+          });
 
         it('loads mixin only once for dirs common to mixinDirs & mixinSources',
-        function() {
-          var appJS = appdir.writeFileSync('custom-mixins/time-stamps.js', '');
+          function(done) {
+            var appJS = appdir.writeFileSync(
+              'custom-mixins/time-stamps.js', '');
 
-          var options = {
-            appRootDir: appdir.PATH,
-            mixinDirs: ['./custom-mixins'],
-            mixinSources: ['./custom-mixins'],
-          };
+            var options = {
+              appRootDir: appdir.PATH,
+              mixinDirs: ['./custom-mixins'],
+              mixinSources: ['./custom-mixins'],
+            };
 
-          var instructions = boot.compile(options);
-          expect(instructions.mixins).to.have.length(1);
-          expect(instructions.mixins[0].sourceFile).to.eql(appJS);
-        });
+            boot.compile(options, function(err, context) {
+              if (err) return done(err);
+              var instructions = context.instructions;
+              expect(instructions.mixins).to.have.length(1);
+              expect(instructions.mixins[0].sourceFile).to.eql(appJS);
+              done();
+            });
+          });
 
         it('loads mixin from mixinSources, when it is also found in mixinDirs',
-        function() {
-          appdir.writeFileSync('mixinDir/time-stamps.js', '');
-          var appJS = appdir.writeFileSync('mixinSource/time-stamps.js', '');
+          function(done) {
+            appdir.writeFileSync('mixinDir/time-stamps.js', '');
+            var appJS = appdir.writeFileSync('mixinSource/time-stamps.js', '');
 
-          var options = {
-            appRootDir: appdir.PATH,
-            mixinDirs: ['./mixinDir'],
-            mixinSources: ['./mixinSource'],
-          };
+            var options = {
+              appRootDir: appdir.PATH,
+              mixinDirs: ['./mixinDir'],
+              mixinSources: ['./mixinSource'],
+            };
 
-          var instructions = boot.compile(options);
-          expect(instructions.mixins).to.have.length(1);
-          expect(instructions.mixins[0].sourceFile).to.eql(appJS);
-        });
+            boot.compile(options, function(err, context) {
+              if (err) return done(err);
+              var instructions = context.instructions;
+              expect(instructions.mixins).to.have.length(1);
+              expect(instructions.mixins[0].sourceFile).to.eql(appJS);
+              done();
+            });
+          });
 
-        it('loads mixin from the most recent mixin definition', function() {
-          appdir.writeFileSync('mixins1/time-stamps.js', '');
-          var mixins2 = appdir.writeFileSync('mixins2/time-stamps.js', '');
+        it('loads mixin from the most recent mixin definition',
+          function(done) {
+            appdir.writeFileSync('mixins1/time-stamps.js', '');
+            var mixins2 = appdir.writeFileSync('mixins2/time-stamps.js', '');
 
-          var options = {
-            appRootDir: appdir.PATH,
-            mixinSources: ['./mixins1', './mixins2'],
-          };
+            var options = {
+              appRootDir: appdir.PATH,
+              mixinSources: ['./mixins1', './mixins2'],
+            };
 
-          var instructions = boot.compile(options);
-          expect(instructions.mixins).to.have.length(1);
-          expect(instructions.mixins[0].sourceFile).to.eql(mixins2);
-        });
+            boot.compile(options, function(err, context) {
+              if (err) return done(err);
+              var instructions = context.instructions;
+              expect(instructions.mixins).to.have.length(1);
+              expect(instructions.mixins[0].sourceFile).to.eql(mixins2);
+              done();
+            });
+          });
       });
 
       describe('name normalization', function() {
@@ -1431,129 +1740,166 @@ describe('compiler', function() {
           appdir.writeFileSync('custom-mixins/space name.js', '');
         });
 
-        it('supports classify', function() {
+        it('supports classify', function(done) {
           options.normalization = 'classify';
-          var instructions = boot.compile(options);
+          boot.compile(options, function(err, context) {
+            if (err) return done(err);
+            var instructions = context.instructions;
 
-          var mixins = instructions.mixins;
-          var mixinNames = mixins.map(getNameProperty);
+            var mixins = instructions.mixins;
+            var mixinNames = mixins.map(getNameProperty);
 
-          expect(mixinNames).to.eql([
-            'CamelCase', 'Foo', 'PascalCase', 'SpaceName', 'TimeStamps',
-          ]);
+            expect(mixinNames).to.eql([
+              'CamelCase', 'Foo', 'PascalCase', 'SpaceName', 'TimeStamps',
+            ]);
+            done();
+          });
         });
 
-        it('supports dasherize', function() {
+        it('supports dasherize', function(done) {
           options.normalization = 'dasherize';
-          var instructions = boot.compile(options);
+          boot.compile(options, function(err, context) {
+            if (err) return done(err);
+            var instructions = context.instructions;
 
-          var mixins = instructions.mixins;
-          var mixinNames = mixins.map(getNameProperty);
+            var mixins = instructions.mixins;
+            var mixinNames = mixins.map(getNameProperty);
 
-          expect(mixinNames).to.eql([
-            'camel-case', 'foo', 'pascal-case', 'space-name', 'time-stamps',
-          ]);
+            expect(mixinNames).to.eql([
+              'camel-case', 'foo', 'pascal-case', 'space-name', 'time-stamps',
+            ]);
+            done();
+          });
         });
 
-        it('supports custom function', function() {
-          var normalize = function(name) { return name.toUpperCase(); };
+        it('supports custom function', function(done) {
+          var normalize = function(name) {
+            return name.toUpperCase();
+          };
           options.normalization = normalize;
-          var instructions = boot.compile(options);
+          boot.compile(options, function(err, context) {
+            if (err) return done(err);
+            var instructions = context.instructions;
 
-          var mixins = instructions.mixins;
-          var mixinNames = mixins.map(getNameProperty);
+            var mixins = instructions.mixins;
+            var mixinNames = mixins.map(getNameProperty);
 
-          expect(mixinNames).to.eql([
-            'CAMELCASE', 'FOO', 'PASCALCASE', 'SPACE NAME', 'TIME-STAMPS',
-          ]);
+            expect(mixinNames).to.eql([
+              'CAMELCASE', 'FOO', 'PASCALCASE', 'SPACE NAME', 'TIME-STAMPS',
+            ]);
+            done();
+          });
         });
 
-        it('supports none', function() {
+        it('supports none', function(done) {
           options.normalization = 'none';
-          var instructions = boot.compile(options);
+          boot.compile(options, function(err, context) {
+            if (err) return done(err);
+            var instructions = context.instructions;
 
-          var mixins = instructions.mixins;
-          var mixinNames = mixins.map(getNameProperty);
+            var mixins = instructions.mixins;
+            var mixinNames = mixins.map(getNameProperty);
 
-          expect(mixinNames).to.eql([
-            'camelCase', 'foo', 'PascalCase', 'space name', 'time-stamps',
-          ]);
+            expect(mixinNames).to.eql([
+              'camelCase', 'foo', 'PascalCase', 'space name', 'time-stamps',
+            ]);
+            done();
+          });
         });
 
-        it('supports false', function() {
+        it('supports false', function(done) {
           options.normalization = false;
-          var instructions = boot.compile(options);
+          boot.compile(options, function(err, context) {
+            if (err) return done(err);
+            var instructions = context.instructions;
 
-          var mixins = instructions.mixins;
-          var mixinNames = mixins.map(getNameProperty);
+            var mixins = instructions.mixins;
+            var mixinNames = mixins.map(getNameProperty);
 
-          expect(mixinNames).to.eql([
-            'camelCase', 'foo', 'PascalCase', 'space name', 'time-stamps',
-          ]);
+            expect(mixinNames).to.eql([
+              'camelCase', 'foo', 'PascalCase', 'space name', 'time-stamps',
+            ]);
+            done();
+          });
         });
 
-        it('defaults to classify', function() {
-          var instructions = boot.compile(options);
+        it('defaults to classify', function(done) {
+          boot.compile(options, function(err, context) {
+            if (err) return done(err);
+            var instructions = context.instructions;
 
-          var mixins = instructions.mixins;
-          var mixinNames = mixins.map(getNameProperty);
+            var mixins = instructions.mixins;
+            var mixinNames = mixins.map(getNameProperty);
 
-          expect(mixinNames).to.eql([
-            'CamelCase', 'Foo', 'PascalCase', 'SpaceName', 'TimeStamps',
-          ]);
+            expect(mixinNames).to.eql([
+              'CamelCase', 'Foo', 'PascalCase', 'SpaceName', 'TimeStamps',
+            ]);
+            done();
+          });
         });
 
-        it('throws error for invalid normalization format', function() {
+        it('throws error for invalid normalization format', function(done) {
           options.normalization = 'invalidFormat';
 
-          expect(function() { boot.compile(options); })
-          .to.throw(/Invalid normalization format - "invalidFormat"/);
+          expectToThrow(/Invalid normalization format - "invalidFormat"/,
+            done, options);
         });
       });
 
-      it('overrides default mixin name, by `name` in JSON', function() {
+      it('overrides default mixin name, by `name` in JSON', function(done) {
         appdir.writeFileSync('mixins/foo.js', '');
         appdir.writeConfigFileSync('mixins/foo.json', { name: 'fooBar' });
 
-        var options = { appRootDir: appdir.PATH,
+        var options = {
+          appRootDir: appdir.PATH,
           mixinDirs: ['./mixins'],
         };
-        var instructions = boot.compile(options);
+        boot.compile(options, function(err, context) {
+          if (err) return done(err);
+          var instructions = context.instructions;
 
-        expect(instructions.mixins[0].name).to.eql('fooBar');
+          expect(instructions.mixins[0].name).to.eql('fooBar');
+          done();
+        });
       });
 
-      it('extends definition from JSON with same file name', function() {
+      it('extends definition from JSON with same file name', function(done) {
         var appJS = appdir.writeFileSync('custom-mixins/foo-bar.js', '');
 
         appdir.writeConfigFileSync('custom-mixins/foo-bar.json', {
-          description: 'JSON file name same as JS file name' });
+          description: 'JSON file name same as JS file name',
+        });
         appdir.writeConfigFileSync('custom-mixins/FooBar.json', {
-          description: 'JSON file name same as normalized name of mixin' });
+          description: 'JSON file name same as normalized name of mixin',
+        });
 
-        var options = { appRootDir: appdir.PATH,
+        var options = {
+          appRootDir: appdir.PATH,
           mixinDirs: ['./custom-mixins'],
-          normalization: 'classify' };
-        var instructions = boot.compile(options);
+          normalization: 'classify',
+        };
+        boot.compile(options, function(err, context) {
+          if (err) return done(err);
+          var instructions = context.instructions;
 
-        expect(instructions.mixins).to.eql([
-          {
-            name: 'FooBar',
-            description: 'JSON file name same as JS file name',
-            sourceFile: appJS,
-          },
-        ]);
+          expect(instructions.mixins).to.eql([
+            {
+              name: 'FooBar',
+              description: 'JSON file name same as JS file name',
+              sourceFile: appJS,
+            },
+          ]);
+        });
+        done();
       });
     });
   });
 
   describe('for middleware', function() {
-    function testMiddlewareRegistration(middlewareId, sourceFile) {
+    function testMiddlewareRegistration(middlewareId, sourceFile, done) {
       var json = {
-        initial: {
-        },
-        custom: {
-        },
+        initial: {},
+        custom: {},
       };
 
       json.custom[middlewareId] = {
@@ -1562,19 +1908,23 @@ describe('compiler', function() {
 
       appdir.writeConfigFileSync('middleware.json', json);
 
-      var instructions = boot.compile(appdir.PATH);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      expect(instructions.middleware).to.eql({
-        phases: ['initial', 'custom'],
-        middleware: [
-          {
-            sourceFile: sourceFile,
-            config: {
-              phase: 'custom',
-              params: 'some-config-data',
+        expect(instructions.middleware).to.eql({
+          phases: ['initial', 'custom'],
+          middleware: [
+            {
+              sourceFile: sourceFile,
+              config: {
+                phase: 'custom',
+                params: 'some-config-data',
+              },
             },
-          },
-        ],
+          ],
+        });
+        done();
       });
     }
 
@@ -1585,14 +1935,14 @@ describe('compiler', function() {
         'loopback/server/middleware/url-not-found');
     });
 
-    it('emits middleware instructions', function() {
+    it('emits middleware instructions', function(done) {
       testMiddlewareRegistration('loopback/server/middleware/url-not-found',
-        sourceFileForUrlNotFound);
+        sourceFileForUrlNotFound, done);
     });
 
-    it('emits middleware instructions for fragment', function() {
+    it('emits middleware instructions for fragment', function(done) {
       testMiddlewareRegistration('loopback#url-not-found',
-        sourceFileForUrlNotFound);
+        sourceFileForUrlNotFound, done);
     });
 
     it('supports `middlewareRootDir` option', function() {
@@ -1628,47 +1978,42 @@ describe('compiler', function() {
       });
     });
 
-    it('fails when a module middleware cannot be resolved', function() {
+    it('fails when a module middleware cannot be resolved', function(done) {
       appdir.writeConfigFileSync('middleware.json', {
         final: {
-          'loopback/path-does-not-exist': { },
+          'loopback/path-does-not-exist': {},
         },
       });
 
-      expect(function() { boot.compile(appdir.PATH); })
-        .to.throw(/path-does-not-exist/);
+      expectToThrow(/path-does-not-exist/, done);
     });
 
     it('does not fail when an optional middleware cannot be resolved',
-    function() {
-      appdir.writeConfigFileSync('middleware.json', {
-        final: {
-          'loopback/path-does-not-exist': {
-            optional: 'this middleware is optional',
-          },
-        },
-      });
-
-      expect(function() { boot.compile(appdir.PATH); })
-        .to.not.throw();
-    });
-
-    it('fails when a module middleware fragment cannot be resolved',
-      function() {
+      function(done) {
         appdir.writeConfigFileSync('middleware.json', {
           final: {
-            'loopback#path-does-not-exist': { },
+            'loopback/path-does-not-exist': {
+              optional: 'this middleware is optional',
+            },
           },
         });
 
-        expect(function() {
-          boot.compile(appdir.PATH);
-        })
-          .to.throw(/path-does-not-exist/);
+        expectToNotThrow(done);
+      });
+
+    it('fails when a module middleware fragment cannot be resolved',
+      function(done) {
+        appdir.writeConfigFileSync('middleware.json', {
+          final: {
+            'loopback#path-does-not-exist': {},
+          },
+        });
+
+        expectToThrow(/path-does-not-exist/, done);
       });
 
     it('does not fail when an optional middleware fragment cannot be resolved',
-      function() {
+      function(done) {
         appdir.writeConfigFileSync('middleware.json', {
           final: {
             'loopback#path-does-not-exist': {
@@ -1677,31 +2022,34 @@ describe('compiler', function() {
           },
         });
 
-        expect(function() { boot.compile(appdir.PATH); })
-          .to.not.throw();
+        expectToNotThrow(done);
       });
 
-    it('resolves paths relatively to appRootDir', function() {
+    it('resolves paths relatively to appRootDir', function(done) {
       appdir.writeFileSync('my-middleware.js', '');
       appdir.writeConfigFileSync('./middleware.json', {
         routes: {
           // resolves to ./my-middleware.js
-          './my-middleware': { },
+          './my-middleware': {},
         },
       });
 
-      var instructions = boot.compile(appdir.PATH);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      expect(instructions.middleware).to.eql({
-        phases: ['routes'],
-        middleware: [{
-          sourceFile: path.resolve(appdir.PATH, 'my-middleware.js'),
-          config: { phase: 'routes' },
-        }],
+        expect(instructions.middleware).to.eql({
+          phases: ['routes'],
+          middleware: [{
+            sourceFile: path.resolve(appdir.PATH, 'my-middleware.js'),
+            config: { phase: 'routes' },
+          }],
+        });
+        done();
       });
     });
 
-    it('merges config.params', function() {
+    it('merges config.params', function(done) {
       appdir.writeConfigFileSync('./middleware.json', {
         routes: {
           './middleware': {
@@ -1722,14 +2070,18 @@ describe('compiler', function() {
         },
       });
 
-      var instructions = boot.compile(appdir.PATH);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      expectFirstMiddlewareParams(instructions).to.eql({
-        key: 'custom value',
+        expectFirstMiddlewareParams(instructions).to.eql({
+          key: 'custom value',
+        });
+        done();
       });
     });
 
-    it('merges config.enabled', function() {
+    it('merges config.enabled', function(done) {
       appdir.writeConfigFileSync('./middleware.json', {
         routes: {
           './middleware': {
@@ -1748,39 +2100,47 @@ describe('compiler', function() {
         },
       });
 
-      var instructions = boot.compile(appdir.PATH);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      expect(instructions.middleware.middleware[0].config)
-        .to.have.property('enabled', false);
+        expect(instructions.middleware.middleware[0].config)
+          .to.have.property('enabled', false);
+        done();
+      });
     });
 
-    function verifyMiddlewareConfig() {
-      var instructions = boot.compile(appdir.PATH);
+    function verifyMiddlewareConfig(done) {
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      expect(instructions.middleware.middleware)
-        .to.eql([
-          {
-            sourceFile: path.resolve(appdir.PATH, 'middleware'),
-            config: {
-              phase: 'routes',
-              params: {
-                key: 'initial value',
+        expect(instructions.middleware.middleware)
+          .to.eql([
+            {
+              sourceFile: path.resolve(appdir.PATH, 'middleware'),
+              config: {
+                phase: 'routes',
+                params: {
+                  key: 'initial value',
+                },
               },
             },
-          },
-          {
-            sourceFile: path.resolve(appdir.PATH, 'middleware'),
-            config: {
-              phase: 'routes',
-              params: {
-                key: 'custom value',
+            {
+              sourceFile: path.resolve(appdir.PATH, 'middleware'),
+              config: {
+                phase: 'routes',
+                params: {
+                  key: 'custom value',
+                },
               },
             },
-          },
-        ]);
+          ]);
+        done();
+      });
     }
 
-    it('merges config.params array to array', function() {
+    it('merges config.params array to array', function(done) {
       appdir.writeConfigFileSync('./middleware.json', {
         routes: {
           './middleware': [{
@@ -1801,10 +2161,10 @@ describe('compiler', function() {
         },
       });
 
-      verifyMiddlewareConfig();
+      verifyMiddlewareConfig(done);
     });
 
-    it('merges config.params array to object', function() {
+    it('merges config.params array to object', function(done) {
       appdir.writeConfigFileSync('./middleware.json', {
         routes: {
           './middleware': {
@@ -1825,10 +2185,10 @@ describe('compiler', function() {
         },
       });
 
-      verifyMiddlewareConfig();
+      verifyMiddlewareConfig(done);
     });
 
-    it('merges config.params object to array', function() {
+    it('merges config.params object to array', function(done) {
       appdir.writeConfigFileSync('./middleware.json', {
         routes: {
           './middleware': [{
@@ -1849,10 +2209,10 @@ describe('compiler', function() {
         },
       });
 
-      verifyMiddlewareConfig();
+      verifyMiddlewareConfig(done);
     });
 
-    it('merges config.params array to empty object', function() {
+    it('merges config.params array to empty object', function(done) {
       appdir.writeConfigFileSync('./middleware.json', {
         routes: {
           './middleware': {},
@@ -1869,23 +2229,27 @@ describe('compiler', function() {
         },
       });
 
-      var instructions = boot.compile(appdir.PATH);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      expect(instructions.middleware.middleware)
-        .to.eql([
-          {
-            sourceFile: path.resolve(appdir.PATH, 'middleware'),
-            config: {
-              phase: 'routes',
-              params: {
-                key: 'custom value',
+        expect(instructions.middleware.middleware)
+          .to.eql([
+            {
+              sourceFile: path.resolve(appdir.PATH, 'middleware'),
+              config: {
+                phase: 'routes',
+                params: {
+                  key: 'custom value',
+                },
               },
             },
-          },
-        ]);
+          ]);
+      });
+      done();
     });
 
-    it('merges config.params array to array by name', function() {
+    it('merges config.params array to array by name', function(done) {
       appdir.writeConfigFileSync('./middleware.json', {
         routes: {
           './middleware': [{
@@ -1912,62 +2276,67 @@ describe('compiler', function() {
         },
       });
 
-      var instructions = boot.compile(appdir.PATH);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      expect(instructions.middleware.middleware)
-        .to.eql([
-          {
-            sourceFile: path.resolve(appdir.PATH, 'middleware'),
-            config: {
-              name: 'a',
-              phase: 'routes',
-              params: {
-                key: 'custom value',
+        expect(instructions.middleware.middleware)
+          .to.eql([
+            {
+              sourceFile: path.resolve(appdir.PATH, 'middleware'),
+              config: {
+                name: 'a',
+                phase: 'routes',
+                params: {
+                  key: 'custom value',
+                },
               },
             },
-          },
-          {
-            sourceFile: path.resolve(appdir.PATH, 'middleware'),
-            config: {
-              phase: 'routes',
-              params: {
-                key: '2nd value',
+            {
+              sourceFile: path.resolve(appdir.PATH, 'middleware'),
+              config: {
+                phase: 'routes',
+                params: {
+                  key: '2nd value',
+                },
               },
             },
-          },
-        ]);
+          ]);
+        done();
+      });
     });
 
-    it('flattens sub-phases', function() {
+    it('flattens sub-phases', function(done) {
       appdir.writeConfigFileSync('middleware.json', {
-        'initial:after': {
-        },
+        'initial:after': {},
         'custom:before': {
           'loopback/server/middleware/url-not-found': {
             params: 'some-config-data',
           },
         },
-        'custom:after': {
-
-        },
+        'custom:after': {},
       });
 
-      var instructions = boot.compile(appdir.PATH);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      expect(instructions.middleware.phases, 'phases')
-        .to.eql(['initial', 'custom']);
-      expect(instructions.middleware.middleware, 'middleware')
-        .to.eql([{
-          sourceFile:
-            require.resolve('loopback/server/middleware/url-not-found'),
-          config: {
-            phase: 'custom:before',
-            params: 'some-config-data',
-          },
-        }]);
+        expect(instructions.middleware.phases, 'phases')
+          .to.eql(['initial', 'custom']);
+        expect(instructions.middleware.middleware, 'middleware')
+          .to.eql([{
+            sourceFile: require.resolve(
+              'loopback/server/middleware/url-not-found'),
+            config: {
+              phase: 'custom:before',
+              params: 'some-config-data',
+            },
+          }]);
+        done();
+      });
     });
 
-    it('supports multiple instances of the same middleware', function() {
+    it('supports multiple instances of the same middleware', function(done) {
       appdir.writeFileSync('my-middleware.js', '');
       appdir.writeConfigFileSync('middleware.json', {
         'final': {
@@ -1982,74 +2351,89 @@ describe('compiler', function() {
         },
       });
 
-      var instructions = boot.compile(appdir.PATH);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      expect(instructions.middleware.middleware)
-        .to.eql([
-          {
-            sourceFile: path.resolve(appdir.PATH, 'my-middleware.js'),
-            config: {
-              phase: 'final',
-              params: 'first',
+        expect(instructions.middleware.middleware)
+          .to.eql([
+            {
+              sourceFile: path.resolve(appdir.PATH, 'my-middleware.js'),
+              config: {
+                phase: 'final',
+                params: 'first',
+              },
             },
-          },
-          {
-            sourceFile: path.resolve(appdir.PATH, 'my-middleware.js'),
-            config: {
-              phase: 'final',
-              params: 'second',
+            {
+              sourceFile: path.resolve(appdir.PATH, 'my-middleware.js'),
+              config: {
+                phase: 'final',
+                params: 'second',
+              },
             },
-          },
-        ]);
+          ]);
+        done();
+      });
     });
 
-    it('supports shorthand notation for middleware paths', function() {
+    it('supports shorthand notation for middleware paths', function(done) {
       appdir.writeConfigFileSync('middleware.json', {
         'final': {
           'loopback#url-not-found': {},
         },
       });
 
-      var instructions = boot.compile(appdir.PATH);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      expect(instructions.middleware.middleware[0].sourceFile)
-        .to.equal(require.resolve('loopback/server/middleware/url-not-found'));
+        expect(instructions.middleware.middleware[0].sourceFile).to.equal(
+          require.resolve('loopback/server/middleware/url-not-found'));
+        done();
+      });
     });
 
-    it('supports shorthand notation for relative paths', function() {
+    it('supports shorthand notation for relative paths', function(done) {
       appdir.writeConfigFileSync('middleware.json', {
         'routes': {
-          './middleware/index#myMiddleware': {
-          },
+          './middleware/index#myMiddleware': {},
         },
       });
 
-      var instructions = boot.compile(appdir.PATH);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      expect(instructions.middleware.middleware[0].sourceFile)
-        .to.equal(path.resolve(appdir.PATH,
+        expect(instructions.middleware.middleware[0].sourceFile)
+          .to.equal(path.resolve(appdir.PATH,
           './middleware/index.js'));
-      expect(instructions.middleware.middleware[0]).have.property(
-        'fragment',
-        'myMiddleware');
+        expect(instructions.middleware.middleware[0]).have.property(
+          'fragment',
+          'myMiddleware');
+        done();
+      });
     });
 
     it('supports shorthand notation when the fragment name matches a property',
-      function() {
+      function(done) {
         appdir.writeConfigFileSync('middleware.json', {
           'final': {
             'loopback#errorHandler': {},
           },
         });
 
-        var instructions = boot.compile(appdir.PATH);
+        boot.compile(appdir.PATH, function(err, context) {
+          if (err) return done(err);
+          var instructions = context.instructions;
 
-        expect(instructions.middleware.middleware[0]).have.property(
-          'sourceFile',
-          pathWithoutIndex(require.resolve('loopback')));
-        expect(instructions.middleware.middleware[0]).have.property(
-          'fragment',
-          'errorHandler');
+          expect(instructions.middleware.middleware[0]).have.property(
+            'sourceFile',
+            pathWithoutIndex(require.resolve('loopback')));
+          expect(instructions.middleware.middleware[0]).have.property(
+            'fragment',
+            'errorHandler');
+          done();
+        });
       });
 
     it('resolves modules relative to appRootDir', function() {
@@ -2064,11 +2448,15 @@ describe('compiler', function() {
         },
       });
 
-      var instructions = boot.compile(appdir.PATH);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      expect(instructions.middleware.middleware[0]).have.property(
-        'sourceFile',
-        pathWithoutIndex(appdir.resolve(HANDLER_FILE)));
+        expect(instructions.middleware.middleware[0]).have.property(
+          'sourceFile',
+          pathWithoutIndex(appdir.resolve(HANDLER_FILE)));
+        done();
+      });
     });
 
     it('prefers appRootDir over node_modules for middleware', function() {
@@ -2080,31 +2468,40 @@ describe('compiler', function() {
         },
       });
 
-      var instructions = boot.compile(appdir.PATH);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      expect(instructions.middleware.middleware).to.have.length(1);
-      expect(instructions.middleware.middleware[0]).have.property(
-        'sourceFile', appJS);
+        expect(instructions.middleware.middleware).to.have.length(1);
+        expect(instructions.middleware.middleware[0]).have.property(
+          'sourceFile', appJS);
+        done();
+      });
     });
 
     it('does not treat module relative path as `appRootDir` relative',
-    function() {
-      appdir.writeFileSync('./my-middleware.js', '');
-      var moduleJS = appdir.writeFileSync('node_modules/my-middleware.js', '');
-      appdir.writeConfigFileSync('middleware.json', {
-        'routes': {
-          'my-middleware': {},
-        },
+      function(done) {
+        appdir.writeFileSync('./my-middleware.js', '');
+        var moduleJS = appdir.writeFileSync(
+          'node_modules/my-middleware.js', '');
+        appdir.writeConfigFileSync('middleware.json', {
+          'routes': {
+            'my-middleware': {},
+          },
+        });
+
+        boot.compile(appdir.PATH, function(err, context) {
+          if (err) return done(err);
+          var instructions = context.instructions;
+
+          expect(instructions.middleware.middleware).to.have.length(1);
+          expect(instructions.middleware.middleware[0]).have.property(
+            'sourceFile', moduleJS);
+          done();
+        });
       });
 
-      var instructions = boot.compile(appdir.PATH);
-
-      expect(instructions.middleware.middleware).to.have.length(1);
-      expect(instructions.middleware.middleware[0]).have.property(
-        'sourceFile', moduleJS);
-    });
-
-    it('loads middleware from coffeescript in appRootdir', function() {
+    it('loads middleware from coffeescript in appRootdir', function(done) {
       var coffee = appdir.writeFileSync('my-middleware.coffee', '');
       appdir.writeConfigFileSync('middleware.json', {
         'routes': {
@@ -2112,64 +2509,81 @@ describe('compiler', function() {
         },
       });
 
-      var instructions = boot.compile(appdir.PATH);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      expect(instructions.middleware.middleware[0]).have.property(
-        'sourceFile', coffee);
+        expect(instructions.middleware.middleware[0]).have.property(
+          'sourceFile', coffee);
+        done();
+      });
     });
 
     it('loads coffeescript from middleware under node_modules',
-    function() {
-      var file = appdir.writeFileSync('node_modules/my-middleware/index.coffee',
-        '');
-      appdir.writeFileSync('node_modules/my-middleware/index.json', '');
-      appdir.writeConfigFileSync('middleware.json', {
-        'routes': {
-          'my-middleware': {},
-        },
+      function(done) {
+        var file = appdir.writeFileSync(
+          'node_modules/my-middleware/index.coffee',
+          '');
+        appdir.writeFileSync('node_modules/my-middleware/index.json', '');
+        appdir.writeConfigFileSync('middleware.json', {
+          'routes': {
+            'my-middleware': {},
+          },
+        });
+
+        boot.compile(appdir.PATH, function(err, context) {
+          if (err) return done(err);
+          var instructions = context.instructions;
+
+          expect(instructions.middleware.middleware).to.have.length(1);
+          expect(instructions.middleware.middleware[0]).have.property(
+            'sourceFile', pathWithoutIndex(file));
+          done();
+        });
       });
-
-      var instructions = boot.compile(appdir.PATH);
-
-      expect(instructions.middleware.middleware).to.have.length(1);
-      expect(instructions.middleware.middleware[0]).have.property(
-        'sourceFile', pathWithoutIndex(file));
-    });
 
     it('prefers coffeescript over json for relative middleware path',
-    function() {
-      var coffee = appdir.writeFileSync('my-middleware.coffee', '');
-      appdir.writeFileSync('my-middleware.json', '');
-      appdir.writeConfigFileSync('middleware.json', {
-        'routes': {
-          './my-middleware': {},
-        },
+      function(done) {
+        var coffee = appdir.writeFileSync('my-middleware.coffee', '');
+        appdir.writeFileSync('my-middleware.json', '');
+        appdir.writeConfigFileSync('middleware.json', {
+          'routes': {
+            './my-middleware': {},
+          },
+        });
+
+        boot.compile(appdir.PATH, function(err, context) {
+          if (err) return done(err);
+          var instructions = context.instructions;
+
+          expect(instructions.middleware.middleware).to.have.length(1);
+          expect(instructions.middleware.middleware[0]).have.property(
+            'sourceFile', coffee);
+          done();
+        });
       });
-
-      var instructions = boot.compile(appdir.PATH);
-
-      expect(instructions.middleware.middleware).to.have.length(1);
-      expect(instructions.middleware.middleware[0]).have.property(
-        'sourceFile', coffee);
-    });
 
     it('prefers coffeescript over json for module relative middleware path',
-    function() {
-      var coffee = appdir.writeFileSync('node_modules/my-middleware.coffee',
-        '');
-      appdir.writeFileSync('node_modules/my-middleware.json', '');
-      appdir.writeConfigFileSync('middleware.json', {
-        'routes': {
-          'my-middleware': {},
-        },
+      function(done) {
+        var coffee = appdir.writeFileSync('node_modules/my-middleware.coffee',
+          '');
+        appdir.writeFileSync('node_modules/my-middleware.json', '');
+        appdir.writeConfigFileSync('middleware.json', {
+          'routes': {
+            'my-middleware': {},
+          },
+        });
+
+        boot.compile(appdir.PATH, function(err, context) {
+          if (err) return done(err);
+          var instructions = context.instructions;
+
+          expect(instructions.middleware.middleware).to.have.length(1);
+          expect(instructions.middleware.middleware[0]).have.property(
+            'sourceFile', coffee);
+          done();
+        });
       });
-
-      var instructions = boot.compile(appdir.PATH);
-
-      expect(instructions.middleware.middleware).to.have.length(1);
-      expect(instructions.middleware.middleware[0]).have.property(
-        'sourceFile', coffee);
-    });
 
     describe('config with relative paths in params', function() {
       var RELATIVE_PATH_PARAMS = [
@@ -2184,67 +2598,92 @@ describe('compiler', function() {
         });
       });
 
-      it('converts paths in top-level array items', function() {
+      it('converts paths in top-level array items', function(done) {
         givenMiddlewareEntrySync({ params: RELATIVE_PATH_PARAMS });
 
-        var instructions = boot.compile(appdir.PATH);
+        boot.compile(appdir.PATH, function(err, context) {
+          if (err) return done(err);
+          var instructions = context.instructions;
 
-        expectFirstMiddlewareParams(instructions)
-          .to.eql(absolutePathParams);
+          expectFirstMiddlewareParams(instructions)
+            .to.eql(absolutePathParams);
+          done();
+        });
       });
 
-      it('converts paths in top-level object properties', function() {
-        givenMiddlewareEntrySync({ params: {
-          path: RELATIVE_PATH_PARAMS[0],
-        }});
-
-        var instructions = boot.compile(appdir.PATH);
-
-        expectFirstMiddlewareParams(instructions)
-          .to.eql({ path: absolutePathParams[0] });
-      });
-
-      it('converts path value when params is a string', function() {
-        givenMiddlewareEntrySync({ params: RELATIVE_PATH_PARAMS[0] });
-
-        var instructions = boot.compile(appdir.PATH);
-
-        expectFirstMiddlewareParams(instructions)
-          .to.eql(absolutePathParams[0]);
-      });
-
-      it('converts paths in nested properties', function() {
-        givenMiddlewareEntrySync({ params: {
-          nestedObject: {
+      it('converts paths in top-level object properties', function(done) {
+        givenMiddlewareEntrySync({
+          params: {
             path: RELATIVE_PATH_PARAMS[0],
           },
-          nestedArray: RELATIVE_PATH_PARAMS,
-        }});
+        });
 
-        var instructions = boot.compile(appdir.PATH);
+        boot.compile(appdir.PATH, function(err, context) {
+          if (err) return done(err);
+          var instructions = context.instructions;
 
-        expectFirstMiddlewareParams(instructions)
-          .to.eql({
+          expectFirstMiddlewareParams(instructions)
+            .to.eql({ path: absolutePathParams[0] });
+          done();
+        });
+      });
+
+      it('converts path value when params is a string', function(done) {
+        givenMiddlewareEntrySync({ params: RELATIVE_PATH_PARAMS[0] });
+
+        boot.compile(appdir.PATH, function(err, context) {
+          if (err) return done(err);
+          var instructions = context.instructions;
+
+          expectFirstMiddlewareParams(instructions)
+            .to.eql(absolutePathParams[0]);
+          done();
+        });
+      });
+
+      it('converts paths in nested properties', function(done) {
+        givenMiddlewareEntrySync({
+          params: {
             nestedObject: {
-              path: absolutePathParams[0],
+              path: RELATIVE_PATH_PARAMS[0],
             },
-            nestedArray: absolutePathParams,
+            nestedArray: RELATIVE_PATH_PARAMS,
+          },
+        });
+
+        boot.compile(appdir.PATH, function(err, context) {
+          if (err) return done(err);
+          var instructions = context.instructions;
+
+          expectFirstMiddlewareParams(instructions)
+            .to.eql({
+              nestedObject: {
+                path: absolutePathParams[0],
+              },
+              nestedArray: absolutePathParams,
+            });
+          done();
+        });
+      });
+
+      it('does not convert values not starting with `./` or `../`',
+        function(done) {
+          var PARAMS = ['$!.somerc', '$!/root', '$!hello!'];
+          givenMiddlewareEntrySync({ params: PARAMS });
+
+          boot.compile(appdir.PATH, function(err, context) {
+            if (err) return done(err);
+            var instructions = context.instructions;
+
+            expectFirstMiddlewareParams(instructions).to.eql(PARAMS);
+            done();
           });
-      });
-
-      it('does not convert values not starting with `./` or `../`', function() {
-        var PARAMS = ['$!.somerc', '$!/root', '$!hello!'];
-        givenMiddlewareEntrySync({ params: PARAMS });
-
-        var instructions = boot.compile(appdir.PATH);
-
-        expectFirstMiddlewareParams(instructions).to.eql(PARAMS);
-      });
+        });
     });
   });
 
   describe('for components', function() {
-    it('loads component configs from multiple files', function() {
+    it('loads component configs from multiple files', function(done) {
       appdir.createConfigFilesSync();
       appdir.writeConfigFileSync('component-config.json', {
         debug: { option: 'value' },
@@ -2258,16 +2697,20 @@ describe('compiler', function() {
         debug: { env: 'applied' },
       });
 
-      var instructions = boot.compile(appdir.PATH);
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
 
-      var component = instructions.components[0];
-      expect(component).to.eql({
-        sourceFile: require.resolve('debug'),
-        config: {
-          option: 'value',
-          local: 'applied',
-          env: 'applied',
-        },
+        var component = instructions.components[0];
+        expect(component).to.eql({
+          sourceFile: require.resolve('debug'),
+          config: {
+            option: 'value',
+            local: 'applied',
+            env: 'applied',
+          },
+        });
+        done();
       });
     });
 
@@ -2295,73 +2738,89 @@ describe('compiler', function() {
       });
     });
 
-    it('loads component relative to appRootDir', function() {
+    it('loads component relative to appRootDir', function(done) {
       appdir.writeConfigFileSync('./component-config.json', {
-        './index': { },
+        './index': {},
       });
       var appJS = appdir.writeConfigFileSync('index.js', '');
 
-      var instructions = boot.compile(appdir.PATH);
-      expect(instructions.components[0]).have.property(
-        'sourceFile', appJS
-      );
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
+        expect(instructions.components[0]).have.property(
+          'sourceFile', appJS
+        );
+        done();
+      });
     });
 
-    it('loads component relative to node modules', function() {
+    it('loads component relative to node modules', function(done) {
       appdir.writeConfigFileSync('component-config.json', {
-        'mycomponent': { },
+        'mycomponent': {},
       });
       var js = appdir.writeConfigFileSync('node_modules/mycomponent/index.js',
         '');
 
-      var instructions = boot.compile(appdir.PATH);
-      expect(instructions.components[0]).have.property(
-        'sourceFile', js
-      );
+      boot.compile(appdir.PATH, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
+        expect(instructions.components[0]).have.property(
+          'sourceFile', js
+        );
+        done();
+      });
     });
 
     it('retains backward compatibility for non-relative path in `appRootDir`',
-    function() {
-      appdir.writeConfigFileSync('component-config.json', {
-        'my-component/component.js': { },
-      });
-      appdir.writeConfigFileSync('./my-component/component.js', '');
+      function(done) {
+        appdir.writeConfigFileSync('component-config.json', {
+          'my-component/component.js': {},
+        });
+        appdir.writeConfigFileSync('./my-component/component.js', '');
 
-      expect(function() { boot.compile(appdir.PATH); })
-        .to.throw('Cannot resolve path \"my-component/component.js\"');
-    });
+        expectToThrow('Cannot resolve path \"my-component/component.js\"',
+          done);
+      });
 
     it('prefers coffeescript over json for relative path component',
-    function() {
-      appdir.writeConfigFileSync('component-config.json', {
-        './component': { },
+      function(done) {
+        appdir.writeConfigFileSync('component-config.json', {
+          './component': {},
+        });
+
+        var coffee = appdir.writeFileSync('component.coffee', '');
+        appdir.writeFileSync('component.json', '');
+
+        boot.compile(appdir.PATH, function(err, context) {
+          if (err) return done(err);
+          var instructions = context.instructions;
+
+          expect(instructions.components).to.have.length(1);
+          expect(instructions.components[0]).have.property(
+            'sourceFile', coffee);
+          done();
+        });
       });
-
-      var coffee = appdir.writeFileSync('component.coffee', '');
-      appdir.writeFileSync('component.json', '');
-
-      var instructions = boot.compile(appdir.PATH);
-
-      expect(instructions.components).to.have.length(1);
-      expect(instructions.components[0]).have.property(
-        'sourceFile', coffee);
-    });
 
     it('prefers coffeescript over json for module relative component path',
-    function() {
-      appdir.writeConfigFileSync('component-config.json', {
-        'component': { },
+      function(done) {
+        appdir.writeConfigFileSync('component-config.json', {
+          'component': {},
+        });
+
+        var coffee = appdir.writeFileSync('node_modules/component.coffee', '');
+        appdir.writeFileSync('node_modules/component.json', '');
+
+        boot.compile(appdir.PATH, function(err, context) {
+          if (err) return done(err);
+          var instructions = context.instructions;
+
+          expect(instructions.components).to.have.length(1);
+          expect(instructions.components[0]).have.property(
+            'sourceFile', coffee);
+          done();
+        });
       });
-
-      var coffee = appdir.writeFileSync('node_modules/component.coffee', '');
-      appdir.writeFileSync('node_modules/component.json', '');
-
-      var instructions = boot.compile(appdir.PATH);
-
-      expect(instructions.components).to.have.length(1);
-      expect(instructions.components[0]).have.property(
-        'sourceFile', coffee);
-    });
   });
 });
 
@@ -2391,3 +2850,4 @@ function pathWithoutExtension(value) {
 function pathWithoutIndex(filePath) {
   return filePath.replace(/[\\\/]index\.[^.]+$/, '');
 }
+

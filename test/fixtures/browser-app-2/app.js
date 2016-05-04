@@ -7,8 +7,10 @@ var loopback = require('loopback');
 var boot = require('../../../');
 
 var app = module.exports = loopback();
+app.start = function(done) {
+  boot(app, {
+    appId: 'browserApp2',
+    appRootDir: __dirname,
+  }, done);
+};
 
-boot(app, {
-  appId: 'browserApp2',
-  appRootDir: __dirname,
-});

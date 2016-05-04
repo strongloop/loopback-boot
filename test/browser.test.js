@@ -58,19 +58,18 @@ describe('browser support', function() {
     browserifyTestApp(appDir, function(err, bundlePath) {
       if (err) return done(err);
 
-      var app = executeBundledApp(bundlePath);
+      var app = executeBundledApp(bundlePath, function(err) {
+        // configured in fixtures/browser-app/boot/configure.js
+        expect(app.settings).to.have.property('custom-key', 'custom-value');
+        expect(Object.keys(app.models)).to.include('Customer');
+        expect(app.models.Customer.settings)
+          .to.have.property('_customized', 'Customer');
 
-      // configured in fixtures/browser-app/boot/configure.js
-      expect(app.settings).to.have.property('custom-key', 'custom-value');
-      expect(Object.keys(app.models)).to.include('Customer');
-      expect(app.models.Customer.settings)
-        .to.have.property('_customized', 'Customer');
-
-      // configured in fixtures/browser-app/component-config.json
-      // and fixtures/browser-app/components/dummy-component.js
-      expect(app.dummyComponentOptions).to.eql({ option: 'value' });
-
-      done();
+        // configured in fixtures/browser-app/component-config.json
+        // and fixtures/browser-app/components/dummy-component.js
+        expect(app.dummyComponentOptions).to.eql({ option: 'value' });
+        done();
+      });
     });
   });
 
@@ -83,14 +82,14 @@ describe('browser support', function() {
     browserifyTestApp(options, function(err, bundlePath) {
       if (err) return done(err);
 
-      var app = executeBundledApp(bundlePath);
+      var app = executeBundledApp(bundlePath, function(err) {
+        var modelBuilder = app.registry.modelBuilder;
+        var registry = modelBuilder.mixins.mixins;
+        expect(Object.keys(registry)).to.eql(['TimeStamps']);
+        expect(app.models.Customer.timeStampsMixin).to.eql(true);
 
-      var modelBuilder = app.registry.modelBuilder;
-      var registry = modelBuilder.mixins.mixins;
-      expect(Object.keys(registry)).to.eql(['TimeStamps']);
-      expect(app.models.Customer.timeStampsMixin).to.eql(true);
-
-      done();
+        done();
+      });
     });
   });
 
@@ -103,14 +102,14 @@ describe('browser support', function() {
     browserifyTestApp(appDir, 'coffee', function(err, bundlePath) {
       if (err) return done(err);
 
-      var app = executeBundledApp(bundlePath);
-
-      // configured in fixtures/browser-app/boot/configure.coffee
-      expect(app.settings).to.have.property('custom-key', 'custom-value');
-      expect(Object.keys(app.models)).to.include('Customer');
-      expect(app.models.Customer.settings)
-        .to.have.property('_customized', 'Customer');
-      done();
+      var app = executeBundledApp(bundlePath, function(err) {
+        // configured in fixtures/browser-app/boot/configure.coffee
+        expect(app.settings).to.have.property('custom-key', 'custom-value');
+        expect(Object.keys(app.models)).to.include('Customer');
+        expect(app.models.Customer.settings)
+          .to.have.property('_customized', 'Customer');
+        done();
+      });
     });
   });
 });
@@ -127,18 +126,19 @@ function browserifyTestApp(options, strategy, next) {
   var appDir = typeof(options) === 'object' ? options.appRootDir : options;
   var b = compileStrategies[strategy](appDir);
 
-  boot.compileToBrowserify(options, b);
-
-  exportBrowserifyToFile(b, 'browser-app-bundle.js', next);
+  boot.compileToBrowserify(options, b, function(err) {
+    exportBrowserifyToFile(b, 'browser-app-bundle.js', next);
+  });
 }
 
-function executeBundledApp(bundlePath) {
+function executeBundledApp(bundlePath, done) {
   var code = fs.readFileSync(bundlePath);
   var context = createBrowserLikeContext();
   vm.runInContext(code, context, bundlePath);
   var app = vm.runInContext('require("browser-app")', context);
-
-  printContextLogs(context);
-
+  app.start(function(err) {
+    printContextLogs(context);
+    done(err);
+  });
   return app;
 }

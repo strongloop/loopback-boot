@@ -146,6 +146,11 @@ var utils = require('./lib/utils');
  */
 
 exports = module.exports = function bootLoopBackApp(app, options, callback) {
+  if (typeof options === 'function' && callback === undefined) {
+    callback = options;
+    options = {};
+  }
+  options = options || {};
   // backwards compatibility with loopback's app.boot
   options.env = options.env || app.get('env');
 
@@ -156,17 +161,14 @@ exports = module.exports = function bootLoopBackApp(app, options, callback) {
     app: app,
   };
 
-  bootstrapper.run(context, callback);
+  return bootstrapper.run(context, callback);
 };
 
-exports.compile = function(options) {
+exports.compile = function(options, done) {
   var bootstrapper = new Bootstrapper(options);
   bootstrapper.phases = ['load', 'compile'];
   var context = {};
-  bootstrapper.run(context, function(err) {
-    if (err) throw err;
-  });
-  return context.instructions;
+  return bootstrapper.run(context, done);
 };
 
 /**
@@ -179,9 +181,13 @@ exports.compile = function(options) {
  *
  * @header boot.compileToBrowserify(options, bundler)
  */
-exports.compileToBrowserify = function(options, bundler) {
-  var instructions = exports.compile(options);
-  addInstructionsToBrowserify({ instructions: instructions }, bundler);
+exports.compileToBrowserify = function(options, bundler, done) {
+  return exports.compile(options, function(err, context) {
+    if (err) return done(err);
+    addInstructionsToBrowserify({ instructions: context.instructions },
+      bundler);
+    done();
+  });
 };
 
 /* -- undocumented low-level API -- */
@@ -202,9 +208,5 @@ exports.execute = function(app, instructions, done) {
     app: app,
     instructions: instructions,
   };
-  bootstrapper.run(context, function(err) {
-    if (err) throw err;
-    if (done) done(err);
-  });
-  return context;
+  return bootstrapper.run(context, done);
 };

@@ -21,7 +21,7 @@ var Bootstrapper = require('./lib/bootstrapper').Bootstrapper;
  * @header boot(app)
  */
 
-exports = module.exports = function bootBrowserApp(app, options) {
+exports = module.exports = function bootBrowserApp(app, options, callback) {
   // Only using options.id to identify the browserified bundle to load for
   // this application. If no Id was provided, load the default bundle.
   var moduleName = 'loopback-boot#instructions';
@@ -39,6 +39,6 @@ exports = module.exports = function bootBrowserApp(app, options) {
     app: app,
     instructions: instructions,
   };
-  bootstrapper.run(context);
+  return bootstrapper.run(context, callback);
 };
 

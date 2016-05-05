@@ -906,6 +906,62 @@ describe('executor', function() {
     });
   });
 
+  describe('when booting with lazy connect', function() {
+    var SAMPLE_INSTRUCTION = someInstructions({
+      dataSources: {
+        lazyConnector: {
+          connector: 'testLazyConnect',
+          name: 'lazyConnector',
+        },
+      },
+    });
+    var connectTriggered = true;
+
+    beforeEach(function() {
+      app.connector('testLazyConnect', {
+        initialize: function(dataSource, callback) {
+          if (dataSource.settings.lazyConnect) {
+            connectTriggered = false;
+          } else {
+            connectTriggered = true;
+          }
+        },
+      });
+    });
+
+    it('should trigger connect with ENV undefined', function(done) {
+      delete process.env.LB_LAZYCONNECT_DATASOURCES;
+      boot.execute(app, SAMPLE_INSTRUCTION, function() {
+        expect(connectTriggered).to.equal(true);
+        done();
+      });
+    });
+
+    it('should not trigger connect with ENV true', function(done) {
+      process.env.LB_LAZYCONNECT_DATASOURCES = 'true';
+      boot.execute(app, SAMPLE_INSTRUCTION, function() {
+        expect(connectTriggered).to.equal(false);
+        done();
+      });
+    });
+
+    it('should trigger connect with ENV false', function(done) {
+      process.env.LB_LAZYCONNECT_DATASOURCES = 'false';
+      boot.execute(app, SAMPLE_INSTRUCTION, function() {
+        expect(connectTriggered).to.equal(true);
+        done();
+      });
+    });
+
+    it('should trigger connect with ENV 0', function(done) {
+      process.env.LB_LAZYCONNECT_DATASOURCES = '0';
+      boot.execute(app, SAMPLE_INSTRUCTION, function() {
+        expect(connectTriggered).to.equal(true);
+        done();
+      });
+    });
+  });
+
   describe('dynamic configuration for datasources.json', function() {
     beforeEach(function() {
       delete process.env.DYNAMIC_HOST;

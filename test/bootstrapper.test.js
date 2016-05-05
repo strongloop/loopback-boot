@@ -29,6 +29,7 @@ describe('Bootstrapper', function() {
       expect(context.configurations.bootScripts).to.be.object;
       expect(context.configurations.middleware).to.be.object;
       expect(context.configurations.models).to.be.object;
+      expect(context.configurations.tracker).to.eql('load');
       expect(context.instructions).to.be.undefined;
       expect(process.bootFlags.length).to.eql(0);
       done();
@@ -55,6 +56,8 @@ describe('Bootstrapper', function() {
       expect(context.configurations.models).to.be.undefined;
       expect(context.configurations.bootScripts).to.be.object;
       expect(context.instructions.application).to.be.object;
+      expect(context.instructions.tracker).to.eql('compile');
+      expect(context.executions.tracker).to.eql('start');
       expect(process.bootFlags).to.eql(['barLoaded',
         'barSyncLoaded',
         'fooLoaded',

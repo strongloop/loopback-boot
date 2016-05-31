@@ -14,21 +14,12 @@ var vm = require('vm');
 var createBrowserLikeContext = require('./helpers/browser').createContext;
 var printContextLogs = require('./helpers/browser').printContextLogs;
 
-function addPlugins(b) {
-  var files = fs.readdirSync(path.join(__dirname, '../lib/plugins'));
-  files.forEach(function(f) {
-    b.require('../../../lib/plugins/' + f,
-      { expose: './plugins/' + path.basename(f, '.js') });
-  });
-}
-
 var compileStrategies = {
   'default': function(appDir) {
     var b = browserify({
       basedir: appDir,
       debug: true,
     });
-    addPlugins(b);
     b.require('./app.js', { expose: 'browser-app' });
     return b;
   },
@@ -39,7 +30,6 @@ var compileStrategies = {
       extensions: ['.coffee'],
       debug: true,
     });
-    addPlugins(b);
     b.transform('coffeeify');
 
     b.require('./app.coffee', { expose: 'browser-app' });

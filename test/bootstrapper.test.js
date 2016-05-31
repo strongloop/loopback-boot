@@ -1,6 +1,11 @@
 var path = require('path');
 var loopback = require('loopback');
-var expect = require('chai').expect;
+
+var chai = require('chai');
+var dirtyChai = require('dirty-chai');
+var expect = chai.expect;
+chai.use(dirtyChai);
+
 var Bootstrapper = require('../lib/bootstrapper').Bootstrapper;
 
 describe('Bootstrapper', function() {
@@ -25,12 +30,12 @@ describe('Bootstrapper', function() {
 
     bootstrapper.run(context, function(err) {
       if (err) return done(err);
-      expect(context.configurations.application).to.be.object;
-      expect(context.configurations.bootScripts).to.be.object;
-      expect(context.configurations.middleware).to.be.object;
-      expect(context.configurations.models).to.be.object;
+      expect(context.configurations.application).to.be.an('object');
+      expect(context.configurations.bootScripts).to.be.an('array');
+      expect(context.configurations.middleware).to.be.an('object');
+      expect(context.configurations.models).to.be.an('object');
       expect(context.configurations.tracker).to.eql('load');
-      expect(context.instructions).to.be.undefined;
+      expect(context.instructions).to.be.undefined();
       expect(process.bootFlags.length).to.eql(0);
       done();
     });
@@ -51,11 +56,11 @@ describe('Bootstrapper', function() {
 
     bootstrapper.run(context, function(err) {
       if (err) return done(err);
-      expect(context.configurations.application).to.be.object;
-      expect(context.configurations.middleware).to.be.undefined;
-      expect(context.configurations.models).to.be.undefined;
-      expect(context.configurations.bootScripts).to.be.object;
-      expect(context.instructions.application).to.be.object;
+      expect(context.configurations.application).to.be.an('object');
+      expect(context.configurations.middleware).to.be.undefined();
+      expect(context.configurations.models).to.be.undefined();
+      expect(context.configurations.bootScripts).to.be.an('array');
+      expect(context.instructions.application).to.be.an('object');
       expect(context.instructions.tracker).to.eql('compile');
       expect(context.executions.tracker).to.eql('start');
       expect(process.bootFlags).to.eql(['barLoaded',

@@ -60,21 +60,11 @@ describe('browser support for multiple apps', function() {
   });
 });
 
-function addPlugins(b) {
-  var files = fs.readdirSync(path.join(__dirname, '../lib/plugins'));
-  files.forEach(function(f) {
-    b.require('../../lib/plugins/' + f,
-      { expose: './plugins/' + path.basename(f, '.js') });
-  });
-}
-
 function browserifyTestApps(apps, next) {
   var b = browserify({
     debug: true,
     basedir: path.resolve(__dirname, './fixtures'),
   });
-
-  addPlugins(b);
 
   var bundles = [];
   for (var i in apps) {

@@ -19,7 +19,11 @@ describe('compiler', function() {
   beforeEach(sandbox.reset);
   beforeEach(appdir.init);
 
-  function expectToThrow(err, done, options) {
+  function expectCompileToThrow(err, options, done) {
+    if (typeof options === 'function') {
+      done = options;
+      options = undefined;
+    }
     boot.compile(options || appdir.PATH, function(err) {
       expect(function() {
         if (err) throw err;
@@ -28,7 +32,11 @@ describe('compiler', function() {
     });
   }
 
-  function expectToNotThrow(done, options) {
+  function expectCompileToNotThrow(options, done) {
+    if (typeof options === 'function') {
+      done = options;
+      options = undefined;
+    }
     boot.compile(options || appdir.PATH, function(err) {
       expect(function() {
         if (err) throw err;
@@ -570,7 +578,8 @@ describe('compiler', function() {
         },
       });
 
-      expectToThrow(/array values of different length.*nest\.array/, done);
+      expectCompileToThrow(/array values of different length.*nest\.array/,
+        done);
     });
 
     it('refuses to merge Array of different length in Array', function(done) {
@@ -582,7 +591,7 @@ describe('compiler', function() {
         key: [['value']],
       });
 
-      expectToThrow(/array values of different length.*key\[0\]/, done);
+      expectCompileToThrow(/array values of different length.*key\[0\]/, done);
     });
 
     it('returns full key of an incorrect Array value', function(done) {
@@ -602,7 +611,8 @@ describe('compiler', function() {
         ],
       });
 
-      expectToThrow(/array values of different length.*toplevel\[0\]\.nested/,
+      expectCompileToThrow(
+        /array values of different length.*toplevel\[0\]\.nested/,
         done);
     });
 
@@ -614,7 +624,7 @@ describe('compiler', function() {
         key: {},
       });
 
-      expectToThrow(/incompatible types.*key/, done);
+      expectCompileToThrow(/incompatible types.*key/, done);
     });
 
     it('refuses to merge incompatible array items', function(done) {
@@ -625,7 +635,7 @@ describe('compiler', function() {
         key: [{}],
       });
 
-      expectToThrow(/incompatible types.*key\[0\]/, done);
+      expectCompileToThrow(/incompatible types.*key\[0\]/, done);
     });
 
     it('merges app configs from multiple files', function(done) {
@@ -977,7 +987,7 @@ describe('compiler', function() {
           foo: { properties: { name: 'string' }},
         });
 
-        expectToThrow(/unsupported 1\.x format/, done);
+        expectCompileToThrow(/unsupported 1\.x format/, done);
       });
 
     it('throws when model-config.json contains 1.x `options.base`',
@@ -986,7 +996,7 @@ describe('compiler', function() {
           Customer: { options: { base: 'User' }},
         });
 
-        expectToThrow(/unsupported 1\.x format/, done);
+        expectCompileToThrow(/unsupported 1\.x format/, done);
       });
 
     it('loads models from `./models`', function(done) {
@@ -1341,7 +1351,7 @@ describe('compiler', function() {
         base: 'Car',
       });
 
-      expectToThrow(/cyclic dependency/i, done);
+      expectCompileToThrow(/cyclic dependency/i, done);
     });
 
     it('uses file name as default value for model name', function(done) {
@@ -1841,8 +1851,8 @@ describe('compiler', function() {
         it('throws error for invalid normalization format', function(done) {
           options.normalization = 'invalidFormat';
 
-          expectToThrow(/Invalid normalization format - "invalidFormat"/,
-            done, options);
+          expectCompileToThrow(/Invalid normalization format - "invalidFormat"/,
+            options, done);
         });
       });
 
@@ -1985,7 +1995,7 @@ describe('compiler', function() {
         },
       });
 
-      expectToThrow(/path-does-not-exist/, done);
+      expectCompileToThrow(/path-does-not-exist/, done);
     });
 
     it('does not fail when an optional middleware cannot be resolved',
@@ -1998,7 +2008,7 @@ describe('compiler', function() {
           },
         });
 
-        expectToNotThrow(done);
+        expectCompileToNotThrow(done);
       });
 
     it('fails when a module middleware fragment cannot be resolved',
@@ -2009,7 +2019,7 @@ describe('compiler', function() {
           },
         });
 
-        expectToThrow(/path-does-not-exist/, done);
+        expectCompileToThrow(/path-does-not-exist/, done);
       });
 
     it('does not fail when an optional middleware fragment cannot be resolved',
@@ -2022,7 +2032,7 @@ describe('compiler', function() {
           },
         });
 
-        expectToNotThrow(done);
+        expectCompileToNotThrow(done);
       });
 
     it('resolves paths relatively to appRootDir', function(done) {
@@ -2778,7 +2788,8 @@ describe('compiler', function() {
         });
         appdir.writeConfigFileSync('./my-component/component.js', '');
 
-        expectToThrow('Cannot resolve path \"my-component/component.js\"',
+        expectCompileToThrow(
+          'Cannot resolve path \"my-component/component.js\"',
           done);
       });
 

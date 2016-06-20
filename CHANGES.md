@@ -1,3 +1,11 @@
+2016-06-20, Version 2.19.0
+==========================
+
+ * update copyright notices and license (Ryan Graham)
+
+ * Add flag var lazyConnect to ds config (juehou)
+
+
 2016-04-13, Version 2.18.1
 ==========================
 

@@ -1,3 +1,8 @@
+// Copyright IBM Corp. 2014,2016. All Rights Reserved.
+// Node module: loopback-boot
+// This file is licensed under the MIT License.
+// License text available at https://opensource.org/licenses/MIT
+
 var async = require('async');
 var boot = require('../');
 var path = require('path');
@@ -37,22 +42,22 @@ describe('executor', function() {
       host: '127.0.0.1',
       restApiRoot: '/rest-api',
       foo: { bar: 'bat' },
-      baz: true
+      baz: true,
     },
     models: [
       {
         name: 'User',
         config: {
-          dataSource: 'the-db'
-        }
-      }
+          dataSource: 'the-db',
+        },
+      },
     ],
     dataSources: {
       'the-db': {
         connector: 'memory',
-        defaultForType: 'db'
-      }
-    }
+        defaultForType: 'db',
+      },
+    },
   });
 
   describe('when booting', function() {
@@ -66,14 +71,14 @@ describe('executor', function() {
       });
     });
 
-    it('should emit the `booted` event', function(done) {
+    it('should emit the `booted` event in the next tick', function(done) {
+      boot.execute(app, dummyInstructions, function(err) {
+        expect(err).to.be.undefined();
+      });
       app.on('booted', function() {
         // This test fails with a timeout when the `booted` event has not been
         // emitted correctly
         done();
-      });
-      boot.execute(app, dummyInstructions, function(err) {
-        expect(err).to.be.undefined();
       });
     });
 
@@ -109,9 +114,9 @@ describe('executor', function() {
             name: 'Customer',
             base: 'User',
           },
-          sourceFile: path.resolve(appdir.PATH, 'models', 'Customer.js')
-        }
-      ]
+          sourceFile: path.resolve(appdir.PATH, 'models', 'Customer.js'),
+        },
+      ],
     }));
 
     expect(app.models.Customer).to.exist();
@@ -127,9 +132,9 @@ describe('executor', function() {
           name: 'Vehicle',
           config: undefined,
           definition: {
-            name: 'Vehicle'
+            name: 'Vehicle',
           },
-          sourceFile: undefined
+          sourceFile: undefined,
         },
         {
           name: 'Car',
@@ -138,9 +143,9 @@ describe('executor', function() {
             name: 'Car',
             base: 'Vehicle',
           },
-          sourceFile: undefined
+          sourceFile: undefined,
         },
-      ]
+      ],
     }));
 
     expect(Object.keys(app.models)).to.eql(['Car']);
@@ -166,15 +171,15 @@ describe('executor', function() {
           name: 'Customer',
           config: { dataSource: 'db' },
           definition: { name: 'Customer' },
-          sourceFile: path.resolve(appdir.PATH, 'models', 'Customer.js')
+          sourceFile: path.resolve(appdir.PATH, 'models', 'Customer.js'),
         },
         {
           name: 'UniqueName',
           config: { dataSource: 'db' },
           definition: { name: 'UniqueName' },
-          sourceFile: undefined
-        }
-      ]
+          sourceFile: undefined,
+        },
+      ],
     }));
 
     expect(app.models.Customer._modelsWhenAttached).to.include('UniqueName');
@@ -188,9 +193,9 @@ describe('executor', function() {
           name: 'LocalCustomer',
           config: { dataSource: 'db' },
           definition: { name: 'LocalCustomer' },
-          sourceFile: undefined
-        }
-      ]
+          sourceFile: undefined,
+        },
+      ],
     }));
 
     expect(Object.keys(loopback.registry.modelBuilder.models), 'global models')
@@ -204,7 +209,7 @@ describe('executor', function() {
       'require("doesnt-exist"); module.exports = {};');
 
     function doBoot() {
-      boot.execute(app, someInstructions({ files: { boot: [file] } }));
+      boot.execute(app, someInstructions({ files: { boot: [file] }}));
     }
 
     expect(doBoot).to.throw(/Cannot find module \'doesnt-exist\'/);
@@ -236,7 +241,7 @@ describe('executor', function() {
         require.resolve('loopback/common/models/user.json')
       ),
       config: { dataSource: 'db' },
-      sourceFile: require.resolve('loopback/common/models/user.js')
+      sourceFile: require.resolve('loopback/common/models/user.js'),
     };
     builtinModel.definition.redefined = true;
 
@@ -260,7 +265,7 @@ describe('executor', function() {
         'barLoaded',
         'barSyncLoaded',
         'fooLoaded',
-        'barStarted'
+        'barStarted',
       ]);
 
       // bar finished happens in the next tick
@@ -272,7 +277,7 @@ describe('executor', function() {
           'fooLoaded',
           'barStarted',
           'barFinished',
-          'barSyncExecuted'
+          'barSyncExecuted',
         ]);
         done();
       }, 10);
@@ -288,7 +293,7 @@ describe('executor', function() {
           'fooLoaded',
           'barStarted',
           'barFinished',
-          'barSyncExecuted'
+          'barSyncExecuted',
         ]);
         done();
       });
@@ -306,11 +311,11 @@ describe('executor', function() {
           'function(Model, options) {}');
 
         appdir.writeConfigFileSync('custom-mixins/time-stamps.json', {
-          name: 'Timestamping'
+          name: 'Timestamping',
         });
 
         options = {
-          appRootDir: appdir.PATH
+          appRootDir: appdir.PATH,
         };
       });
 
@@ -357,8 +362,8 @@ describe('executor', function() {
       boot.execute(app, someInstructions({
         config: {
           port: undefined,
-          host: undefined
-        }
+          host: undefined,
+        },
       }));
     }
 
@@ -388,6 +393,7 @@ describe('executor', function() {
 
     it('should prioritize host sources', function() {
       // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
+      /*eslint-disable camelcase*/
       process.env.npm_config_host = randomHost();
       process.env.OPENSHIFT_SLS_IP = randomHost();
       process.env.OPENSHIFT_NODEJS_IP = randomHost();
@@ -397,9 +403,11 @@ describe('executor', function() {
 
       bootWithDefaults();
       assert.equal(app.get('host'), process.env.npm_config_host);
+      /*eslint-enable camelcase*/
     });
 
     it('should prioritize port sources', function() {
+      /*eslint-disable camelcase*/
       process.env.npm_config_port = randomPort();
       process.env.OPENSHIFT_SLS_PORT = randomPort();
       process.env.OPENSHIFT_NODEJS_PORT = randomPort();
@@ -409,6 +417,7 @@ describe('executor', function() {
 
       bootWithDefaults();
       assert.equal(app.get('port'), process.env.npm_config_port);
+      /*eslint-enable camelcase*/
     });
 
     function randomHost() {
@@ -420,24 +429,28 @@ describe('executor', function() {
     }
 
     it('should honor 0 for free port', function() {
-      boot.execute(app, someInstructions({ config: { port: 0 } }));
+      boot.execute(app, someInstructions({ config: { port: 0 }}));
       assert.equal(app.get('port'), 0);
     });
 
     it('should default to port 3000', function() {
-      boot.execute(app, someInstructions({ config: { port: undefined } }));
+      boot.execute(app, someInstructions({ config: { port: undefined }}));
       assert.equal(app.get('port'), 3000);
     });
 
     it('should respect named pipes port values in ENV', function() {
       var NAMED_PORT = '\\.\\pipe\\test';
       process.env.PORT = NAMED_PORT;
-      boot.execute(app, someInstructions({ config: { port: 3000 } }));
+      boot.execute(app, someInstructions({ config: { port: 3000 }}));
       assert.equal(app.get('port'), NAMED_PORT);
     });
   });
 
   describe('with middleware.json', function() {
+    beforeEach(function() {
+      delete process.env.restApiRoot;
+    });
+
     it('should parse a simple config variable', function(done) {
       boot.execute(app, simpleMiddlewareConfig('routes',
         { path: '${restApiRoot}' }
@@ -446,6 +459,36 @@ describe('executor', function() {
       supertest(app).get('/').end(function(err, res) {
         if (err) return done(err);
         expect(res.body.path).to.equal(app.get('restApiRoot'));
+        done();
+      });
+    });
+
+    it('should parse simple config variable from env var', function(done) {
+      process.env.restApiRoot = '/url-from-env-var';
+      boot.execute(app, simpleMiddlewareConfig('routes',
+        { path: '${restApiRoot}' }
+      ));
+
+      supertest(app).get('/url-from-env-var').end(function(err, res) {
+        if (err) return done(err);
+        expect(res.body.path).to.equal('/url-from-env-var');
+        done();
+      });
+    });
+
+    it('dynamic variable from `env var` should have' +
+    ' precedence over app.get()', function(done) {
+      process.env.restApiRoot = '/url-from-env-var';
+      var bootInstructions;
+      bootInstructions = simpleMiddlewareConfig('routes',
+        { path: '${restApiRoot}' });
+      bootInstructions.config = { restApiRoot: '/url-from-config' };
+      boot.execute(app, someInstructions(bootInstructions));
+
+      supertest(app).get('/url-from-env-var').end(function(err, res) {
+        if (err) return done(err);
+        expect(app.get('restApiRoot')).to.equal('/url-from-config');
+        expect(res.body.path).to.equal('/url-from-env-var');
         done();
       });
     });
@@ -479,13 +522,13 @@ describe('executor', function() {
 
     it('should parse config variables in an object', function(done) {
       boot.execute(app, simpleMiddlewareConfig('routes',
-        { info: { path: '${restApiRoot}' } }
+        { info: { path: '${restApiRoot}' }}
       ));
 
       supertest(app).get('/').end(function(err, res) {
         if (err) return done(err);
         expect(res.body.info).to.eql({
-          path: app.get('restApiRoot')
+          path: app.get('restApiRoot'),
         });
         done();
       });
@@ -493,13 +536,30 @@ describe('executor', function() {
 
     it('should parse config variables in a nested object', function(done) {
       boot.execute(app, simpleMiddlewareConfig('routes',
-        { nested: { info: { path: '${restApiRoot}' } } }
+        { nested: { info: { path: '${restApiRoot}' }}}
       ));
 
       supertest(app).get('/').end(function(err, res) {
         if (err) return done(err);
         expect(res.body.nested).to.eql({
-          info: { path: app.get('restApiRoot') }
+          info: { path: app.get('restApiRoot') },
+        });
+        done();
+      });
+    });
+
+    it('should parse config variables with null values', function(done) {
+      boot.execute(app, simpleMiddlewareConfig('routes',
+        { nested: { info: { path: '${restApiRoot}', some: null }}}
+      ));
+
+      supertest(app).get('/').end(function(err, res) {
+        if (err) return done(err);
+        expect(res.body.nested).to.eql({
+          info: {
+            path: app.get('restApiRoot'),
+            some: null,
+          },
         });
         done();
       });
@@ -509,7 +569,7 @@ describe('executor', function() {
       var invalidDataTypes = [undefined, function() {}];
       async.each(invalidDataTypes, function(invalidDataType, cb) {
         var config = simpleMiddlewareConfig('routes', {
-          path: invalidDataType
+          path: invalidDataType,
         });
         boot.execute(app, config);
 
@@ -525,7 +585,7 @@ describe('executor', function() {
 
     it('should parse valid config variables', function(done) {
       var config = simpleMiddlewareConfig('routes', {
-        props: ['a', '${vVar}', 1, true, function() {}, {x:1, y: '${y}'}]
+        props: ['a', '${vVar}', 1, true, function() {}, { x: 1, y: '${y}' }],
       });
       boot.execute(app, config);
 
@@ -552,6 +612,10 @@ describe('executor', function() {
   });
 
   describe('with component-config.json', function() {
+    beforeEach(function() {
+      delete process.env.DYNAMIC_ENVVAR;
+      delete process.env.DYNAMIC_VARIABLE;
+    });
 
     it('should parse a simple config variable', function(done) {
       boot.execute(app, simpleComponentConfig(
@@ -561,6 +625,46 @@ describe('executor', function() {
       supertest(app).get('/component').end(function(err, res) {
         if (err) return done(err);
         expect(res.body.path).to.equal(app.get('restApiRoot'));
+        done();
+      });
+    });
+
+    it('should parse config from `env-var` and `config`', function(done) {
+      var bootInstructions = simpleComponentConfig(
+        {
+          path: '${restApiRoot}',
+          fromConfig: '${DYNAMIC_CONFIG}',
+          fromEnvVar: '${DYNAMIC_ENVVAR}',
+        }
+      );
+
+      // result should get value from config.json
+      bootInstructions.config['DYNAMIC_CONFIG'] = 'FOOBAR-CONFIG';
+      // result should get value from env var
+      process.env.DYNAMIC_ENVVAR = 'FOOBAR-ENVVAR';
+
+      boot.execute(app, bootInstructions);
+      supertest(app).get('/component').end(function(err, res) {
+        if (err) return done(err);
+        expect(res.body.fromConfig).to.equal('FOOBAR-CONFIG');
+        expect(res.body.fromEnvVar).to.equal('FOOBAR-ENVVAR');
+        done();
+      });
+    });
+
+    it('`env-var` should have precedence over `config`', function(done) {
+      var key = 'DYNAMIC_VARIABLE';
+      var bootInstructions = simpleComponentConfig({
+        path: '${restApiRoot}',
+        isDynamic: '${' + key + '}',
+      });
+      bootInstructions.config[key] = 'should be overwritten';
+      process.env[key] = 'successfully overwritten';
+
+      boot.execute(app, bootInstructions);
+      supertest(app).get('/component').end(function(err, res) {
+        if (err) return done(err);
+        expect(res.body.isDynamic).to.equal('successfully overwritten');
         done();
       });
     });
@@ -594,13 +698,13 @@ describe('executor', function() {
 
     it('should parse config variables in an object', function(done) {
       boot.execute(app, simpleComponentConfig(
-        { info: { path: '${restApiRoot}' } }
+        { info: { path: '${restApiRoot}' }}
       ));
 
       supertest(app).get('/component').end(function(err, res) {
         if (err) return done(err);
         expect(res.body.info).to.eql({
-          path: app.get('restApiRoot')
+          path: app.get('restApiRoot'),
         });
         done();
       });
@@ -608,18 +712,17 @@ describe('executor', function() {
 
     it('should parse config variables in a nested object', function(done) {
       boot.execute(app, simpleComponentConfig(
-        { nested: { info: { path: '${restApiRoot}' } } }
+        { nested: { info: { path: '${restApiRoot}' }}}
       ));
 
       supertest(app).get('/component').end(function(err, res) {
         if (err) return done(err);
         expect(res.body.nested).to.eql({
-          info: { path: app.get('restApiRoot') }
+          info: { path: app.get('restApiRoot') },
         });
         done();
       });
     });
-
   });
 
   it('calls function exported by boot/init.js', function() {
@@ -627,7 +730,7 @@ describe('executor', function() {
       'module.exports = function(app) { app.fnCalled = true; };');
 
     delete app.fnCalled;
-    boot.execute(app, someInstructions({ files: { boot: [file] } }));
+    boot.execute(app, someInstructions({ files: { boot: [file] }}));
     expect(app.fnCalled, 'exported fn was called').to.be.true();
   });
 
@@ -642,33 +745,33 @@ describe('executor', function() {
             sourceFile: pushNamePath,
             config: {
               phase: 'initial',
-              params: 'initial'
-            }
+              params: 'initial',
+            },
           },
           {
             sourceFile: pushNamePath,
             config: {
               phase: 'custom',
-              params: 'custom'
-            }
+              params: 'custom',
+            },
           },
           {
             sourceFile: pushNamePath,
             config: {
               phase: 'routes',
-              params: 'routes'
-            }
+              params: 'routes',
+            },
           },
           {
             sourceFile: pushNamePath,
             config: {
               phase: 'routes',
               enabled: false,
-              params: 'disabled'
-            }
-          }
-        ]
-      }
+              params: 'disabled',
+            },
+          },
+        ],
+      },
     }));
 
     supertest(app)
@@ -682,7 +785,6 @@ describe('executor', function() {
   });
 
   it('configures middleware using shortform', function(done) {
-
     boot.execute(app, someInstructions({
       middleware: {
         middleware: [
@@ -691,11 +793,11 @@ describe('executor', function() {
             fragment: 'static',
             config: {
               phase: 'files',
-              params: path.join(__dirname, './fixtures/simple-app/client/')
-            }
-          }
-        ]
-      }
+              params: path.join(__dirname, './fixtures/simple-app/client/'),
+            },
+          },
+        ],
+      },
     }));
 
     supertest(app)
@@ -725,8 +827,8 @@ describe('executor', function() {
   it('configures components', function() {
     appdir.writeConfigFileSync('component-config.json', {
       './components/test-component': {
-        option: 'value'
-      }
+        option: 'value',
+      },
     });
 
     appdir.writeFileSync('components/test-component/index.js',
@@ -743,7 +845,7 @@ describe('executor', function() {
 
   it('disables component when configuration is not set', function() {
     appdir.writeConfigFileSync('component-config.json', {
-      './components/test-component': false
+      './components/test-component': false,
     });
 
     appdir.writeFileSync('components/test-component/index.js',
@@ -758,10 +860,10 @@ describe('executor', function() {
 
   it('disable component if overrided by production configuration', function() {
     appdir.writeConfigFileSync('component-config.json', {
-      './components/test-component': {}
+      './components/test-component': {},
     });
     appdir.writeConfigFileSync('component-config.production.json', {
-      './components/test-component': null
+      './components/test-component': null,
     });
 
     appdir.writeFileSync('components/test-component/index.js',
@@ -785,11 +887,11 @@ describe('executor', function() {
             sourceFile: passportPath,
             fragment: 'initialize',
             config: {
-              phase: 'auth:before'
-            }
-          }
-        ]
-      }
+              phase: 'auth:before',
+            },
+          },
+        ],
+      },
     }));
 
     supertest(app)
@@ -809,6 +911,132 @@ describe('executor', function() {
     });
   });
 
+  describe('when booting with lazy connect', function() {
+    var SAMPLE_INSTRUCTION = someInstructions({
+      dataSources: {
+        lazyConnector: {
+          connector: 'testLazyConnect',
+          name: 'lazyConnector',
+        },
+      },
+    });
+    var connectTriggered = true;
+
+    beforeEach(function() {
+      app.connector('testLazyConnect', {
+        initialize: function(dataSource, callback) {
+          if (dataSource.settings.lazyConnect) {
+            connectTriggered = false;
+          } else {
+            connectTriggered = true;
+          }
+        },
+      });
+    });
+
+    it('should trigger connect with ENV undefined', function(done) {
+      delete process.env.LB_LAZYCONNECT_DATASOURCES;
+      boot.execute(app, SAMPLE_INSTRUCTION, function() {
+        expect(connectTriggered).to.equal(true);
+        done();
+      });
+    });
+
+    it('should not trigger connect with ENV true', function(done) {
+      process.env.LB_LAZYCONNECT_DATASOURCES = 'true';
+      boot.execute(app, SAMPLE_INSTRUCTION, function() {
+        expect(connectTriggered).to.equal(false);
+        done();
+      });
+    });
+
+    it('should trigger connect with ENV false', function(done) {
+      process.env.LB_LAZYCONNECT_DATASOURCES = 'false';
+      boot.execute(app, SAMPLE_INSTRUCTION, function() {
+        expect(connectTriggered).to.equal(true);
+        done();
+      });
+    });
+
+    it('should trigger connect with ENV 0', function(done) {
+      process.env.LB_LAZYCONNECT_DATASOURCES = '0';
+      boot.execute(app, SAMPLE_INSTRUCTION, function() {
+        expect(connectTriggered).to.equal(true);
+        done();
+      });
+    });
+  });
+
+  describe('dynamic configuration for datasources.json', function() {
+    beforeEach(function() {
+      delete process.env.DYNAMIC_HOST;
+      delete process.env.DYNAMIC_PORT;
+    });
+
+    it('should convert dynamic variable for datasource', function(done) {
+      var datasource = {
+        mydb: {
+          host: '${DYNAMIC_HOST}',
+          port: '${DYNAMIC_PORT}',
+        },
+      };
+      var bootInstructions = { dataSources: datasource };
+
+      process.env.DYNAMIC_PORT = '10007';
+      process.env.DYNAMIC_HOST = '123.321.123.132';
+
+      boot.execute(app, someInstructions(bootInstructions), function() {
+        expect(app.datasources.mydb.settings.host).to.equal('123.321.123.132');
+        expect(app.datasources.mydb.settings.port).to.equal('10007');
+        done();
+      });
+    });
+
+    it('should resolve dynamic config via app.get()', function(done) {
+      var datasource = {
+        mydb: { host: '${DYNAMIC_HOST}' },
+      };
+      var bootInstructions = {
+        config: { DYNAMIC_HOST: '127.0.0.4' },
+        dataSources: datasource,
+      };
+      boot.execute(app, someInstructions(bootInstructions), function() {
+        expect(app.get('DYNAMIC_HOST')).to.equal('127.0.0.4');
+        expect(app.datasources.mydb.settings.host).to.equal(
+          '127.0.0.4');
+        done();
+      });
+    });
+
+    it('should take ENV precedence over config.json', function(done) {
+      process.env.DYNAMIC_HOST = '127.0.0.2';
+      var datasource = {
+        mydb: { host: '${DYNAMIC_HOST}' },
+      };
+      var bootInstructions = {
+        config: { DYNAMIC_HOST: '127.0.0.3' },
+        dataSources: datasource,
+      };
+      boot.execute(app, someInstructions(bootInstructions), function() {
+        expect(app.get('DYNAMIC_HOST')).to.equal('127.0.0.3');
+        expect(app.datasources.mydb.settings.host).to.equal('127.0.0.2');
+        done();
+      });
+    });
+
+    it('empty dynamic conf should resolve as `undefined`', function(done) {
+      var datasource = {
+        mydb: { host: '${DYNAMIC_HOST}' },
+      };
+      var bootInstructions = { dataSources: datasource };
+
+      boot.execute(app, someInstructions(bootInstructions), function() {
+        expect(app.get('DYNAMIC_HOST')).to.be.undefined();
+        expect(app.datasources.mydb.settings.host).to.be.undefined();
+        done();
+      });
+    });
+  });
 });
 
 function simpleMiddlewareConfig(phase, paths, params) {
@@ -819,7 +1047,7 @@ function simpleMiddlewareConfig(phase, paths, params) {
 
   var config = {
     phase: phase,
-    params: params
+    params: params,
   };
 
   if (paths) config.paths = paths;
@@ -831,9 +1059,9 @@ function simpleMiddlewareConfig(phase, paths, params) {
         {
           sourceFile: path.join(__dirname, './fixtures/simple-middleware.js'),
           config: config,
-        }
-      ]
-    }
+        },
+      ],
+    },
   });
 }
 
@@ -842,9 +1070,9 @@ function simpleComponentConfig(config) {
     components: [
       {
         sourceFile: path.join(__dirname, './fixtures/simple-component.js'),
-        config: config
-      }
-    ]
+        config: config,
+      },
+    ],
   });
 }
 
@@ -869,12 +1097,12 @@ function someInstructions(values) {
   var result = {
     config: values.config || {},
     models: values.models || [],
-    dataSources: values.dataSources || { db: { connector: 'memory' } },
+    dataSources: values.dataSources || { db: { connector: 'memory' }},
     middleware: values.middleware || { phases: [], middleware: [] },
     components: values.components || [],
     files: {
-      boot: []
-    }
+      boot: [],
+    },
   };
 
   if (values.env)
@@ -898,6 +1126,6 @@ function envAppInstructions() {
   fs.copySync(ENV_APP, appdir.PATH);
   return boot.compile({
     appRootDir: appdir.PATH,
-    env: 'test'
+    env: 'test',
   });
 }

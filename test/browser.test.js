@@ -1,3 +1,8 @@
+// Copyright IBM Corp. 2014,2016. All Rights Reserved.
+// Node module: loopback-boot
+// This file is licensed under the MIT License.
+// License text available at https://opensource.org/licenses/MIT
+
 var boot = require('../');
 var exportBrowserifyToFile = require('./helpers/browserify').exportToSandbox;
 var fs = require('fs');
@@ -13,7 +18,7 @@ var compileStrategies = {
   'default': function(appDir) {
     var b = browserify({
       basedir: appDir,
-      debug: true
+      debug: true,
     });
 
     b.require('./app.js', { expose: 'browser-app' });
@@ -24,7 +29,7 @@ var compileStrategies = {
     var b = browserify({
       basedir: appDir,
       extensions: ['.coffee'],
-      debug: true
+      debug: true,
     });
 
     b.transform('coffeeify');
@@ -64,7 +69,7 @@ describe('browser support', function() {
   it('loads mixins', function(done) {
     var appDir = path.resolve(__dirname, './fixtures/browser-app');
     var options = {
-      appRootDir: appDir
+      appRootDir: appDir,
     };
 
     browserifyTestApp(options, function(err, bundlePath) {

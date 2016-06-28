@@ -1,3 +1,8 @@
+// Copyright IBM Corp. 2015,2016. All Rights Reserved.
+// Node module: loopback-boot
+// This file is licensed under the MIT License.
+// License text available at https://opensource.org/licenses/MIT
+
 var vm = require('vm');
 
 function createContext() {
@@ -8,14 +13,14 @@ function createContext() {
 
     localStorage: {
       // used by `debug` module
-      debug: process.env.DEBUG
+      debug: process.env.DEBUG,
     },
 
     // used by DataSource.prototype.ready
     setTimeout: setTimeout,
 
     // used by `debug` module
-    document: { documentElement: { style: {} } },
+    document: { documentElement: { style: {}}},
 
     // used by `debug` module
     navigator: { userAgent: 'sandbox' },
@@ -39,9 +44,9 @@ function createContext() {
       _logs: {
         log: [],
         warn: [],
-        error: []
+        error: [],
       },
-    }
+    },
   };
 
   // `window` is used by loopback to detect browser runtime
@@ -52,9 +57,10 @@ function createContext() {
 exports.createContext = createContext;
 
 function printContextLogs(context) {
-  for (var k in context.console._logs) {
+  var k, ix; // see https://github.com/eslint/eslint/issues/5744
+  for (k in context.console._logs) {
     var items = context.console._logs[k];
-    for (var ix in items) {
+    for (ix in items) {
       console[k].apply(console, items[ix]);
     }
   }

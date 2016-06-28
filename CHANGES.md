@@ -1,3 +1,35 @@
+2016-06-20, Version 2.19.0
+==========================
+
+ * update copyright notices and license (Ryan Graham)
+
+ * Add flag var lazyConnect to ds config (juehou)
+
+
+2016-04-13, Version 2.18.1
+==========================
+
+ * parse config: should ignore null values (Loïc Mahieu)
+
+
+2016-04-07, Version 2.18.0
+==========================
+
+ * Dynamic datasources.json from ENV and config.json (David Cheung)
+
+ * Use eslint with loopback config (Miroslav Bajtoš)
+
+
+2016-02-23, Version 2.17.0
+==========================
+
+ * executor: move "booted" and cb() to the next tick (Miroslav Bajtoš)
+
+ * Fix lodash 4.0.0 breaking changes (Jérémie Drouet)
+
+ * When config is overriden with null don't merge (Farid Neshat)
+
+
 2015-12-22, Version 2.16.0
 ==========================
 
@@ -314,8 +346,6 @@
 2014-07-17, Version v2.0.0-beta3
 ================================
 
- * v2.0.0-beta3 (Miroslav Bajtoš)
-
  * compiler: return a clone of instructions (Miroslav Bajtoš)
 
 
@@ -333,8 +363,6 @@
 
 2014-06-26, Version 2.0.0-beta1
 ===============================
-
- * 2.0.0-beta1 (Miroslav Bajtoš)
 
  * test: fix jshint warnings (Miroslav Bajtoš)
 

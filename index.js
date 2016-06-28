@@ -1,3 +1,8 @@
+// Copyright IBM Corp. 2014,2016. All Rights Reserved.
+// Node module: loopback-boot
+// This file is licensed under the MIT License.
+// License text available at https://opensource.org/licenses/MIT
+
 var ConfigLoader = require('./lib/config-loader');
 var compile = require('./lib/compiler');
 var execute = require('./lib/executor');
@@ -154,7 +159,7 @@ exports.compileToBrowserify = function(options, bundler) {
   addInstructionsToBrowserify(compile(options), bundler);
 };
 
-/*-- undocumented low-level API --*/
+/* -- undocumented low-level API -- */
 
 exports.ConfigLoader = ConfigLoader;
 exports.compile = compile;

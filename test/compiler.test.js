@@ -2244,7 +2244,7 @@ describe('compiler', function() {
   });
 
   describe('for components', function() {
-    function testComponentConfigsMerge() {
+    it('loads component configs from multiple files', function() {
       appdir.createConfigFilesSync();
       appdir.writeConfigFileSync('component-config.json', {
         debug: { option: 'value' },
@@ -2269,10 +2269,6 @@ describe('compiler', function() {
           env: 'applied',
         },
       });
-    }
-
-    it('loads component configs from multiple files', function() {
-      testComponentConfigsMerge();
     });
 
     it('supports `componentRootDir` option', function() {

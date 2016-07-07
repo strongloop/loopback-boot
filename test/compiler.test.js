@@ -2244,7 +2244,6 @@ describe('compiler', function() {
   });
 
   describe('for components', function() {
-    // Validate merging of component configuration from different locations
     function testComponentConfigsMerge() {
       appdir.createConfigFilesSync();
       appdir.writeConfigFileSync('component-config.json', {

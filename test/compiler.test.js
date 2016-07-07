@@ -1548,9 +1548,7 @@ describe('compiler', function() {
   });
 
   describe('for middleware', function() {
-
-    function testMiddlewareRegistration(middlewareId, sourceFile,
-                                        alternativeDirTest) {
+    function testMiddlewareRegistration(middlewareId, sourceFile) {
       var json = {
         initial: {
         },
@@ -1564,21 +1562,7 @@ describe('compiler', function() {
 
       appdir.writeConfigFileSync('middleware.json', json);
 
-      var instructions;
-
-      if (alternativeDirTest === true) {
-        var customDir = path.resolve(appdir.PATH, 'custom');
-        fs.mkdirsSync(customDir);
-        fs.renameSync(
-          path.resolve(appdir.PATH, 'middleware.json'),
-          path.resolve(customDir, 'middleware.json'));
-        instructions = boot.compile({
-          appRootDir: appdir.PATH,
-          middlewareRootDir: path.resolve(appdir.PATH, 'custom')
-        });
-      } else {
-        instructions = boot.compile(appdir.PATH);
-      }
+      var instructions = boot.compile(appdir.PATH);
 
       expect(instructions.middleware).to.eql({
         phases: ['initial', 'custom'],
@@ -1606,21 +1590,42 @@ describe('compiler', function() {
         sourceFileForUrlNotFound);
     });
 
-    it('Suports `middlewareRootDir` Option And ' +
-      'emits middleware instructions', function() {
-      testMiddlewareRegistration('loopback/server/middleware/url-not-found',
-        sourceFileForUrlNotFound, true);
-    });
-
     it('emits middleware instructions for fragment', function() {
       testMiddlewareRegistration('loopback#url-not-found',
         sourceFileForUrlNotFound);
     });
 
-    it('Suports `middlewareRootDir` Option And ' +
-      'emits middleware instructions for fragment', function() {
-      testMiddlewareRegistration('loopback#url-not-found',
-        sourceFileForUrlNotFound, true);
+    it('supports `middlewareRootDir` option', function() {
+      var middlewareJson = {
+        initial: {},
+        custom: {
+          'loopback/server/middleware/url-not-found': {
+            params: 'some-config-data',
+          },
+        },
+      };
+      var customDir = path.resolve(appdir.PATH, 'custom');
+      fs.mkdirsSync(customDir);
+      fs.writeJsonSync(path.resolve(customDir, 'middleware.json'),
+        middlewareJson);
+
+      var instructions = boot.compile({
+        appRootDir: appdir.PATH,
+        middlewareRootDir: path.resolve(appdir.PATH, 'custom'),
+      });
+
+      expect(instructions.middleware).to.eql({
+        phases: ['initial', 'custom'],
+        middleware: [
+          {
+            sourceFile: sourceFileForUrlNotFound,
+            config: {
+              phase: 'custom',
+              params: 'some-config-data',
+            },
+          },
+        ],
+      });
     });
 
     it('fails when a module middleware cannot be resolved', function() {
@@ -2240,7 +2245,7 @@ describe('compiler', function() {
 
   describe('for components', function() {
     // Validate merging of component configuration from different locations
-    function testComponentConfigsMerge(alternativeDirTest) {
+    function testComponentConfigsMerge() {
       appdir.createConfigFilesSync();
       appdir.writeConfigFileSync('component-config.json', {
         debug: { option: 'value' },
@@ -2254,31 +2259,7 @@ describe('compiler', function() {
         debug: { env: 'applied' },
       });
 
-      var instructions;
-
-      if (alternativeDirTest === true) {
-        var customDir = path.resolve(appdir.PATH, 'custom');
-        fs.mkdirsSync(customDir);
-
-        fs.renameSync(
-          path.resolve(appdir.PATH, 'component-config.json'),
-          path.resolve(customDir, 'component-config.json'));
-
-        fs.renameSync(
-          path.resolve(appdir.PATH, 'component-config.local.json'),
-          path.resolve(customDir, 'component-config.local.json'));
-
-        fs.renameSync(
-          path.resolve(appdir.PATH, 'component-config.' + env + '.json'),
-          path.resolve(customDir, 'component-config.' + env + '.json'));
-
-        instructions = boot.compile({
-          appRootDir: appdir.PATH,
-          componentRootDir: path.resolve(appdir.PATH, 'custom')
-        });
-      } else {
-        instructions = boot.compile(appdir.PATH);
-      }
+      var instructions = boot.compile(appdir.PATH);
 
       var component = instructions.components[0];
       expect(component).to.eql({
@@ -2295,9 +2276,28 @@ describe('compiler', function() {
       testComponentConfigsMerge();
     });
 
-    it('Suports `componentRootDir` Option And ' +
-      'loads component configs from multiple files', function() {
-      testComponentConfigsMerge(true);
+    it('supports `componentRootDir` option', function() {
+      var componentJson = {
+        debug: {
+          option: 'value',
+        },
+      };
+      var customDir = path.resolve(appdir.PATH, 'custom');
+      fs.mkdirsSync(customDir);
+      fs.writeJsonSync(
+        path.resolve(customDir, 'component-config.json'), componentJson);
+
+      var instructions = boot.compile({
+        appRootDir: appdir.PATH,
+        componentRootDir: path.resolve(appdir.PATH, 'custom'),
+      });
+      var component = instructions.components[0];
+      expect(component).to.eql({
+        sourceFile: require.resolve('debug'),
+        config: {
+          option: 'value',
+        },
+      });
     });
 
     it('loads component relative to appRootDir', function() {

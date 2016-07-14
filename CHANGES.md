@@ -1,3 +1,13 @@
+2016-07-14, Version 2.20.0
+==========================
+
+ * Update URLs in CONTRIBUTING.md (#198) (Ryan Graham)
+
+ * travis: drop io.js, add Node v4 and v6 (Miroslav Bajtoš)
+
+ * Stop caching config files (Miroslav Bajtoš)
+
+
 2016-06-20, Version 2.19.0
 ==========================
 

@@ -28,6 +28,17 @@ function createContext() {
     // used by crypto-browserify & friends
     Int32Array: Int32Array,
     DataView: DataView,
+    crypto: {
+      getRandomValues: function(typedArray) {
+        var randomBuffer = require('crypto').randomBytes(typedArray.length);
+        // This implementation is not secure: we take random 8bit values
+        // and assign them to 8/16/32bit values, leaving high-order bits
+        // filled with zeroes.
+        // Fortunately, the bootstrapping process does not rely on secure
+        // random numbers, therefore we can afford such shortcut.
+        typedArray.set(randomBuffer);
+      },
+    },
 
     // allow the browserified code to log messages
     // call `printContextLogs(context)` to print the accumulated messages

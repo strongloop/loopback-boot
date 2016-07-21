@@ -1,0 +1,21 @@
+{
+  "ae47060728bbbccb3b6279bfce9895e8": "Discarding middleware instructions, loopback client does not support middleware.",
+  "69746d336c89bf4bb371a6c2fe56304d": "{0} does not resolve to a valid value, returned as {1}. \"{2}\" must be resolvable in Environment variable or by app.get().",
+  "cdbbcf09fd7f613f3a3e4eacba0e614f": "WARNING: Main config file \"{0}.json\" is missing",
+  "3a7049e42006e8bc19e0f4fc8df63b6b": "The `app` is powered by an incompatible loopback version {0}. Supported versions: {1}",
+  "70654dc6eb565613a33344efed3de998": "Failed loading boot script: {0}\n{1}",
+  "0c8892b57ac28e5bdeb28f6d4eeace0f": "Middleware must be an array",
+  "33e14d1e42c43970490614c1fa38dbd3": "Middleware phases must be an array",
+  "35c9468dd1fc15ae5ee90a4801467772": "The phase \"{0}\" is not defined in the main config.",
+  "75f38e979d1caf27338aba1122e42884": "Middleware factory must be a function",
+  "e422b92bace89e40433df300053440c1": "The middleware \"{0}\" in phase \"{1}\"is not defined in the main config.",
+  "fdc23df1bd0fe55fe3faabcc89ff60f3": "Middleware \"{0}\" not found: {1}",
+  "34319676975b1abf107da7a056abb434": "Invalid normalization format - \"{0}\"",
+  "4d052d84c8620730afd4a30832f11724": "Cannot configure unknown model {0}",
+  "5b0d7d21c4b507336a96242c7f29b788": "The data in model-config.json is in the unsupported 1.x format.",
+  "6037512314fac9d12af6c654a3804823": "Built-in model {0} should have been defined",
+  "1e5fea50eef843cbffd1d438494912c8": "Cannot resolve path \"{0}\"",
+  "6447e6b342a2c51ab0bc53b3cbdf3742": "Ordering conflict: cannot add \"{0}\" after \"{1}\", because the opposite order was  already specified",
+  "978a25819e71602cad691dbe7ba17592": "{0} config must be a valid JSON object",
+  "be2dcdab7aa493ed8d77287eb45cfec8": "cannot require directory contents without directory name"
+}

@@ -1,3 +1,11 @@
+2016-07-27, Version 2.21.0
+==========================
+
+ * Configurable dir for components and middleware (Doped Dude)
+
+ * test: fix security warning (Miroslav Bajtoš)
+
+
 2016-07-14, Version 2.20.0
 ==========================
 

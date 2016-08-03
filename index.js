@@ -6,6 +6,8 @@
 var PluginBase = require('./lib/plugin-base');
 var Bootstrapper = require('./lib/bootstrapper').Bootstrapper;
 var addInstructionsToBrowserify = require('./lib/bundler');
+var SG = require('strong-globalize');
+SG.SetRootDir(__dirname);
 
 /**
  * Initialize an application from an options object or

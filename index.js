@@ -3,6 +3,10 @@
 // This file is licensed under the MIT License.
 // License text available at https://opensource.org/licenses/MIT
 
+// Strong globalize
+var SG = require('strong-globalize');
+SG.SetRootDir(__dirname);
+
 var ConfigLoader = require('./lib/config-loader');
 var compile = require('./lib/compiler');
 var execute = require('./lib/executor');

@@ -66,6 +66,22 @@ describe('browser support', function() {
     });
   });
 
+  it('can load UMD model code', function(done) {
+    var appDir = path.resolve(__dirname, './fixtures/umd-app');
+
+    browserifyTestApp(appDir, function(err, bundlePath) {
+      if (err) return done(err);
+
+      var app = executeBundledApp(bundlePath);
+
+      expect(Object.keys(app.models)).to.include('Customer');
+      expect(app.models.Customer.settings)
+        .to.have.property('_customized', 'Customer');
+
+      done();
+    });
+  });
+
   it('loads mixins', function(done) {
     var appDir = path.resolve(__dirname, './fixtures/browser-app');
     var options = {

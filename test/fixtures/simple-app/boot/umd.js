@@ -2,7 +2,6 @@
 // Node module: loopback-boot
 // This file is licensed under the MIT License.
 // License text available at https://opensource.org/licenses/MIT
-
 // GENERATED CODE
 (function (factory) {
     if (typeof module === 'object' && typeof module.exports === 'object') {

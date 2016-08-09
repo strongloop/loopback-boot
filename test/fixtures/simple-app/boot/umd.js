@@ -15,7 +15,6 @@
     "use strict";
     function default_1(app) {
         console.log('UMD Module loaded');
-
         process.bootFlags.push('umdLoaded');
     }
     Object.defineProperty(exports, "__esModule", { value: true });

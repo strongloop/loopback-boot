@@ -1955,7 +1955,7 @@ describe('compiler', function() {
         sourceFileForUrlNotFound, done);
     });
 
-    it('supports `middlewareRootDir` option', function() {
+    it('supports `middlewareRootDir` option', function(done) {
       var middlewareJson = {
         initial: {},
         custom: {
@@ -1968,23 +1968,24 @@ describe('compiler', function() {
       fs.mkdirsSync(customDir);
       fs.writeJsonSync(path.resolve(customDir, 'middleware.json'),
         middlewareJson);
-
-      var instructions = boot.compile({
+      boot.compile({
         appRootDir: appdir.PATH,
-        middlewareRootDir: path.resolve(appdir.PATH, 'custom'),
-      });
-
-      expect(instructions.middleware).to.eql({
-        phases: ['initial', 'custom'],
-        middleware: [
-          {
-            sourceFile: sourceFileForUrlNotFound,
-            config: {
-              phase: 'custom',
-              params: 'some-config-data',
+        middlewareRootDir: customDir,
+      }, function(err, context) {
+        var instructions = context.instructions;
+        expect(instructions.middleware).to.eql({
+          phases: ['initial', 'custom'],
+          middleware: [
+            {
+              sourceFile: sourceFileForUrlNotFound,
+              config: {
+                phase: 'custom',
+                params: 'some-config-data',
+              },
             },
-          },
-        ],
+          ],
+        });
+        done();
       });
     });
 
@@ -2724,7 +2725,7 @@ describe('compiler', function() {
       });
     });
 
-    it('supports `componentRootDir` option', function() {
+    it('supports `componentRootDir` option', function(done) {
       var componentJson = {
         debug: {
           option: 'value',
@@ -2735,16 +2736,20 @@ describe('compiler', function() {
       fs.writeJsonSync(
         path.resolve(customDir, 'component-config.json'), componentJson);
 
-      var instructions = boot.compile({
+      boot.compile({
         appRootDir: appdir.PATH,
         componentRootDir: path.resolve(appdir.PATH, 'custom'),
-      });
-      var component = instructions.components[0];
-      expect(component).to.eql({
-        sourceFile: require.resolve('debug'),
-        config: {
-          option: 'value',
-        },
+      }, function(err, context) {
+        if (err) return done(err);
+        var instructions = context.instructions;
+        var component = instructions.components[0];
+        expect(component).to.eql({
+          sourceFile: require.resolve('debug'),
+          config: {
+            option: 'value',
+          },
+        });
+        done();
       });
     });
 

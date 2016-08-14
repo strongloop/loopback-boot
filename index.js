@@ -11,6 +11,7 @@ var ConfigLoader = require('./lib/config-loader');
 var compile = require('./lib/compiler');
 var execute = require('./lib/executor');
 var addInstructionsToBrowserify = require('./lib/bundler');
+var utils = require('./lib/utils');
 
 /**
  * Initialize an application from an options object or
@@ -172,4 +173,5 @@ exports.compileToBrowserify = function(options, bundler) {
 exports.ConfigLoader = ConfigLoader;
 exports.compile = compile;
 exports.execute = execute;
+exports.utils = utils;
 exports.addInstructionsToBrowserify = addInstructionsToBrowserify;

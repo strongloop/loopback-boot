@@ -38,7 +38,7 @@ describe('executor', function() {
 
   var dummyInstructions = someInstructions({
     config: {
-      port: 3000,
+      port: 0,
       host: '127.0.0.1',
       restApiRoot: '/rest-api',
       foo: { bar: 'bat' },

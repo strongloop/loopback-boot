@@ -8,18 +8,15 @@ var expect = require('chai').expect;
 var sandbox = require('./helpers/sandbox');
 var appdir = require('./helpers/appdir');
 
-// add coffee-script to require.extensions
-require('coffee-script/register');
-
 describe('utils', function() {
   beforeEach(sandbox.reset);
   beforeEach(function(done) {
     appdir.init(done);
   });
-  describe('fileExists', function() {
+  describe('fileExistsSync', function() {
     it('returns false when a file does not exist', function() {
       var doesNotExist = sandbox.resolve('does-not-exist.json');
-      expect(boot.utils.fileExists(doesNotExist))
+      expect(boot.utils.fileExistsSync(doesNotExist))
         .to.equal(false);
     });
 
@@ -27,7 +24,7 @@ describe('utils', function() {
       var doesExist = appdir.writeConfigFileSync('does-exist.json', {
         exists: true,
       });
-      expect(boot.utils.fileExists(doesExist))
+      expect(boot.utils.fileExistsSync(doesExist))
         .to.equal(true);
     });
   });

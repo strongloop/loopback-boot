@@ -1,3 +1,13 @@
+2016-09-05, Version 2.22.0
+==========================
+
+ * Replace fs.existsSync calls with fs.statSync (Joshua Estrin Skrzypek)
+
+ * Change test cases port to be dynamic (David Cheung)
+
+ * Globalization for Loopback-boot (David Cheung)
+
+
 2016-07-27, Version 2.21.0
 ==========================
 

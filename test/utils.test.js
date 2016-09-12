@@ -3,7 +3,7 @@
 // This file is licensed under the MIT License.
 // License text available at https://opensource.org/licenses/MIT
 
-var boot = require('../');
+var utils = require('../lib/utils');
 var expect = require('chai').expect;
 var sandbox = require('./helpers/sandbox');
 var appdir = require('./helpers/appdir');
@@ -16,7 +16,7 @@ describe('utils', function() {
   describe('fileExistsSync', function() {
     it('returns false when a file does not exist', function() {
       var doesNotExist = sandbox.resolve('does-not-exist.json');
-      expect(boot.utils.fileExistsSync(doesNotExist))
+      expect(utils.fileExistsSync(doesNotExist))
         .to.equal(false);
     });
 
@@ -24,7 +24,7 @@ describe('utils', function() {
       var doesExist = appdir.writeConfigFileSync('does-exist.json', {
         exists: true,
       });
-      expect(boot.utils.fileExistsSync(doesExist))
+      expect(utils.fileExistsSync(doesExist))
         .to.equal(true);
     });
   });

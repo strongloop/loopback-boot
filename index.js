@@ -10,7 +10,6 @@ SG.SetRootDir(__dirname);
 var PluginBase = require('./lib/plugin-base');
 var Bootstrapper = require('./lib/bootstrapper').Bootstrapper;
 var addInstructionsToBrowserify = require('./lib/bundler');
-var utils = require('./lib/utils');
 
 /**
  * Initialize an application from an options object or
@@ -190,14 +189,7 @@ exports.compileToBrowserify = function(options, bundler, done) {
   });
 };
 
-/* -- undocumented low-level API -- */
-
-exports.ConfigLoader = ConfigLoader;
-exports.compile = compile;
-exports.execute = execute;
-exports.utils = utils;
 exports.addInstructionsToBrowserify = addInstructionsToBrowserify;
-
 exports.Bootstrapper = Bootstrapper;
 exports.PluginBase = PluginBase;
 

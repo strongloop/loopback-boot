@@ -509,6 +509,40 @@ describe('compiler', function() {
       });
     });
 
+    it('does not cache loaded values', function(done) {
+      appdir.createConfigFilesSync();
+      appdir.writeConfigFileSync('middleware.json', {
+        'strong-error-handler': { params: { debug: false }},
+      });
+      appdir.writeConfigFileSync('middleware.development.json', {
+        'strong-error-handler': { params: { debug: true }},
+      });
+
+      // Here we load main config and merge it with DEV overrides
+      var bootOptions = {
+        appRootDir: appdir.PATH,
+        env: 'development',
+        phases: ['load'],
+      };
+      var productionBootOptions = {
+        appRootDir: appdir.PATH,
+        env: 'production',
+        phases: ['load'],
+      };
+      boot.compile(bootOptions, function(err, context) {
+        var config = context.configurations.middleware;
+        expect(config['strong-error-handler'].params.debug,
+          'debug in development').to.equal(true);
+
+        boot.compile(productionBootOptions, function(err, context2) {
+          var config = context2.configurations.middleware;
+          expect(config['strong-error-handler'].params.debug,
+            'debug in production').to.equal(false);
+          done();
+        });
+      });
+    });
+
     it('allows env specific model-config json', function(done) {
       appdir.createConfigFilesSync();
       appdir.writeConfigFileSync('model-config.local.json', {

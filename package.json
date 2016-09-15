@@ -30,7 +30,7 @@
     "debug": "^2.2.0",
     "lodash": "^4.13.1",
     "semver": "^5.1.0",
-    "strong-globalize": "^2.6.2",
+    "strong-globalize": "^2.7.0",
     "toposort": "^1.0.0"
   },
   "devDependencies": {

@@ -4,8 +4,7 @@
 // License text available at https://opensource.org/licenses/MIT
 
 // Strong globalize
-var SG = require('strong-globalize');
-SG.SetRootDir(__dirname);
+var g = require('./lib/globalize');
 
 var PluginBase = require('./lib/plugin-base');
 var Bootstrapper = require('./lib/bootstrapper').Bootstrapper;

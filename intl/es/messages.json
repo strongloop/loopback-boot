@@ -1,0 +1,26 @@
+{
+  "ec551b6f2fafd8d40af801ebe5bb09f6": "Descartando instrucciones de {{middleware}}, el cliente de {{loopback}} no da soporte a {{middleware}}.",
+  "1e5fea50eef843cbffd1d438494912c8": "No se puede resolver la vía de acceso \"{0}\"",
+  "34319676975b1abf107da7a056abb434": "Formato de normalización no válido - \"{0}\"",
+  "46e3ab0ef1149ce0a171b5fac2612ea3": "{{Middleware}} \"{0}\" no encontrado: {1}",
+  "79e93b2a95e969788590c14e26bb2c1b": "Los datos de {{model-config.json}} están en un formato 1.x no soportado.",
+  "978a25819e71602cad691dbe7ba17592": "La configuración de {0} debe ser un objeto JSON válido",
+  "be2dcdab7aa493ed8d77287eb45cfec8": "no se puede exigir el contenido de directorio sin el nombre de directorio",
+  "2634623ad4b2c5902f6c6bb25e68b733": "AVISO: falta el archivo de {{config}} principal \"{0}.json\"",
+  "4ed668e9187650d898acf97707df445a": "La {{phase}} \"{0}\" no está definida en la configuración principal.",
+  "6de7e97f033f2cf477297b3d05a93608": "El {{middleware}} \"{0}\" en la fase \"{1}\" no está definido en la configuración principal.",
+  "94a0c7d5ab6462f7892b90c63f316f42": "matriz no válida: {0}",
+  "ec34cc58612cb654742e4cd0a57aca78": "No se puede aplicar {0}: {1}",
+  "0b91d122f6459c8bbe7865be0936fc4a": "{{app.restBasePath}} es obligatorio",
+  "1cda77c9954be299bb7154f73cb6ab74": "{{instructions.middleware.phases}} debe ser una {{array}}",
+  "22549489736fb0d7eba5a4b08977505f": "{{app.host}} debe ser una {{string}}",
+  "4c581cc529a7aeda620d5c4b4ef5cfa8": "{{app.restApiRoot}} debe empezar por \"/\"",
+  "6037512314fac9d12af6c654a3804823": "El modelo incorporada {0} debería haberse definido",
+  "69746d336c89bf4bb371a6c2fe56304d": "{0} no se resuelve como un valor válido, se ha devuelto como {1}. \"{2}\" debe poder resolverse en la variable de entorno o por medio de app.get().",
+  "70654dc6eb565613a33344efed3de998": "No se ha podido cargar el script de arranque: {0}\n{1}",
+  "b078ccd043437a258581e387f93dc1a5": "La `{{app}}` está basada en una versión de {{loopback}} incompatible {0}. Versiones soportadas: {1}",
+  "e8d29edfb313cfe64f5c96cc7d3d5b4b": "Al utilizar {{loopback-boot}} con {{loopback}} <1.9, el módulo {{loopback}} debe estar disponible para `{{require('loopback')}}`.",
+  "f48405e7c61c3d665b601c9ba41da424": "{{app.port}} debe ser una {{string}} o un {{number}}",
+  "fa2a7d5137c8891693f9515d48f5b7d7": "{{app.restApiRoot}} debe ser una {{string}}"
+}
+

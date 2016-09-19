@@ -1,0 +1,26 @@
+{
+  "ec551b6f2fafd8d40af801ebe5bb09f6": "{{middleware}} yönergeleri atılıyor, {{middleware}}, {{loopback}} istemcisi tarafından desteklenmiyor.",
+  "1e5fea50eef843cbffd1d438494912c8": "\"{0}\" yolu çözülemiyor",
+  "34319676975b1abf107da7a056abb434": "Geçersiz normalleştirme biçimi - \"{0}\"",
+  "46e3ab0ef1149ce0a171b5fac2612ea3": "{{Middleware}} \"{0}\" bulunamadı: {1}",
+  "79e93b2a95e969788590c14e26bb2c1b": "{{model-config.json}} içiindeki verileri desteklenmeyen 1.x biçiminde.",
+  "978a25819e71602cad691dbe7ba17592": "{0} yapılandırması geçerli bir JSON nesnesi olmalıdır",
+  "be2dcdab7aa493ed8d77287eb45cfec8": "dizin adı olmadan dizin içeriği istenemez",
+  "2634623ad4b2c5902f6c6bb25e68b733": "UYARI: Ana {{config}} dosyası \"{0}.json\" eksik",
+  "4ed668e9187650d898acf97707df445a": "{{phase}} \"{0}\", ana yapılandırmada tanımlı değil",
+  "6de7e97f033f2cf477297b3d05a93608": "\"{1}\" aşamasındaki {{middleware}} \"{0}\" ana yapılandırmada tanımlı değil.",
+  "94a0c7d5ab6462f7892b90c63f316f42": "geçersiz dizi: {0}",
+  "ec34cc58612cb654742e4cd0a57aca78": "{0} uygulanamıyor: {1}",
+  "0b91d122f6459c8bbe7865be0936fc4a": "{{app.restBasePath}} zorunludur",
+  "1cda77c9954be299bb7154f73cb6ab74": "{{instructions.middleware.phases}} bir {{array}} olmalıdır",
+  "22549489736fb0d7eba5a4b08977505f": "{{app.host}} bir {{string}} olmalıdır",
+  "4c581cc529a7aeda620d5c4b4ef5cfa8": "{{app.restApiRoot}}, \"/\" ile başlamalıdır",
+  "6037512314fac9d12af6c654a3804823": "{0} yerleşik modeli tanımlanmış olmalıdır",
+  "69746d336c89bf4bb371a6c2fe56304d": "{0} geçerli bir değere çözülmüyor, {1} olarak döndürüldü. \"{2}\" ortam değişkeninde ya da app.get() ile çözülebilir olmalıdır.",
+  "70654dc6eb565613a33344efed3de998": "Önyükleme komut dosyasının yüklenmesi başarısız oldu: {0}\n{1}",
+  "b078ccd043437a258581e387f93dc1a5": "`{{app}}` uyumsuz olan {{loopback}} {0} sürümüyle güçlendirilmiş. Desteklenen sürümler: {1}",
+  "e8d29edfb313cfe64f5c96cc7d3d5b4b": "{{loopback-boot}} {{loopback}} <1.9 ile kullanılırken {{loopback}} modülü `{{require('loopback')}}` için kullanılabilir olmalıdır.",
+  "f48405e7c61c3d665b601c9ba41da424": "{{app.port}} bir {{string}} ya da {{number}} olmalıdır",
+  "fa2a7d5137c8891693f9515d48f5b7d7": "{{app.restApiRoot}} bir {{string}} olmalıdır"
+}
+

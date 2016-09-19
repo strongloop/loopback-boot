@@ -16,5 +16,4 @@ generated-instructions*.json
 checkstyle.xml
 loopback-boot-*.tgz
 /test/sandbox/
-intl/*
-!intl/en/
+intl/zz/

@@ -1,0 +1,26 @@
+{
+  "ec551b6f2fafd8d40af801ebe5bb09f6": "正在捨棄 {{middleware}} 指令，{{loopback}} 用戶端不支援 {{middleware}}。",
+  "1e5fea50eef843cbffd1d438494912c8": "無法解析路徑 \"{0}\"",
+  "34319676975b1abf107da7a056abb434": "無效的正規化格式 - \"{0}\"",
+  "46e3ab0ef1149ce0a171b5fac2612ea3": "找不到 {{Middleware}} \"{0}\"：{1}",
+  "79e93b2a95e969788590c14e26bb2c1b": "{{model-config.json}} 中的資料是不受支援的 1.x 格式。",
+  "978a25819e71602cad691dbe7ba17592": "{0} 配置必須是有效的 JSON 物件",
+  "be2dcdab7aa493ed8d77287eb45cfec8": "缺少目錄名稱，無法取得目錄內容",
+  "2634623ad4b2c5902f6c6bb25e68b733": "警告：遺漏主要 {{config}} 檔 \"{0}.json\"",
+  "4ed668e9187650d898acf97707df445a": "主要配置中未定義 {{phase}} \"{0}\"。",
+  "6de7e97f033f2cf477297b3d05a93608": "主要配置中未定義階段 \"{1}\" 中的 {{middleware}} \"{0}\"。",
+  "94a0c7d5ab6462f7892b90c63f316f42": "無效陣列：{0}",
+  "ec34cc58612cb654742e4cd0a57aca78": "無法套用 {0}：{1}",
+  "0b91d122f6459c8bbe7865be0936fc4a": "需要 {{app.restBasePath}}",
+  "1cda77c9954be299bb7154f73cb6ab74": "{{instructions.middleware.phases}} 必須是 {{array}}",
+  "22549489736fb0d7eba5a4b08977505f": "{{app.host}} 必須是 {{string}}",
+  "4c581cc529a7aeda620d5c4b4ef5cfa8": "{{app.restApiRoot}} 的開頭必須是 \"/\"",
+  "6037512314fac9d12af6c654a3804823": "應該已定義內建模型 {0}",
+  "69746d336c89bf4bb371a6c2fe56304d": "{0} 未解析成有效的值，傳回 {1}。\"{2}\" 必須可在環境變數中解析或由 app.get() 解析。",
+  "70654dc6eb565613a33344efed3de998": "載入啟動 Script 時失敗：{0}\n{1}",
+  "b078ccd043437a258581e387f93dc1a5": "`{{app}}` 採用不相容的 {{loopback}} {0} 版技術。支援的版本：{1}",
+  "e8d29edfb313cfe64f5c96cc7d3d5b4b": "當 {{loopback-boot}} 與 {{loopback}} <1.9 搭配使用時，{{loopback}} 模組必須可供 `{{require('loopback')}}` 使用。",
+  "f48405e7c61c3d665b601c9ba41da424": "{{app.port}} 必須是 {{string}} 或 {{number}}",
+  "fa2a7d5137c8891693f9515d48f5b7d7": "{{app.restApiRoot}} 必須是 {{string}}"
+}
+

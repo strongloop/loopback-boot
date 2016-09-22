@@ -806,7 +806,7 @@ describe('executor', function() {
         expect(res.text).to.eql(('<!DOCTYPE html>\n<html>\n<head lang="en">\n' +
           '    <meta charset="UTF-8">\n    <title>simple-app</title>\n' +
           '</head>\n<body>\n<h1>simple-app</h1>\n' +
-          '</body>\n</html>').replace(/\n/g, /(\r\n)|(\n)|(\r)/));
+          '</body>\n</html>'));
         done();
       });
   });

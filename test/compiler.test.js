@@ -39,7 +39,6 @@ describe('compiler', function() {
         dataSources: {
           'the-db': {
             connector: 'memory',
-            defaultForType: 'db',
           },
         },
       };

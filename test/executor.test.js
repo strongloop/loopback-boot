@@ -55,7 +55,6 @@ describe('executor', function() {
     dataSources: {
       'the-db': {
         connector: 'memory',
-        defaultForType: 'db',
       },
     },
   });

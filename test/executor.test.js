@@ -55,7 +55,6 @@ describe('executor', function() {
     dataSources: {
       'the-db': {
         connector: 'memory',
-        defaultForType: 'db',
       },
     },
   });
@@ -804,10 +803,11 @@ describe('executor', function() {
       .get('/')
       .end(function(err, res) {
         if (err) return done(err);
-        expect(res.text).to.eql(('<!DOCTYPE html>\n<html>\n<head lang="en">\n' +
+        expect(res.text).to.match(new RegExp(
+          '<!DOCTYPE html>\n<html>\n<head lang="en">\n' +
           '    <meta charset="UTF-8">\n    <title>simple-app</title>\n' +
           '</head>\n<body>\n<h1>simple-app</h1>\n' +
-          '</body>\n</html>').replace(/\n/g, os.EOL));
+          '</body>\n</html>'.replace('\n', '(\r\n)|(\n)|(\r)')));
         done();
       });
   });

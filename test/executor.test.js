@@ -804,10 +804,11 @@ describe('executor', function() {
       .get('/')
       .end(function(err, res) {
         if (err) return done(err);
-        expect(res.text).to.eql(('<!DOCTYPE html>\n<html>\n<head lang="en">\n' +
+        var EXPECTED_TEXT = '<!DOCTYPE html>\n<html>\n<head lang="en">\n' +
           '    <meta charset="UTF-8">\n    <title>simple-app</title>\n' +
           '</head>\n<body>\n<h1>simple-app</h1>\n' +
-          '</body>\n</html>').replace(/\n/g, os.EOL));
+          '</body>\n</html>';
+        expect(normalizeEols(res.text)).to.eql(normalizeEols(EXPECTED_TEXT));
         done();
       });
   });
@@ -1128,4 +1129,8 @@ function envAppInstructions() {
     appRootDir: appdir.PATH,
     env: 'test',
   });
+}
+
+function normalizeEols(str) {
+  return str.replace(/\r\n/g, '\n');
 }

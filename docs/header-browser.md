@@ -9,3 +9,7 @@ var boot = require('loopback-boot');
 var app = module.exports = loopback();
 boot(app);
 ```
+
+### Browserify Note
+
+Loopback-boot will *not work correctly* with `fullpaths` option set in browserify/watchify.

@@ -1,3 +1,11 @@
+2016-10-13, Version 2.23.0
+==========================
+
+ * Fix resolution of middleware modules (Miroslav Bajtoš)
+
+ * Normalize line endings to support both LF and CRLF (Miroslav Bajtoš)
+
+
 2016-09-05, Version 2.22.0
 ==========================
 

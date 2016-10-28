@@ -7,6 +7,7 @@ var vm = require('vm');
 
 function createContext() {
   var context = {
+    self: context,
     // required by browserify
     XMLHttpRequest: function() { throw new Error('not implemented'); },
     FormData: function() { throw new Error('not implemented'); },

@@ -2,7 +2,7 @@
 
 A convention-based bootstrapper for LoopBack applications.
 
-For full documentation, see the official StrongLoop documentation: [Defining boot scripts](http://docs.strongloop.com/display/LB/Defining+boot+scripts) and [Creating a LoopBack application](http://docs.strongloop.com/display/LB/Creating+an+application).
+For full documentation, see the official StrongLoop documentation: [Defining boot scripts](https://loopback.io/doc/en/lb2/Defining-boot-scripts) and [Creating a LoopBack application](https://loopback.io/doc/en/lb2/Creating-an-application).
 
 ## Overview
 
@@ -13,7 +13,7 @@ The loopback-boot module initializes (bootstraps) a LoopBack application.  Speci
  - Configures application settings
  - Runs additional boot scripts, so you can put custom setup code in multiple small files instead of in the main application file.
 
-For more information, see [Defining boot scripts](http://docs.strongloop.com/display/LB/Defining+boot+scripts).
+For more information, see [Defining boot scripts](https://loopback.io/doc/en/lb2/Defining-boot-scripts).
 
 ### Version notes
 

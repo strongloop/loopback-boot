@@ -15,6 +15,9 @@
     "type": "git",
     "url": "https://github.com/strongloop/loopback-boot"
   },
+  "engines": {
+    "node": ">=4.0.0"
+  },
   "main": "index.js",
   "browser": "browser.js",
   "scripts": {

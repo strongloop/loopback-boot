@@ -2,7 +2,9 @@
 // Node module: loopback-boot
 // This file is licensed under the MIT License.
 // License text available at https://opensource.org/licenses/MIT
+/* eslint-env es6 */
 
+'use strict';
 var vm = require('vm');
 
 function createContext() {
@@ -20,10 +22,10 @@ function createContext() {
     setTimeout: setTimeout,
 
     // used by `debug` module
-    document: { documentElement: { style: {}}},
+    document: {documentElement: {style: {}}},
 
     // used by `debug` module
-    navigator: { userAgent: 'sandbox' },
+    navigator: {userAgent: 'sandbox'},
 
     // used by crypto-browserify & friends
     Int32Array: Int32Array,

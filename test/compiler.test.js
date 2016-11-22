@@ -3,6 +3,7 @@
 // This file is licensed under the MIT License.
 // License text available at https://opensource.org/licenses/MIT
 
+'use strict';
 var boot = require('../');
 var fs = require('fs-extra');
 var path = require('path');
@@ -54,7 +55,7 @@ describe('compiler', function() {
           port: 3000,
           host: '127.0.0.1',
           restApiRoot: '/rest-api',
-          foo: { bar: 'bat' },
+          foo: {bar: 'bat'},
           baz: true,
         },
         models: {
@@ -114,7 +115,7 @@ describe('compiler', function() {
 
     describe('with custom model definitions', function(done) {
       var dataSources = {
-        'the-db': { connector: 'memory' },
+        'the-db': {connector: 'memory'},
       };
 
       it('loads model without definition', function(done) {
@@ -367,12 +368,12 @@ describe('compiler', function() {
     it('merges datasource configs from multiple files', function(done) {
       appdir.createConfigFilesSync();
       appdir.writeConfigFileSync('datasources.local.json', {
-        db: { local: 'applied' },
+        db: {local: 'applied'},
       });
 
       var env = process.env.NODE_ENV || 'development';
       appdir.writeConfigFileSync('datasources.' + env + '.json', {
-        db: { env: 'applied' },
+        db: {env: 'applied'},
       });
 
       boot.compile(appdir.PATH, function(err, context) {
@@ -409,10 +410,10 @@ describe('compiler', function() {
     });
 
     it('merges new Object values', function(done) {
-      var objectValue = { key: 'value' };
+      var objectValue = {key: 'value'};
       appdir.createConfigFilesSync();
       appdir.writeConfigFileSync('datasources.local.json', {
-        db: { nested: objectValue },
+        db: {nested: objectValue},
       });
 
       boot.compile(appdir.PATH, function(err, context) {
@@ -495,7 +496,7 @@ describe('compiler', function() {
       var arrayValue = ['value'];
       appdir.createConfigFilesSync();
       appdir.writeConfigFileSync('datasources.local.json', {
-        db: { nested: arrayValue },
+        db: {nested: arrayValue},
       });
 
       boot.compile(appdir.PATH, function(err, context) {
@@ -512,10 +513,10 @@ describe('compiler', function() {
     it('does not cache loaded values', function(done) {
       appdir.createConfigFilesSync();
       appdir.writeConfigFileSync('middleware.json', {
-        'strong-error-handler': { params: { debug: false }},
+        'strong-error-handler': {params: {debug: false}},
       });
       appdir.writeConfigFileSync('middleware.development.json', {
-        'strong-error-handler': { params: { debug: true }},
+        'strong-error-handler': {params: {debug: true}},
       });
 
       // Here we load main config and merge it with DEV overrides
@@ -546,7 +547,7 @@ describe('compiler', function() {
     it('allows env specific model-config json', function(done) {
       appdir.createConfigFilesSync();
       appdir.writeConfigFileSync('model-config.local.json', {
-        foo: { dataSource: 'db' },
+        foo: {dataSource: 'db'},
       });
 
       boot.compile(appdir.PATH, function(err, context) {
@@ -561,9 +562,9 @@ describe('compiler', function() {
 
     it('allows env specific model-config json to be merged', function(done) {
       appdir.createConfigFilesSync(null, null,
-        { foo: { dataSource: 'mongo', public: false }});
+        {foo: {dataSource: 'mongo', public: false}});
       appdir.writeConfigFileSync('model-config.local.json', {
-        foo: { dataSource: 'db' },
+        foo: {dataSource: 'db'},
       });
 
       boot.compile(appdir.PATH, function(err, context) {
@@ -675,11 +676,11 @@ describe('compiler', function() {
     it('merges app configs from multiple files', function(done) {
       appdir.createConfigFilesSync();
 
-      appdir.writeConfigFileSync('config.local.json', { cfgLocal: 'applied' });
+      appdir.writeConfigFileSync('config.local.json', {cfgLocal: 'applied'});
 
       var env = process.env.NODE_ENV || 'development';
       appdir.writeConfigFileSync('config.' + env + '.json',
-        { cfgEnv: 'applied' });
+        {cfgEnv: 'applied'});
 
       boot.compile(appdir.PATH, function(err, context) {
         if (err) return done(err);
@@ -715,7 +716,7 @@ describe('compiler', function() {
     });
 
     it('supports `appConfigRootDir` option', function(done) {
-      appdir.createConfigFilesSync({ port: 3000 });
+      appdir.createConfigFilesSync({port: 3000});
 
       var customDir = path.resolve(appdir.PATH, 'custom');
       fs.mkdirsSync(customDir);
@@ -759,7 +760,7 @@ describe('compiler', function() {
     it('supports `modelsRootDir` option', function(done) {
       appdir.createConfigFilesSync();
       appdir.writeConfigFileSync('custom/model-config.json', {
-        foo: { dataSource: 'db' },
+        foo: {dataSource: 'db'},
       });
 
       boot.compile({
@@ -1018,7 +1019,7 @@ describe('compiler', function() {
     it('throws when models-config.json contains 1.x `properties`',
       function(done) {
         appdir.createConfigFilesSync({}, {}, {
-          foo: { properties: { name: 'string' }},
+          foo: {properties: {name: 'string'}},
         });
 
         expectCompileToThrow(/unsupported 1\.x format/, done);
@@ -1027,7 +1028,7 @@ describe('compiler', function() {
     it('throws when model-config.json contains 1.x `options.base`',
       function(done) {
         appdir.createConfigFilesSync({}, {}, {
-          Customer: { options: { base: 'User' }},
+          Customer: {options: {base: 'User'}},
         });
 
         expectCompileToThrow(/unsupported 1\.x format/, done);
@@ -1035,9 +1036,9 @@ describe('compiler', function() {
 
     it('loads models from `./models`', function(done) {
       appdir.createConfigFilesSync({}, {}, {
-        Car: { dataSource: 'db' },
+        Car: {dataSource: 'db'},
       });
-      appdir.writeConfigFileSync('models/car.json', { name: 'Car' });
+      appdir.writeConfigFileSync('models/car.json', {name: 'Car'});
       appdir.writeFileSync('models/car.js', '');
 
       boot.compile(appdir.PATH, function(err, context) {
@@ -1061,9 +1062,9 @@ describe('compiler', function() {
 
     it('loads coffeescript models from `./models`', function(done) {
       appdir.createConfigFilesSync({}, {}, {
-        Car: { dataSource: 'db' },
+        Car: {dataSource: 'db'},
       });
-      appdir.writeConfigFileSync('models/car.json', { name: 'Car' });
+      appdir.writeConfigFileSync('models/car.json', {name: 'Car'});
       appdir.writeFileSync('models/car.coffee', '');
 
       boot.compile(appdir.PATH, function(err, context) {
@@ -1087,9 +1088,9 @@ describe('compiler', function() {
 
     it('supports `modelSources` option', function(done) {
       appdir.createConfigFilesSync({}, {}, {
-        Car: { dataSource: 'db' },
+        Car: {dataSource: 'db'},
       });
-      appdir.writeConfigFileSync('custom-models/car.json', { name: 'Car' });
+      appdir.writeConfigFileSync('custom-models/car.json', {name: 'Car'});
       appdir.writeFileSync('custom-models/car.js', '');
 
       boot.compile({
@@ -1119,9 +1120,9 @@ describe('compiler', function() {
         _meta: {
           sources: ['./custom-models'],
         },
-        Car: { dataSource: 'db' },
+        Car: {dataSource: 'db'},
       });
-      appdir.writeConfigFileSync('custom-models/car.json', { name: 'Car' });
+      appdir.writeConfigFileSync('custom-models/car.json', {name: 'Car'});
       appdir.writeFileSync('custom-models/car.js', '');
 
       boot.compile(appdir.PATH, function(err, context) {
@@ -1145,7 +1146,7 @@ describe('compiler', function() {
 
     it('supports sources relative to node_modules', function(done) {
       appdir.createConfigFilesSync({}, {}, {
-        User: { dataSource: 'db' },
+        User: {dataSource: 'db'},
       });
 
       boot.compile({
@@ -1173,9 +1174,9 @@ describe('compiler', function() {
 
     it('resolves relative path in `modelSources` option', function(done) {
       appdir.createConfigFilesSync({}, {}, {
-        Car: { dataSource: 'db' },
+        Car: {dataSource: 'db'},
       });
-      appdir.writeConfigFileSync('custom-models/car.json', { name: 'Car' });
+      appdir.writeConfigFileSync('custom-models/car.json', {name: 'Car'});
       var appJS = appdir.writeFileSync('custom-models/car.js', '');
 
       boot.compile({
@@ -1194,10 +1195,10 @@ describe('compiler', function() {
     it('resolves module relative path in `modelSources` option',
       function(done) {
         appdir.createConfigFilesSync({}, {}, {
-          Car: { dataSource: 'db' },
+          Car: {dataSource: 'db'},
         });
         appdir.writeConfigFileSync('node_modules/custom-models/car.json',
-          { name: 'Car' });
+          {name: 'Car'});
         var appJS = appdir.writeFileSync(
           'node_modules/custom-models/car.js', '');
 
@@ -1220,9 +1221,9 @@ describe('compiler', function() {
           _meta: {
             sources: ['./custom-models'],
           },
-          Car: { dataSource: 'db' },
+          Car: {dataSource: 'db'},
         });
-        appdir.writeConfigFileSync('custom-models/car.json', { name: 'Car' });
+        appdir.writeConfigFileSync('custom-models/car.json', {name: 'Car'});
         var appJS = appdir.writeFileSync('custom-models/car.js', '');
 
         boot.compile(appdir.PATH, function(err, context) {
@@ -1241,10 +1242,10 @@ describe('compiler', function() {
           _meta: {
             sources: ['custom-models'],
           },
-          Car: { dataSource: 'db' },
+          Car: {dataSource: 'db'},
         });
         appdir.writeConfigFileSync('node_modules/custom-models/car.json',
-          { name: 'Car' });
+          {name: 'Car'});
 
         var appJS = appdir.writeFileSync(
           'node_modules/custom-models/car.js', '');
@@ -1261,9 +1262,9 @@ describe('compiler', function() {
 
     it('handles model definitions with no code', function(done) {
       appdir.createConfigFilesSync({}, {}, {
-        Car: { dataSource: 'db' },
+        Car: {dataSource: 'db'},
       });
-      appdir.writeConfigFileSync('models/car.json', { name: 'Car' });
+      appdir.writeConfigFileSync('models/car.json', {name: 'Car'});
 
       boot.compile(appdir.PATH, function(err, context) {
         if (err) return done(err);
@@ -1285,10 +1286,10 @@ describe('compiler', function() {
 
     it('excludes models not listed in `model-config.json`', function(done) {
       appdir.createConfigFilesSync({}, {}, {
-        Car: { dataSource: 'db' },
+        Car: {dataSource: 'db'},
       });
-      appdir.writeConfigFileSync('models/car.json', { name: 'Car' });
-      appdir.writeConfigFileSync('models/bar.json', { name: 'Bar' });
+      appdir.writeConfigFileSync('models/car.json', {name: 'Car'});
+      appdir.writeConfigFileSync('models/bar.json', {name: 'Bar'});
 
       boot.compile(appdir.PATH, function(err, context) {
         if (err) return done(err);
@@ -1302,7 +1303,7 @@ describe('compiler', function() {
 
     it('includes models used as Base models', function(done) {
       appdir.createConfigFilesSync({}, {}, {
-        Car: { dataSource: 'db' },
+        Car: {dataSource: 'db'},
       });
       appdir.writeConfigFileSync('models/car.json', {
         name: 'Car',
@@ -1326,7 +1327,7 @@ describe('compiler', function() {
 
     it('excludes pre-built base models', function(done) {
       appdir.createConfigFilesSync({}, {}, {
-        Car: { dataSource: 'db' },
+        Car: {dataSource: 'db'},
       });
       appdir.writeConfigFileSync('models/car.json', {
         name: 'Car',
@@ -1345,9 +1346,9 @@ describe('compiler', function() {
 
     it('sorts models, base models first', function(done) {
       appdir.createConfigFilesSync({}, {}, {
-        Vehicle: { dataSource: 'db' },
-        FlyingCar: { dataSource: 'db' },
-        Car: { dataSource: 'db' },
+        Vehicle: {dataSource: 'db'},
+        FlyingCar: {dataSource: 'db'},
+        Car: {dataSource: 'db'},
       });
       appdir.writeConfigFileSync('models/car.json', {
         name: 'Car',
@@ -1373,8 +1374,8 @@ describe('compiler', function() {
 
     it('detects circular Model dependencies', function(done) {
       appdir.createConfigFilesSync({}, {}, {
-        Vehicle: { dataSource: 'db' },
-        Car: { dataSource: 'db' },
+        Vehicle: {dataSource: 'db'},
+        Car: {dataSource: 'db'},
       });
       appdir.writeConfigFileSync('models/car.json', {
         name: 'Car',
@@ -1390,7 +1391,7 @@ describe('compiler', function() {
 
     it('uses file name as default value for model name', function(done) {
       appdir.createConfigFilesSync({}, {}, {
-        Car: { dataSource: 'db' },
+        Car: {dataSource: 'db'},
       });
       appdir.writeConfigFileSync('models/car.json', {});
 
@@ -1407,7 +1408,7 @@ describe('compiler', function() {
     it('uses `OrderItem` as default model name for file with name `order-item`',
       function(done) {
         appdir.createConfigFilesSync({}, {}, {
-          OrderItem: { dataSource: 'db' },
+          OrderItem: {dataSource: 'db'},
         });
         appdir.writeConfigFileSync('models/order-item.json', {});
 
@@ -1424,7 +1425,7 @@ describe('compiler', function() {
     it('uses `OrderItem` as default model name for file with name `order_item`',
       function(done) {
         appdir.createConfigFilesSync({}, {}, {
-          OrderItem: { dataSource: 'db' },
+          OrderItem: {dataSource: 'db'},
         });
         appdir.writeConfigFileSync('models/order_item.json', {});
 
@@ -1441,7 +1442,7 @@ describe('compiler', function() {
     it('uses `OrderItem` as default model name for file with name `order item`',
       function(done) {
         appdir.createConfigFilesSync({}, {}, {
-          OrderItem: { dataSource: 'db' },
+          OrderItem: {dataSource: 'db'},
         });
         appdir.writeConfigFileSync('models/order item.json', {});
 
@@ -1458,9 +1459,9 @@ describe('compiler', function() {
     it('overrides `default model name` by `name` in model definition',
       function(done) {
         appdir.createConfigFilesSync({}, {}, {
-          overrideCar: { dataSource: 'db' },
+          overrideCar: {dataSource: 'db'},
         });
-        appdir.writeConfigFileSync('models/car.json', { name: 'overrideCar' });
+        appdir.writeConfigFileSync('models/car.json', {name: 'overrideCar'});
 
         boot.compile(appdir.PATH, function(err, context) {
           if (err) return done(err);
@@ -1474,19 +1475,19 @@ describe('compiler', function() {
 
     it('overwrites model with same default name', function(done) {
       appdir.createConfigFilesSync({}, {}, {
-        'OrderItem': { dataSource: 'db' },
+        'OrderItem': {dataSource: 'db'},
       });
 
       appdir.writeConfigFileSync('models/order-item.json', {
         properties: {
-          price: { type: 'number' },
+          price: {type: 'number'},
         },
       });
       appdir.writeFileSync('models/order-item.js', '');
 
       appdir.writeConfigFileSync('models/orderItem.json', {
         properties: {
-          quantity: { type: 'number' },
+          quantity: {type: 'number'},
         },
       });
       var appJS = appdir.writeFileSync('models/orderItem.js', '');
@@ -1503,7 +1504,7 @@ describe('compiler', function() {
           definition: {
             name: 'OrderItem',
             properties: {
-              quantity: { type: 'number' },
+              quantity: {type: 'number'},
             },
           },
           sourceFile: appJS,
@@ -1514,13 +1515,13 @@ describe('compiler', function() {
 
     it('overwrites model with same name in model definition', function(done) {
       appdir.createConfigFilesSync({}, {}, {
-        'customOrder': { dataSource: 'db' },
+        'customOrder': {dataSource: 'db'},
       });
 
       appdir.writeConfigFileSync('models/order1.json', {
         name: 'customOrder',
         properties: {
-          price: { type: 'number' },
+          price: {type: 'number'},
         },
       });
       appdir.writeFileSync('models/order1.js', '');
@@ -1528,7 +1529,7 @@ describe('compiler', function() {
       appdir.writeConfigFileSync('models/order2.json', {
         name: 'customOrder',
         properties: {
-          quantity: { type: 'number' },
+          quantity: {type: 'number'},
         },
       });
       var appJS = appdir.writeFileSync('models/order2.js', '');
@@ -1545,7 +1546,7 @@ describe('compiler', function() {
           definition: {
             name: 'customOrder',
             properties: {
-              quantity: { type: 'number' },
+              quantity: {type: 'number'},
             },
           },
           sourceFile: appJS,
@@ -1608,11 +1609,11 @@ describe('compiler', function() {
       describe(' - mixinSources', function() {
         beforeEach(function() {
           appdir.createConfigFilesSync({}, {}, {
-            Car: { dataSource: 'db' },
+            Car: {dataSource: 'db'},
           });
           appdir.writeConfigFileSync('models/car.json', {
             name: 'Car',
-            mixins: { 'TimeStamps': {}},
+            mixins: {'TimeStamps': {}},
           });
         });
 
@@ -1700,7 +1701,7 @@ describe('compiler', function() {
 
             appdir.writeConfigFileSync('models/car.json', {
               name: 'Car',
-              mixins: { 'Timestamping': {}},
+              mixins: {'Timestamping': {}},
             });
 
             boot.compile(appdir.PATH, function(err, context) {
@@ -1775,7 +1776,7 @@ describe('compiler', function() {
       describe('name normalization', function() {
         var options;
         beforeEach(function() {
-          options = { appRootDir: appdir.PATH, mixinDirs: ['./custom-mixins'] };
+          options = {appRootDir: appdir.PATH, mixinDirs: ['./custom-mixins']};
 
           appdir.writeFileSync('custom-mixins/foo.js', '');
           appdir.writeFileSync('custom-mixins/time-stamps.js', '');
@@ -1892,7 +1893,7 @@ describe('compiler', function() {
 
       it('overrides default mixin name, by `name` in JSON', function(done) {
         appdir.writeFileSync('mixins/foo.js', '');
-        appdir.writeConfigFileSync('mixins/foo.json', { name: 'fooBar' });
+        appdir.writeConfigFileSync('mixins/foo.json', {name: 'fooBar'});
 
         var options = {
           appRootDir: appdir.PATH,
@@ -2087,7 +2088,7 @@ describe('compiler', function() {
           phases: ['routes'],
           middleware: [{
             sourceFile: path.resolve(appdir.PATH, 'my-middleware.js'),
-            config: { phase: 'routes' },
+            config: {phase: 'routes'},
           }],
         });
         done();
@@ -2481,7 +2482,7 @@ describe('compiler', function() {
         });
       });
 
-    it('resolves modules relative to appRootDir', function() {
+    it('resolves modules relative to appRootDir', function(done) {
       var HANDLER_FILE = 'node_modules/handler/index.js';
       appdir.writeFileSync(
         HANDLER_FILE,
@@ -2644,7 +2645,7 @@ describe('compiler', function() {
       });
 
       it('converts paths in top-level array items', function(done) {
-        givenMiddlewareEntrySync({ params: RELATIVE_PATH_PARAMS });
+        givenMiddlewareEntrySync({params: RELATIVE_PATH_PARAMS});
 
         boot.compile(appdir.PATH, function(err, context) {
           if (err) return done(err);
@@ -2668,13 +2669,13 @@ describe('compiler', function() {
           var instructions = context.instructions;
 
           expectFirstMiddlewareParams(instructions)
-            .to.eql({ path: absolutePathParams[0] });
+            .to.eql({path: absolutePathParams[0]});
           done();
         });
       });
 
       it('converts path value when params is a string', function(done) {
-        givenMiddlewareEntrySync({ params: RELATIVE_PATH_PARAMS[0] });
+        givenMiddlewareEntrySync({params: RELATIVE_PATH_PARAMS[0]});
 
         boot.compile(appdir.PATH, function(err, context) {
           if (err) return done(err);
@@ -2714,7 +2715,7 @@ describe('compiler', function() {
       it('does not convert values not starting with `./` or `../`',
         function(done) {
           var PARAMS = ['$!.somerc', '$!/root', '$!hello!'];
-          givenMiddlewareEntrySync({ params: PARAMS });
+          givenMiddlewareEntrySync({params: PARAMS});
 
           boot.compile(appdir.PATH, function(err, context) {
             if (err) return done(err);
@@ -2731,15 +2732,15 @@ describe('compiler', function() {
     it('loads component configs from multiple files', function(done) {
       appdir.createConfigFilesSync();
       appdir.writeConfigFileSync('component-config.json', {
-        debug: { option: 'value' },
+        debug: {option: 'value'},
       });
       appdir.writeConfigFileSync('component-config.local.json', {
-        debug: { local: 'applied' },
+        debug: {local: 'applied'},
       });
 
       var env = process.env.NODE_ENV || 'development';
       appdir.writeConfigFileSync('component-config.' + env + '.json', {
-        debug: { env: 'applied' },
+        debug: {env: 'applied'},
       });
 
       boot.compile(appdir.PATH, function(err, context) {

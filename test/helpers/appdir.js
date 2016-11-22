@@ -3,6 +3,7 @@
 // This file is licensed under the MIT License.
 // License text available at https://opensource.org/licenses/MIT
 
+'use strict';
 var path = require('path');
 var fs = require('fs-extra');
 var extend = require('util')._extend;
@@ -27,7 +28,7 @@ appdir.init = function(cb) {
 appdir.createConfigFilesSync = function(appConfig, dataSources, models) {
   appConfig = extend({
   }, appConfig);
-  appdir.writeConfigFileSync ('config.json', appConfig);
+  appdir.writeConfigFileSync('config.json', appConfig);
 
   dataSources = extend({
     db: {
@@ -35,11 +36,11 @@ appdir.createConfigFilesSync = function(appConfig, dataSources, models) {
       defaultForType: 'db',
     },
   }, dataSources);
-  appdir.writeConfigFileSync ('datasources.json', dataSources);
+  appdir.writeConfigFileSync('datasources.json', dataSources);
 
   models = extend({
   }, models);
-  appdir.writeConfigFileSync ('model-config.json', models);
+  appdir.writeConfigFileSync('model-config.json', models);
 };
 
 appdir.writeConfigFileSync = function(name, json) {

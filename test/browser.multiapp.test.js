@@ -3,6 +3,7 @@
 // This file is licensed under the MIT License.
 // License text available at https://opensource.org/licenses/MIT
 
+'use strict';
 var boot = require('../');
 var async = require('async');
 var exportBrowserifyToFile = require('./helpers/browserify').exportToSandbox;
@@ -74,7 +75,7 @@ function browserifyTestApps(apps, next) {
     var appId = apps[i].appId;
 
     appFile = path.join(appDir, appFile);
-    b.require(appFile, { expose: moduleName });
+    b.require(appFile, {expose: moduleName});
 
     var opts = appDir;
     if (appId) {

@@ -3,6 +3,7 @@
 // This file is licensed under the MIT License.
 // License text available at https://opensource.org/licenses/MIT
 
+'use strict';
 exports.myMiddleware = function(name) {
   return function(req, res, next) {
     req._names = req._names || [];

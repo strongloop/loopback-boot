@@ -277,6 +277,7 @@ describe('executor', function() {
           'barStarted',
           'barFinished',
           'barSyncExecuted',
+          'umdLoaded',
         ]);
         done();
       }, 10);
@@ -293,6 +294,7 @@ describe('executor', function() {
           'barStarted',
           'barFinished',
           'barSyncExecuted',
+          'umdLoaded',
         ]);
         done();
       });

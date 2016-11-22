@@ -1,2 +1,4 @@
 coverage/
 test/sandbox/
+test/fixtures/simple-app/boot/umd.js
+test/fixtures/umd-app/models/customer.js

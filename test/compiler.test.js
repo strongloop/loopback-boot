@@ -2016,6 +2016,22 @@ describe('compiler', function() {
         .to.equal(require.resolve('loopback/server/middleware/url-not-found'));
     });
 
+    it('supports absolute paths notation', function() {
+      var middlewarePath =
+        path.resolve(__dirname, './fixtures/simple-middleware.js');
+      var routes = {};
+      routes[middlewarePath] = {};
+      appdir.writeConfigFileSync('middleware.json', {
+        'routes': routes,
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.middleware.middleware[0].sourceFile)
+        .to.equal(path.resolve(appdir.PATH,
+          middlewarePath));
+    });
+
     it('supports shorthand notation for relative paths', function() {
       appdir.writeConfigFileSync('middleware.json', {
         'routes': {

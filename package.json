@@ -31,6 +31,7 @@
     "bluebird": "^3.4.0",
     "commondir": "^1.0.1",
     "debug": "^2.2.0",
+    "load-config-file": "^0.3.3",
     "lodash": "^4.13.1",
     "semver": "^5.1.0",
     "strong-globalize": "^2.7.0",

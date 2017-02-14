@@ -23,7 +23,7 @@ describe('compiler', function() {
       if (model.name === aName) return model;
     }
   }
-  describe.only('from directory', function() {
+  describe('from directory', function() {
     it('loads Model yaml config files', function(done) {
       boot.compile(COFFEE_APP, function(err, context) {
         if (err) return done(err);

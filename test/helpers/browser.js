@@ -63,6 +63,12 @@ function createContext() {
   // `window` is used by loopback to detect browser runtime
   context.window = context;
 
+  // In Node.js 0.10, the Uint8Array is provided by Node.js glue,
+  // it's not available in the V8 runtime itself
+  if (/^v0\.10/.test(process.version)) {
+    context.Uint8Array = Uint8Array;
+  }
+
   return vm.createContext(context);
 }
 exports.createContext = createContext;

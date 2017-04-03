@@ -299,6 +299,23 @@ describe('executor', function() {
       });
     });
 
+    it('searches boot file extensions specified in options.scriptExtensions',
+    function(done) {
+      var options = {
+        app: app,
+        appRootDir: path.join(__dirname, './fixtures/simple-app'),
+        scriptExtensions: ['.customjs', '.customjs2'],
+      };
+      boot.execute(app, boot.compile(options), function(err) {
+        if (err) return done(err);
+        expect(process.bootFlags, 'process: bootFlags').to.eql([
+          'customjs',
+          'customjs2',
+        ]);
+        done();
+      });
+    });
+
     describe('for mixins', function() {
       var options;
       beforeEach(function() {

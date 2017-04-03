@@ -1,3 +1,11 @@
+2017-04-03, Version 2.24.0
+==========================
+
+ * Provide options.scriptExtensions (Supasate Choochaisri)
+
+ * Fix browser tests on Node.js 0.10 (Miroslav Bajtoš)
+
+
 2016-10-13, Version 2.23.0
 ==========================
 

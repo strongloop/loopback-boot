@@ -1,0 +1,6 @@
+'use strict';
+
+module.exports = function(app, callback) {
+  process.bootFlags.push('customjs2');
+  callback();
+};

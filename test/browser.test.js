@@ -3,6 +3,8 @@
 // This file is licensed under the MIT License.
 // License text available at https://opensource.org/licenses/MIT
 
+'use strict';
+
 var boot = require('../');
 var exportBrowserifyToFile = require('./helpers/browserify').exportToSandbox;
 var fs = require('fs');
@@ -20,7 +22,7 @@ var compileStrategies = {
       basedir: appDir,
       debug: true,
     });
-    b.require('./app.js', { expose: 'browser-app' });
+    b.require('./app.js', {expose: 'browser-app'});
     return b;
   },
 
@@ -32,7 +34,7 @@ var compileStrategies = {
     });
     b.transform('coffeeify');
 
-    b.require('./app.coffee', { expose: 'browser-app' });
+    b.require('./app.coffee', {expose: 'browser-app'});
     return b;
   },
 };
@@ -58,7 +60,7 @@ describe('browser support', function() {
 
         // configured in fixtures/browser-app/component-config.json
         // and fixtures/browser-app/components/dummy-component.js
-        expect(app.dummyComponentOptions).to.eql({ option: 'value' });
+        expect(app.dummyComponentOptions).to.eql({option: 'value'});
         done();
       });
     });

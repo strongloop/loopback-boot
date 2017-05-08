@@ -3,6 +3,8 @@
 // This file is licensed under the MIT License.
 // License text available at https://opensource.org/licenses/MIT
 
+'use strict';
+
 // Strong globalize
 var g = require('./lib/globalize');
 
@@ -144,6 +146,10 @@ var addInstructionsToBrowserify = require('./lib/bundler');
  */
 
 exports = module.exports = function bootLoopBackApp(app, options, callback) {
+  if (typeof options === 'string') {
+    // The 2nd arg is appRootDir
+    options = {appRootDir: options};
+  }
   if (typeof options === 'function' && callback === undefined) {
     callback = options;
     options = {};
@@ -182,7 +188,7 @@ exports.compile = function(options, done) {
 exports.compileToBrowserify = function(options, bundler, done) {
   return exports.compile(options, function(err, context) {
     if (err) return done(err);
-    addInstructionsToBrowserify({ instructions: context.instructions },
+    addInstructionsToBrowserify({instructions: context.instructions},
       bundler);
     done();
   });
@@ -194,7 +200,7 @@ exports.PluginBase = PluginBase;
 
 exports.execute = function(app, instructions, done) {
   var bootstrapper = new Bootstrapper(
-    { phases: ['starting', 'start', 'started'] });
+    {phases: ['starting', 'start', 'started']});
   var context = {
     app: app,
     instructions: instructions,

@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports = function(opitions) {
   return new Tracker(opitions);
 };

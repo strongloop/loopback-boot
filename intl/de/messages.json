@@ -1,0 +1,17 @@
+{
+  "1e5fea50eef843cbffd1d438494912c8": "Pfad \"{0}\" kann nicht aufgelöst werden",
+  "34319676975b1abf107da7a056abb434": "Ungültiges Normalisierungsformat - \"{0}\"",
+  "3a7049e42006e8bc19e0f4fc8df63b6b": "Die `app` wird von einer nicht kompatiblen Loopback-Version {0} betrieben. Unterstützte Versionen: {1}",
+  "3f93b626dd9a1c33d67490f6e71018b5": "WARNUNG: Hauptkonfigurationsdatei \"{0}{{.json}}\" fehlt",
+  "4d052d84c8620730afd4a30832f11724": "Unbekanntes Modell {0} kann nicht konfiguriert werden",
+  "4ed668e9187650d898acf97707df445a": "Die {{phase}} \"{0}\" ist in der Hauptkonfiguration nicht definiert.",
+  "6447e6b342a2c51ab0bc53b3cbdf3742": "Sortierungskonflikt: \"{0}\" kann nicht nach \"{1}\" hinzugefügt werden, da die entgegengesetzte Reihenfolge bereits angegeben wurde",
+  "70654dc6eb565613a33344efed3de998": "Laden von Boot-Script fehlgeschlagen: {0}\n{1}",
+  "7f7bdcadb75abfef1bd8a126d547dd6d": "{0} wird nicht in einen gültigen Wert aufgelöst; zurückgegeben als {1}. \"{2}\" muss in der Umgebungsvariable oder über {{app.get()}} auflösbar sein.",
+  "91a742b7c3568cf6b6755741a70b3c52": "Die {{middleware}} \"{0}\" in {{phase}} \"{1}\" ist in der Hauptkonfiguration nicht definiert.",
+  "a3aa22086ae4976cd013065c9a3ff81c": "{0} kann nicht angewendet werden: ",
+  "be2cf2868ba54624fe38e9908dde5e9e": "Die Daten in {{model-config.json}} haben das nicht unterstützte {{1.x}}-Format.",
+  "ec551b6f2fafd8d40af801ebe5bb09f6": "{{middleware}}-Anweisungen werden verworfen, {{loopback}}-Client unterstützt {{middleware}} nicht.",
+  "fdc23df1bd0fe55fe3faabcc89ff60f3": "Middleware \"{0}\" nicht gefunden: {1}"
+}
+

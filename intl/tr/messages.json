@@ -1,0 +1,17 @@
+{
+  "1e5fea50eef843cbffd1d438494912c8": "\"{0}\" yolu çözülemiyor",
+  "34319676975b1abf107da7a056abb434": "Geçersiz normalleştirme biçimi - \"{0}\"",
+  "3a7049e42006e8bc19e0f4fc8df63b6b": "`app` uyumsuz olan geri döngü {0} sürümüyle güçlendirilmiş. Desteklenen sürümler: {1}",
+  "3f93b626dd9a1c33d67490f6e71018b5": "UYARI: Ana yapılandırma dosyası \"{0}{{.json}}\" eksik",
+  "4d052d84c8620730afd4a30832f11724": "Bilinmeyen {0} modeli yapılandırılamıyor",
+  "4ed668e9187650d898acf97707df445a": "{{phase}} \"{0}\", ana yapılandırmada tanımlı değil",
+  "6447e6b342a2c51ab0bc53b3cbdf3742": "Sıralama çakışması: \"{0}\", \"{1}\" sonrasına eklenemez; karşıt sıra belirtilmiş",
+  "70654dc6eb565613a33344efed3de998": "Önyükleme komut dosyasının yüklenmesi başarısız oldu: {0}\n{1}",
+  "7f7bdcadb75abfef1bd8a126d547dd6d": "{0} geçerli bir değere çözülmüyor, {1} olarak döndürüldü. \"{2}\" ortam değişkeninde ya da {{app.get()}} ile çözülebilir olmalıdır.",
+  "91a742b7c3568cf6b6755741a70b3c52": "{{phase}} \"{1}\" aşamasındaki {{middleware}} \"{0}\" ana yapılandırmada tanımlı değil.",
+  "a3aa22086ae4976cd013065c9a3ff81c": "{0} uygulanamıyor: ",
+  "be2cf2868ba54624fe38e9908dde5e9e": "{{model-config.json}} içindeki verileri desteklenmeyen {{1.x}} biçiminde.",
+  "ec551b6f2fafd8d40af801ebe5bb09f6": "{{middleware}} yönergeleri atılıyor, {{middleware}}, {{loopback}} istemcisi tarafından desteklenmiyor.",
+  "fdc23df1bd0fe55fe3faabcc89ff60f3": "Ara katman \"{0}\" bulunamadı: {1}"
+}
+

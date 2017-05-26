@@ -1,3 +1,37 @@
+2017-05-22, Version 3.0.0
+=========================
+
+ * Upgrade deps and fix style issues (Raymond Feng)
+
+ * Provide scriptExtensions option (Supasate Choochaisri)
+
+ * Update paid support URL (Siddhi Pai)
+
+ * Refactor for  modular and pluggable design (Raymond Feng)
+
+ * Add Node v7 to Travis CI platforms (Miroslav Bajtoš)
+
+ * Drop support for Node v0.10 and v0.12 (Miroslav Bajtoš)
+
+ * readme: update URL to new doc site (David Cheung)
+
+ * Update ja translation file (Candy)
+
+ * Update header-browser.md (Sequoia McDowell)
+
+ * Update translation files - round#2 (Candy)
+
+ * Normalize line endings to support both LF and CRLF (Miroslav Bajtoš)
+
+ * Remove "defaultForType" from datasource config (Miroslav Bajtoš)
+
+ * Update deps to loopback 3.0.0 RC (Miroslav Bajtoš)
+
+ * globalization: add translated strings (gunjpan)
+
+ * Start development of 3.0 (Miroslav Bajtoš)
+
+
 2016-09-05, Version 2.22.0
 ==========================
 

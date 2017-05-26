@@ -1,3 +1,5 @@
+'use strict';
+
 var path = require('path');
 var loopback = require('loopback');
 
@@ -72,6 +74,30 @@ describe('Bootstrapper', function() {
         'barStarted',
         'barFinished',
         'barSyncExecuted',
+      ]);
+      done();
+    });
+  });
+
+  it('searches boot file extensions specified in options.scriptExtensions',
+  function(done) {
+    var options = {
+      app: app,
+      appRootDir: path.join(__dirname, './fixtures/simple-app'),
+      scriptExtensions: ['.customjs', '.customjs2'],
+    };
+
+    var bootstrapper = new Bootstrapper(options);
+
+    var context = {
+      app: app,
+    };
+
+    bootstrapper.run(context, function(err) {
+      if (err) return done(err);
+      expect(process.bootFlags, 'process: bootFlags').to.eql([
+        'customjs',
+        'customjs2',
       ]);
       done();
     });

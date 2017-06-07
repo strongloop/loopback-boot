@@ -1,3 +1,9 @@
+2017-06-07, Version 2.24.1
+==========================
+
+ * add support for absolute middleware paths on win32 (Benjamin Kroeger)
+
+
 2017-04-03, Version 2.24.0
 ==========================
 

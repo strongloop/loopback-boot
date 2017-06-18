@@ -57,10 +57,15 @@ describe('browser support', function() {
       expect(Object.keys(app.models)).to.include('Customer');
       expect(app.models.Customer.settings)
         .to.have.property('_customized', 'Customer');
+      expect(Object.keys(app.models)).to.include('ProductUmd');
+      expect(app.models.ProductUmd.settings)
+        .to.have.property('_customized', 'UMD');
 
-      // configured in fixtures/browser-app/component-config.json
-      // and fixtures/browser-app/components/dummy-component.js
+      // configured in fixtures/browser-app/component-config.json,
+      // fixtures/browser-app/components/dummy-component.js and
+      // fixtures/browser-app/components/dummy-component-umd.js
       expect(app.dummyComponentOptions).to.eql({ option: 'value' });
+      expect(app.dummyComponentUmdOptions).to.eql({ option: 'valueUmd' });
 
       done();
     });
@@ -79,8 +84,9 @@ describe('browser support', function() {
 
       var modelBuilder = app.registry.modelBuilder;
       var registry = modelBuilder.mixins.mixins;
-      expect(Object.keys(registry)).to.eql(['TimeStamps']);
+      expect(Object.keys(registry)).to.eql(['AuditedUmd', 'TimeStamps']);
       expect(app.models.Customer.timeStampsMixin).to.eql(true);
+      expect(app.models.ProductUmd.auditedMixin).to.eql(true);
 
       done();
     });

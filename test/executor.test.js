@@ -278,6 +278,7 @@ describe('executor', function() {
           'barStarted',
           'barFinished',
           'barSyncExecuted',
+          'umdLoaded',
         ]);
         done();
       }, 10);
@@ -294,6 +295,7 @@ describe('executor', function() {
           'barStarted',
           'barFinished',
           'barSyncExecuted',
+          'umdLoaded',
         ]);
         done();
       });
@@ -838,6 +840,7 @@ describe('executor', function() {
       .end(function(err, res) {
         if (err) return done(err);
         expect(res.headers.names).to.equal('custom-middleware');
+        expect(res.headers.umd).to.equal('success');
         done();
       });
   });

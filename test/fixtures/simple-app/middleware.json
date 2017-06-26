@@ -2,6 +2,9 @@
   "initial": {
     "../../helpers/push-name-middleware": {
       "params": "custom-middleware"
-    }
+    },
+     "../../helpers/set-umd-middleware": {
+       "params": "success"
+     }
   }
 }

@@ -1,0 +1,5 @@
+{
+  "name": "ProductUmd",
+  "base": "User",
+  "mixins": {"AuditedUmd": {} }
+}

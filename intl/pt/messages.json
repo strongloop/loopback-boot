@@ -1,0 +1,17 @@
+{
+  "1e5fea50eef843cbffd1d438494912c8": "Não é possível resolver caminho \"{0}\"",
+  "34319676975b1abf107da7a056abb434": "Formato de normalização inválido - \"{0}\"",
+  "3a7049e42006e8bc19e0f4fc8df63b6b": "O `app` é desenvolvido com uma versão de loopback incompatível {0}. Versões suportadas: {1}",
+  "3f93b626dd9a1c33d67490f6e71018b5": "AVISO: o arquivo de configuração principal \"{0}{{.json}}\" está ausente",
+  "4d052d84c8620730afd4a30832f11724": "Não é possível configurar modelo desconhecido {0}",
+  "4ed668e9187650d898acf97707df445a": "A {{phase}} \"{0}\" não foi definida na configuração principal.",
+  "6447e6b342a2c51ab0bc53b3cbdf3742": "Conflito de ordem: não é possível incluir \"{0}\" após \"{1}\", porque a ordem oposta já foi especificada",
+  "70654dc6eb565613a33344efed3de998": "Falha ao carregar script de inicialização: {0}\n{1}",
+  "7f7bdcadb75abfef1bd8a126d547dd6d": "{0} não resolve para um valor válido, retornado como {1}. \"{2}\" deve ser resolvível na variável de ambiente ou pelo {{app.get()}}.",
+  "91a742b7c3568cf6b6755741a70b3c52": "O {{middleware}} \"{0}\" em {{phase}} \"{1}\" não é definido na configuração principal.",
+  "a3aa22086ae4976cd013065c9a3ff81c": "Não é possível aplicar {0}: ",
+  "be2cf2868ba54624fe38e9908dde5e9e": "Os dados em {{model-config.json}} estão no formato não suportado {{1.x}}.",
+  "ec551b6f2fafd8d40af801ebe5bb09f6": "Descartando instruções de {{middleware}}, cliente de {{loopback}} não suporta {{middleware}}.",
+  "fdc23df1bd0fe55fe3faabcc89ff60f3": "Middleware \"{0}\" não localizado: {1}"
+}
+

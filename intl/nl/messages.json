@@ -1,0 +1,17 @@
+{
+  "1e5fea50eef843cbffd1d438494912c8": "Pad \"{0}\" kan niet worden omgezet.",
+  "34319676975b1abf107da7a056abb434": "Ongeldige normalisatie-indeling - \"{0}\"",
+  "3a7049e42006e8bc19e0f4fc8df63b6b": "De 'app' wordt aangestuurd door een incompatibele versie van loopback, {0}. Ondersteunde versies: {1}",
+  "3f93b626dd9a1c33d67490f6e71018b5": "WAARSCHUWING: Hoofdconfiguratiebestand \"{0}{{.json}}\" ontbreekt.",
+  "4d052d84c8620730afd4a30832f11724": "Configuratie van onbekend model {0} kan niet ongedaan worden gemaakt",
+  "4ed668e9187650d898acf97707df445a": "De {{phase}} \"{0}\" is niet gedefinieerd in de hoofdconfiguratie.",
+  "6447e6b342a2c51ab0bc53b3cbdf3742": "Volgordeconflict: \"{0}\" kan  niet worden toegevoegd na \"{1}\", omdat de omgekeerde volgorde al is opgegeven.",
+  "70654dc6eb565613a33344efed3de998": "Laden van opstartscript is mislukt: {0}\n{1}",
+  "7f7bdcadb75abfef1bd8a126d547dd6d": "{0} wordt niet omgezet in een geldige waarde; wordt geretourneerd als {1}. \"{2}\" moet omgezet kunnen worden in een omgevingsvariabele of door {{app.get()}}.",
+  "91a742b7c3568cf6b6755741a70b3c52": "De {{middleware}} \"{0}\" in {{phase}} \"{1}\" is niet gedefinieerd in de hoofdconfiguratie.",
+  "a3aa22086ae4976cd013065c9a3ff81c": "{0} kan niet worden toegepast: ",
+  "be2cf2868ba54624fe38e9908dde5e9e": "De gegevens in {{model-config.json}} hebben de niet ondersteunde indeling {{1.x}}.",
+  "ec551b6f2fafd8d40af801ebe5bb09f6": "{{middleware}} instructies worden verwijderd, {{loopback}}-client ondersteunt geen {{middleware}}.",
+  "fdc23df1bd0fe55fe3faabcc89ff60f3": "Middleware \"{0}\" is niet gevonden: {1}"
+}
+

@@ -1,0 +1,17 @@
+{
+  "1e5fea50eef843cbffd1d438494912c8": "Impossibile risolvere il percorso \"{0}\"",
+  "34319676975b1abf107da7a056abb434": "Formato di normalizzazione non valido - \"{0}\"",
+  "3a7049e42006e8bc19e0f4fc8df63b6b": "La `app` si basa su una versione loopback non compatibile {0}. Versioni supportate: {1}",
+  "3f93b626dd9a1c33d67490f6e71018b5": "AVVERTENZA: file di configurazione principale \"{0}{{.json}}\" mancante",
+  "4d052d84c8620730afd4a30832f11724": "Impossibile configurare il modello {0} sconosciuto",
+  "4ed668e9187650d898acf97707df445a": "{{phase}} \"{0}\" non definita nella configurazione principale.",
+  "6447e6b342a2c51ab0bc53b3cbdf3742": "Conflitto di ordinamento: impossibile aggiungere \"{0}\" dopo \"{1}\", perché è già stato specificato l'ordine opposto",
+  "70654dc6eb565613a33344efed3de998": "Caricamento dello script di boot non riuscito: {0}\n{1}",
+  "7f7bdcadb75abfef1bd8a126d547dd6d": "{0} non viene risolto in un valore valido, restituito come {1}. \"{2}\" deve essere risolto in una variabile di ambiente o da {{app.get()}}.",
+  "91a742b7c3568cf6b6755741a70b3c52": "{{middleware}} \"{0}\" in {{phase}} \"{1}\" non definito nella configurazione principale.",
+  "a3aa22086ae4976cd013065c9a3ff81c": "Impossibile applicare {0}: ",
+  "be2cf2868ba54624fe38e9908dde5e9e": "I dati in {{model-config.json}} sono nel formato {{1.x}} non supportato.",
+  "ec551b6f2fafd8d40af801ebe5bb09f6": "Eliminazione delle istruzioni {{middleware}}, il client {{loopback}} non supporta {{middleware}}.",
+  "fdc23df1bd0fe55fe3faabcc89ff60f3": "Middleware \"{0}\" non trovato: {1}"
+}
+

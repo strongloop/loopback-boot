@@ -1,3 +1,9 @@
+2017-06-26, Version 2.25.0
+==========================
+
+ * Support es2015 module exports (Babel, TypeScript) (John McLaughlin)
+
+
 2017-06-07, Version 2.24.1
 ==========================
 

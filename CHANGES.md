@@ -1,3 +1,13 @@
+2017-07-31, Version 2.26.0
+==========================
+
+ * Add support for ES6 style async boot scripts (Jürg Lehni)
+
+ * Update Italian translated strings Q2 2017 (Allen Boone)
+
+ * Update translated strings Q2 2017 (Allen Boone)
+
+
 2017-06-26, Version 2.25.0
 ==========================
 

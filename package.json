@@ -31,6 +31,7 @@
   },
   "devDependencies": {
     "browserify": "^4.1.8",
+    "bluebird": "^3.1.1",
     "chai": "^1.10.0",
     "coffee-script": "^1.8.0",
     "coffeeify": "^0.7.0",

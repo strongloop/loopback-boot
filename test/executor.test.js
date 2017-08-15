@@ -30,10 +30,13 @@ describe('executor', function() {
 
     // process.bootFlags is used by simple-app/boot/*.js scripts
     process.bootFlags = [];
+    // process.componentFlags is used by sync-component.js and async-component.js
+    process.componentFlags = [];
   });
 
   afterEach(function() {
     delete process.bootFlags;
+    delete process.componentFlags;
   });
 
   var dummyInstructions = someInstructions({
@@ -289,7 +292,7 @@ describe('executor', function() {
           'umdLoaded',
         ]);
         done();
-      }, 10);
+      }, 100);
     });
   });
 
@@ -796,6 +799,19 @@ describe('executor', function() {
         done();
       });
     });
+
+    it('should support async components', function(done) {
+      boot.execute(app, asyncSyncComponentConfig());
+
+      setTimeout(function() {
+        expect(process.componentFlags).to.eql([
+          'asyncStarted',
+          'asyncFinished',
+          'syncExecuted',
+        ]);
+        done();
+      }, 100);
+    });
   });
 
   it('calls function exported by boot/init.js', function() {
@@ -1146,6 +1162,21 @@ function simpleComponentConfig(config) {
       {
         sourceFile: path.join(__dirname, './fixtures/simple-component.js'),
         config: config,
+      },
+    ],
+  });
+}
+
+function asyncSyncComponentConfig() {
+  return someInstructions({
+    components: [
+      {
+        sourceFile: path.join(__dirname, './fixtures/async-component.js'),
+        config: null,
+      },
+      {
+        sourceFile: path.join(__dirname, './fixtures/sync-component.js'),
+        config: null,
       },
     ],
   });

@@ -373,6 +373,23 @@ describe('executor', function() {
     });
   });
 
+  describe('with boot script returning a promise and calling callback',
+    function() {
+      before(function() {
+        process.promiseAndCallback = true;
+      });
+
+      after(function() {
+        delete process.promiseAndCallback;
+      });
+
+      it('should only call the callback once', function(done) {
+        // Note: Mocha will fail this test if done() is called twice
+        boot.execute(app, simpleAppInstructions(), done);
+      });
+    }
+  );
+
   describe('for mixins', function() {
     var options;
     beforeEach(function() {

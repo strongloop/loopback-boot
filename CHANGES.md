@@ -1,3 +1,9 @@
+2017-08-17, Version 2.26.1
+==========================
+
+ * Do not call callbacks twice in async boot scripts (Jürg Lehni)
+
+
 2017-07-31, Version 2.26.0
 ==========================
 

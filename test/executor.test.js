@@ -306,9 +306,15 @@ describe('executor', function() {
         'barLoaded',
         'barSyncLoaded',
         'fooLoaded',
+        'promiseLoaded',
+        'thenableLoaded',
         'barStarted',
         'barFinished',
         'barSyncExecuted',
+        'promiseStarted',
+        'promiseFinished',
+        'thenableStarted',
+        'thenableFinished',
       ]);
     });
   });
@@ -322,60 +328,132 @@ describe('executor', function() {
             'barLoaded',
             'barSyncLoaded',
             'fooLoaded',
+            'promiseLoaded',
+            'thenableLoaded',
             'barStarted',
             'barFinished',
             'barSyncExecuted',
+            'promiseStarted',
+            'promiseFinished',
+            'thenableStarted',
+            'thenableFinished',
           ]);
           done();
         });
       });
     });
+  });
 
-    describe('for mixins', function() {
-      var options;
-      beforeEach(function() {
-        appdir.writeFileSync('custom-mixins/example.js',
-          'module.exports = ' +
-          'function(Model, options) {}');
+  describe('with boot script returning a rejected promise', function() {
+    before(function() {
+      // Tell simple-app/boot/reject.js to return a rejected promise
+      process.rejectPromise = true;
+    });
 
-        appdir.writeFileSync('custom-mixins/time-stamps.js',
-          'module.exports = ' +
-          'function(Model, options) {}');
+    after(function() {
+      delete process.rejectPromise;
+    });
 
-        appdir.writeConfigFileSync('custom-mixins/time-stamps.json', {
-          name: 'Timestamping',
+    it('receives rejected promise as callback error',
+    function(done) {
+      simpleAppInstructions(function(err, context) {
+        if (err) return done(err);
+        boot.execute(app, context.instructions, function(err) {
+          expect(err).to.exist.and.be.an.instanceOf(Error)
+            .with.property('message', 'reject');
+          done();
         });
+      });
+    });
+  });
 
-        options = {
-          appRootDir: appdir.PATH,
-        };
+  describe('with boot script throwing an error', function() {
+    before(function() {
+      // Tell simple-app/boot/throw.js to throw an error
+      process.throwError = true;
+    });
+
+    after(function() {
+      delete process.throwError;
+    });
+
+    it('receives thrown error as callback errors',
+    function(done) {
+      simpleAppInstructions(function(err, context) {
+        if (err) return done(err);
+        boot.execute(app, context.instructions, function(err) {
+          expect(err).to.exist.and.be.an.instanceOf(Error)
+            .with.property('message', 'throw');
+          done();
+        });
+      });
+    });
+  });
+
+  describe('with boot script returning a promise and calling callback',
+    function() {
+      before(function() {
+        process.promiseAndCallback = true;
       });
 
-      it('defines mixins from instructions - using `mixinDirs`',
-        function(done) {
-          options.mixinDirs = ['./custom-mixins'];
-          boot(app, options, function(err) {
-            if (err) return done(err);
-            var modelBuilder = app.registry.modelBuilder;
-            var registry = modelBuilder.mixins.mixins;
-            expect(Object.keys(registry)).to.eql(['Example', 'Timestamping']);
-            done();
-          });
-        });
+      after(function() {
+        delete process.promiseAndCallback;
+      });
 
-      it('defines mixins from instructions - using `mixinSources`',
-        function(done) {
-          options.mixinSources = ['./custom-mixins'];
-          boot(app, options, function(err) {
-            if (err) return done(err);
-
-            var modelBuilder = app.registry.modelBuilder;
-            var registry = modelBuilder.mixins.mixins;
-            expect(Object.keys(registry)).to.eql(['Example', 'Timestamping']);
-            done();
-          });
+      it('should only call the callback once', function(done) {
+        simpleAppInstructions(function(err, context) {
+          if (err) return done(err);
+          // Note: Mocha will fail this test if done() is called twice
+          boot.execute(app, context.instructions, done);
         });
+      });
+    }
+  );
+
+  describe('for mixins', function() {
+    var options;
+    beforeEach(function() {
+      appdir.writeFileSync('custom-mixins/example.js',
+        'module.exports = ' +
+        'function(Model, options) {}');
+
+      appdir.writeFileSync('custom-mixins/time-stamps.js',
+        'module.exports = ' +
+        'function(Model, options) {}');
+
+      appdir.writeConfigFileSync('custom-mixins/time-stamps.json', {
+        name: 'Timestamping',
+      });
+
+      options = {
+        appRootDir: appdir.PATH,
+      };
     });
+
+    it('defines mixins from instructions - using `mixinDirs`',
+      function(done) {
+        options.mixinDirs = ['./custom-mixins'];
+        boot(app, options, function(err) {
+          if (err) return done(err);
+          var modelBuilder = app.registry.modelBuilder;
+          var registry = modelBuilder.mixins.mixins;
+          expect(Object.keys(registry)).to.eql(['Example', 'Timestamping']);
+          done();
+        });
+      });
+
+    it('defines mixins from instructions - using `mixinSources`',
+      function(done) {
+        options.mixinSources = ['./custom-mixins'];
+        boot(app, options, function(err) {
+          if (err) return done(err);
+
+          var modelBuilder = app.registry.modelBuilder;
+          var registry = modelBuilder.mixins.mixins;
+          expect(Object.keys(registry)).to.eql(['Example', 'Timestamping']);
+          done();
+        });
+      });
   });
 
   describe('with PaaS and npm env variables', function() {

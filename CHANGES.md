@@ -1,3 +1,15 @@
+2017-06-22, Version 3.0.1
+=========================
+
+ * Update Italian translated strings Q2 2017 (Allen Boone)
+
+ * Update translated strings Q2 2017 (Allen Boone)
+
+ * Replicate new issue_template from loopback (Siddhi Pai)
+
+ * Replicate issue_template from loopback repo (Siddhi Pai)
+
+
 2017-05-22, Version 3.0.0
 =========================
 

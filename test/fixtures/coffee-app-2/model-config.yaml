@@ -1,0 +1,4 @@
+Customer:
+  dataSource: "db"
+Order:
+  dataSource: "db"

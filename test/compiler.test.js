@@ -2187,6 +2187,24 @@ describe('compiler', function() {
         'sourceFile', coffee);
     });
 
+    it('ignores sourcmap files when loading middleware',
+    function() {
+      var middleware = appdir.writeFileSync('my-middleware.js',
+        '// I am the middleware');
+      var sourcemap = appdir.writeFileSync('my-middleware.js.map',
+        '// I am a sourcemap');
+      appdir.writeConfigFileSync('middleware.json', {
+        'routes': {
+          './my-middleware': {},
+        },
+      });
+
+      var instructions = boot.compile(appdir.PATH);
+
+      expect(instructions.middleware.middleware[0]).have.property(
+        'sourceFile', middleware);
+    });
+
     describe('config with relative paths in params', function() {
       var RELATIVE_PATH_PARAMS = [
         '$!./here',

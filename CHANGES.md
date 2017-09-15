@@ -1,3 +1,9 @@
+2017-09-15, Version 2.26.2
+==========================
+
+ * Ignore js sourcemap files from boot (Zak Barbuto)
+
+
 2017-08-17, Version 2.26.1
 ==========================
 

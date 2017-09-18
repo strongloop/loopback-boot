@@ -2,6 +2,7 @@
 // Node module: loopback-boot
 // This file is licensed under the MIT License.
 // License text available at https://opensource.org/licenses/MIT
+'use strict';
 
 var boot = require('../');
 var fs = require('fs-extra');
@@ -30,8 +31,8 @@ describe('compiler', function() {
         var instructions = context.instructions;
 
         var model = getModelByName(instructions.models, 'Order');
-        expect(model).to.be.exist;
-        expect(model.sourceFile).to.be.exist;
+        expect(model).to.be.exist();
+        expect(model.sourceFile).to.be.exist();
         done();
       });
     });

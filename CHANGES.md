@@ -1,3 +1,19 @@
+2017-10-13, Version 3.1.0
+=========================
+
+ * update strong-globalize to 3.1.0 (shimks)
+
+ * CODEOWNERS: add zbarbuto (Miroslav Bajtoš)
+
+ * Ignore source maps in boot (Zak Barbuto)
+
+ * CODEOWNERS: add lehni (Miroslav Bajtoš)
+
+ * Create Issue and PR Templates (#261) (Sakib Hasan)
+
+ * Add CODEOWNER file (Diana Lau)
+
+
 2017-06-22, Version 3.0.1
 =========================
 

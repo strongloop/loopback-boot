@@ -19,6 +19,9 @@
     "posttest": "npm run lint",
     "lint": "eslint ."
   },
+  "engines": {
+    "node": ">=4"
+  },
   "license": "MIT",
   "dependencies": {
     "async": "~0.9.0",

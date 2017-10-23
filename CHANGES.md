@@ -1,3 +1,15 @@
+2017-10-23, Version 2.27.0
+==========================
+
+ * Drop support for Node.js versions 0.10 and 0.12 (Miroslav Bajtoš)
+
+ * CODEOWNERS: move @lehni to Alumni section (Miroslav Bajtoš)
+
+ * CODEOWNERS: add zbarbuto (Miroslav Bajtoš)
+
+ * Add CODEOWNERS file (Miroslav Bajtoš)
+
+
 2017-09-15, Version 2.26.2
 ==========================
 

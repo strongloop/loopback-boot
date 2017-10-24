@@ -29,7 +29,7 @@
     "debug": "^2.0.0",
     "lodash": "^3.6.0",
     "semver": "^4.1.0",
-    "strong-globalize": "^2.6.2",
+    "strong-globalize": "^3.1.0",
     "toposort": "^0.2.10"
   },
   "devDependencies": {

@@ -81,6 +81,7 @@ describe('Bootstrapper', function() {
         'promiseFinished',
         'thenableStarted',
         'thenableFinished',
+        'umdLoaded',
       ]);
       done();
     });

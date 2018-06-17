@@ -315,6 +315,7 @@ describe('executor', function() {
         'promiseFinished',
         'thenableStarted',
         'thenableFinished',
+        'umdLoaded',
       ]);
     });
   });
@@ -337,6 +338,7 @@ describe('executor', function() {
             'promiseFinished',
             'thenableStarted',
             'thenableFinished',
+            'umdLoaded',
           ]);
           done();
         });

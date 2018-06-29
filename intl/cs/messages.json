@@ -1,0 +1,17 @@
+{
+  "1e5fea50eef843cbffd1d438494912c8": "Nelze vyřešit cestu \"{0}\"",
+  "34319676975b1abf107da7a056abb434": "Neplatný formát normalizace - \"{0}\"",
+  "3a7049e42006e8bc19e0f4fc8df63b6b": "Aplikace `app` je založena na nekompatibilní verzí Loopback {0}. Podporované verze: {1}",
+  "3f93b626dd9a1c33d67490f6e71018b5": "VAROVÁNÍ: Hlavní konfigurační soubor \"{0}{{.json}}\" chybí",
+  "4d052d84c8620730afd4a30832f11724": "Nelze konfigurovat neznámý model {0}",
+  "4ed668e9187650d898acf97707df445a": "Fáze {{phase}} \"{0}\" není definována v hlavní konfiguraci.",
+  "6447e6b342a2c51ab0bc53b3cbdf3742": "Konflikt řazení: Nelze přidat \"{0}\" za \"{1}\", protože již bylo uvedené opačné pořadí",
+  "70654dc6eb565613a33344efed3de998": "Nezdařilo se načíst zaváděcí skript: {0}\n{1}",
+  "7f7bdcadb75abfef1bd8a126d547dd6d": "{0} se neinterpretuje na platnou hodnotu, vráceno jako {1}. \"{2}\" musí být rozdělitelný v proměnné prostředí nebo {{app.get()}}.",
+  "91a742b7c3568cf6b6755741a70b3c52": "{{middleware}} \"{0}\" v {{phase}} \"{1}\" není definováno v hlavní konfiguraci.",
+  "a3aa22086ae4976cd013065c9a3ff81c": "Nelze použít {0}: ",
+  "be2cf2868ba54624fe38e9908dde5e9e": "Data v {{model-config.json}} jsou v nepodporovaném formátu {{1.x}}.",
+  "ec551b6f2fafd8d40af801ebe5bb09f6": "Vyřazení pokynů {{middleware}}, klient {{loopback}} nepodporuje {{middleware}}.",
+  "fdc23df1bd0fe55fe3faabcc89ff60f3": "Middleware \"{0}\" nelze nalézt: {1}"
+}
+

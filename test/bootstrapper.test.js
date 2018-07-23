@@ -68,40 +68,47 @@ describe('Bootstrapper', function() {
       expect(instructions.application, 'application').to.be.an('object');
       expect(instructions.tracker, 'instruction: tracker').to.eql('compile');
       expect(context.executions.tracker, 'execution: tracker').to.eql('start');
-      expect(process.bootFlags, 'process: bootFlags').to.eql(['barLoaded',
+      expect(process.bootFlags, 'process: bootFlags').to.eql([
+        'barLoaded',
         'barSyncLoaded',
         'fooLoaded',
+        'promiseLoaded',
+        'thenableLoaded',
         'barStarted',
         'barFinished',
         'barSyncExecuted',
+        'promiseStarted',
+        'promiseFinished',
+        'thenableStarted',
+        'thenableFinished',
       ]);
       done();
     });
   });
 
   it('searches boot file extensions specified in options.scriptExtensions',
-  function(done) {
-    var options = {
-      app: app,
-      appRootDir: path.join(__dirname, './fixtures/simple-app'),
-      scriptExtensions: ['.customjs', '.customjs2'],
-    };
+    function(done) {
+      var options = {
+        app: app,
+        appRootDir: path.join(__dirname, './fixtures/simple-app'),
+        scriptExtensions: ['.customjs', '.customjs2'],
+      };
 
-    var bootstrapper = new Bootstrapper(options);
+      var bootstrapper = new Bootstrapper(options);
 
-    var context = {
-      app: app,
-    };
+      var context = {
+        app: app,
+      };
 
-    bootstrapper.run(context, function(err) {
-      if (err) return done(err);
-      expect(process.bootFlags, 'process: bootFlags').to.eql([
-        'customjs',
-        'customjs2',
-      ]);
-      done();
+      bootstrapper.run(context, function(err) {
+        if (err) return done(err);
+        expect(process.bootFlags, 'process: bootFlags').to.eql([
+          'customjs',
+          'customjs2',
+        ]);
+        done();
+      });
     });
-  });
 
   afterEach(function() {
     delete process.bootFlags;

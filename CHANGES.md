@@ -1,3 +1,19 @@
+2018-07-26, Version 3.1.1
+=========================
+
+ * update: dependency (jannyHou)
+
+ * chore: update dependencies (Diana Lau)
+
+ * [WebFM] cs/pl/ru translation (candytangnb)
+
+ * chore: update license (Diana Lau)
+
+ * CODEOWNERS: move @lehni to Alumni section (Miroslav Bajtoš)
+
+ * Add support for ES6 style async boot scripts (Jürg Lehni)
+
+
 2017-10-13, Version 3.1.0
 =========================
 

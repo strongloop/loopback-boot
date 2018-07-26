@@ -17,7 +17,7 @@ var createBrowserLikeContext = require('./helpers/browser').createContext;
 var printContextLogs = require('./helpers/browser').printContextLogs;
 
 var compileStrategies = {
-  'default': function(appDir) {
+  default: function(appDir) {
     var b = browserify({
       basedir: appDir,
       debug: true,
@@ -26,7 +26,7 @@ var compileStrategies = {
     return b;
   },
 
-  'coffee': function(appDir) {
+  coffee: function(appDir) {
     var b = browserify({
       basedir: appDir,
       extensions: ['.coffee'],
@@ -55,8 +55,10 @@ describe('browser support', function() {
         // configured in fixtures/browser-app/boot/configure.js
         expect(app.settings).to.have.property('custom-key', 'custom-value');
         expect(Object.keys(app.models)).to.include('Customer');
-        expect(app.models.Customer.settings)
-          .to.have.property('_customized', 'Customer');
+        expect(app.models.Customer.settings).to.have.property(
+          '_customized',
+          'Customer'
+        );
 
         // configured in fixtures/browser-app/component-config.json
         // and fixtures/browser-app/components/dummy-component.js
@@ -88,7 +90,7 @@ describe('browser support', function() {
 
   it('supports coffee-script files', function(done) {
     // add coffee-script to require.extensions
-    require('coffee-script/register');
+    require('coffeescript/register');
 
     var appDir = path.resolve(__dirname, './fixtures/coffee-app');
 
@@ -99,8 +101,10 @@ describe('browser support', function() {
         // configured in fixtures/browser-app/boot/configure.coffee
         expect(app.settings).to.have.property('custom-key', 'custom-value');
         expect(Object.keys(app.models)).to.include('Customer');
-        expect(app.models.Customer.settings)
-          .to.have.property('_customized', 'Customer');
+        expect(app.models.Customer.settings).to.have.property(
+          '_customized',
+          'Customer'
+        );
         done();
       });
     });
@@ -109,14 +113,13 @@ describe('browser support', function() {
 
 function browserifyTestApp(options, strategy, next) {
   // set default args
-  if (((typeof strategy) === 'function') && !next) {
+  if (typeof strategy === 'function' && !next) {
     next = strategy;
     strategy = undefined;
   }
-  if (!strategy)
-    strategy = 'default';
+  if (!strategy) strategy = 'default';
 
-  var appDir = typeof(options) === 'object' ? options.appRootDir : options;
+  var appDir = typeof options === 'object' ? options.appRootDir : options;
   var b = compileStrategies[strategy](appDir);
 
   boot.compileToBrowserify(options, b, function(err) {

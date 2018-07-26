@@ -1188,6 +1188,7 @@ describe('executor', function() {
     it('should convert dynamic variable for datasource', function(done) {
       var datasource = {
         mydb: {
+          connector: 'memory',
           host: '${DYNAMIC_HOST}',
           port: '${DYNAMIC_PORT}',
         },
@@ -1206,7 +1207,10 @@ describe('executor', function() {
 
     it('should resolve dynamic config via app.get()', function(done) {
       var datasource = {
-        mydb: {host: '${DYNAMIC_HOST}'},
+        mydb: {
+          connector: 'memory',
+          host: '${DYNAMIC_HOST}',
+        },
       };
       var bootInstructions = {
         application: {DYNAMIC_HOST: '127.0.0.4'},
@@ -1223,7 +1227,10 @@ describe('executor', function() {
     it('should take ENV precedence over config.json', function(done) {
       process.env.DYNAMIC_HOST = '127.0.0.2';
       var datasource = {
-        mydb: {host: '${DYNAMIC_HOST}'},
+        mydb: {
+          connector: 'memory',
+          host: '${DYNAMIC_HOST}',
+        },
       };
       var bootInstructions = {
         application: {DYNAMIC_HOST: '127.0.0.3'},
@@ -1238,7 +1245,10 @@ describe('executor', function() {
 
     it('empty dynamic conf should resolve as `undefined`', function(done) {
       var datasource = {
-        mydb: {host: '${DYNAMIC_HOST}'},
+        mydb: {
+          connector: 'memory',
+          host: '${DYNAMIC_HOST}',
+        },
       };
       var bootInstructions = {dataSources: datasource};
 

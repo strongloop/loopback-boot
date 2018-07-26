@@ -300,24 +300,24 @@ describe('compiler', function() {
                     name: 'model-with-definition-with-falsey-source-file',
                   },
                   sourceFile: appdir.resolve(
-                  'custom-models',
-                  'file-does-not-exist.js'
-                ),
+                    'custom-models',
+                    'file-does-not-exist.js'
+                  ),
                 },
               ],
               dataSources: dataSources,
             },
-          function(err, context) {
-            if (err) return done(err);
-            var instructions = context.instructions;
-            expect(instructions.models[0].name).to.equal(
-              'model-with-definition-with-falsey-source-file'
-            );
-            expect(instructions.models[0].definition).not.to.equal(undefined);
-            expect(instructions.models[0].sourceFile).to.equal(undefined);
-            done();
-          }
-        );
+            function(err, context) {
+              if (err) return done(err);
+              var instructions = context.instructions;
+              expect(instructions.models[0].name).to.equal(
+                'model-with-definition-with-falsey-source-file'
+              );
+              expect(instructions.models[0].definition).not.to.equal(undefined);
+              expect(instructions.models[0].sourceFile).to.equal(undefined);
+              done();
+            }
+          );
         });
 
       it('does not set source file path if no source file supplied.',
@@ -340,17 +340,17 @@ describe('compiler', function() {
               ],
               dataSources: dataSources,
             },
-          function(err, context) {
-            if (err) return done(err);
-            var instructions = context.instructions;
-            expect(instructions.models[0].name).to.equal(
-              'model-with-definition-without-source-file-property'
-            );
-            expect(instructions.models[0].definition).not.to.equal(undefined);
-            expect(instructions.models[0].sourceFile).to.equal(undefined);
-            done();
-          }
-        );
+            function(err, context) {
+              if (err) return done(err);
+              var instructions = context.instructions;
+              expect(instructions.models[0].name).to.equal(
+                'model-with-definition-without-source-file-property'
+              );
+              expect(instructions.models[0].definition).not.to.equal(undefined);
+              expect(instructions.models[0].sourceFile).to.equal(undefined);
+              done();
+            }
+          );
         });
 
       it('loads models defined in `models` only.', function(done) {
@@ -949,13 +949,13 @@ describe('compiler', function() {
             appRootDir: appdir.PATH,
             bootDirs: ['./custom-boot'],
           },
-        function(err, context) {
-          if (err) return done(err);
-          var instructions = context.instructions;
-          expect(instructions.bootScripts).to.eql([coffee]);
-          done();
-        }
-      );
+          function(err, context) {
+            if (err) return done(err);
+            var instructions = context.instructions;
+            expect(instructions.bootScripts).to.eql([coffee]);
+            done();
+          }
+        );
       });
 
     it('prefers coffeescript over json in `bootDir` non-relative path',
@@ -969,13 +969,13 @@ describe('compiler', function() {
             appRootDir: appdir.PATH,
             bootDirs: ['custom-boot'],
           },
-        function(err, context) {
-          if (err) return done(err);
-          var instructions = context.instructions;
-          expect(instructions.bootScripts).to.eql([coffee]);
-          done();
-        }
-      );
+          function(err, context) {
+            if (err) return done(err);
+            var instructions = context.instructions;
+            expect(instructions.bootScripts).to.eql([coffee]);
+            done();
+          }
+        );
       });
 
     it('supports `bootScripts` option', function(done) {
@@ -1084,13 +1084,13 @@ describe('compiler', function() {
             appRootDir: appdir.PATH,
             bootScripts: ['custom-boot/init'],
           },
-        function(err, context) {
-          if (err) return done(err);
-          var instructions = context.instructions;
-          expect(instructions.bootScripts).to.eql([initJs]);
-          done();
-        }
-      );
+          function(err, context) {
+            if (err) return done(err);
+            var instructions = context.instructions;
+            expect(instructions.bootScripts).to.eql([initJs]);
+            done();
+          }
+        );
       });
 
     it('resolves module relative path for `bootScripts`', function(done) {
@@ -1146,12 +1146,12 @@ describe('compiler', function() {
     it('throws when models-config.json contains 1.x `properties`',
       function(done) {
         appdir.createConfigFilesSync(
-        {},
-        {},
+          {},
+          {},
           {
             foo: {properties: {name: 'string'}},
           }
-      );
+        );
 
         expectCompileToThrow(/unsupported 1\.x format/, done);
       });
@@ -1159,12 +1159,12 @@ describe('compiler', function() {
     it('throws when model-config.json contains 1.x `options.base`',
       function(done) {
         appdir.createConfigFilesSync(
-        {},
-        {},
+          {},
+          {},
           {
             Customer: {options: {base: 'User'}},
           }
-      );
+        );
 
         expectCompileToThrow(/unsupported 1\.x format/, done);
       });
@@ -1363,12 +1363,12 @@ describe('compiler', function() {
     it('resolves module relative path in `modelSources` option',
       function(done) {
         appdir.createConfigFilesSync(
-        {},
-        {},
+          {},
+          {},
           {
             Car: {dataSource: 'db'},
           }
-      );
+        );
         appdir.writeConfigFileSync('node_modules/custom-models/car.json', {
           name: 'Car',
         });
@@ -1380,29 +1380,29 @@ describe('compiler', function() {
             appRootDir: appdir.PATH,
             modelSources: ['custom-models'],
           },
-        function(err, context) {
-          if (err) return done(err);
-          var instructions = context.instructions;
+          function(err, context) {
+            if (err) return done(err);
+            var instructions = context.instructions;
 
-          expect(instructions.models).to.have.length(1);
-          expect(instructions.models[0].sourceFile).to.equal(appJS);
-          done();
-        }
-      );
+            expect(instructions.models).to.have.length(1);
+            expect(instructions.models[0].sourceFile).to.equal(appJS);
+            done();
+          }
+        );
       });
 
     it('resolves relative path in `sources` option in `model-config.json`',
       function(done) {
         appdir.createConfigFilesSync(
-        {},
-        {},
+          {},
+          {},
           {
             _meta: {
               sources: ['./custom-models'],
             },
             Car: {dataSource: 'db'},
           }
-      );
+        );
         appdir.writeConfigFileSync('custom-models/car.json', {name: 'Car'});
         var appJS = appdir.writeFileSync('custom-models/car.js', '');
 
@@ -1419,15 +1419,15 @@ describe('compiler', function() {
     it('resolves module relative path in `sources` option in model-config.json',
       function(done) {
         appdir.createConfigFilesSync(
-        {},
-        {},
+          {},
+          {},
           {
             _meta: {
               sources: ['custom-models'],
             },
             Car: {dataSource: 'db'},
           }
-      );
+        );
         appdir.writeConfigFileSync('node_modules/custom-models/car.json', {
           name: 'Car',
         });
@@ -1623,12 +1623,12 @@ describe('compiler', function() {
     it('uses `OrderItem` as default model name for file with name `order-item`',
       function(done) {
         appdir.createConfigFilesSync(
-        {},
-        {},
+          {},
+          {},
           {
             OrderItem: {dataSource: 'db'},
           }
-      );
+        );
         appdir.writeConfigFileSync('models/order-item.json', {});
 
         boot.compile(appdir.PATH, function(err, context) {
@@ -1644,12 +1644,12 @@ describe('compiler', function() {
     it('uses `OrderItem` as default model name for file with name `order_item`',
       function(done) {
         appdir.createConfigFilesSync(
-        {},
-        {},
+          {},
+          {},
           {
             OrderItem: {dataSource: 'db'},
           }
-      );
+        );
         appdir.writeConfigFileSync('models/order_item.json', {});
 
         boot.compile(appdir.PATH, function(err, context) {
@@ -1665,12 +1665,12 @@ describe('compiler', function() {
     it('uses `OrderItem` as default model name for file with name `order item`',
       function(done) {
         appdir.createConfigFilesSync(
-        {},
-        {},
+          {},
+          {},
           {
             OrderItem: {dataSource: 'db'},
           }
-      );
+        );
         appdir.writeConfigFileSync('models/order item.json', {});
 
         boot.compile(appdir.PATH, function(err, context) {
@@ -1686,12 +1686,12 @@ describe('compiler', function() {
     it('overrides `default model name` by `name` in model definition',
       function(done) {
         appdir.createConfigFilesSync(
-        {},
-        {},
+          {},
+          {},
           {
             overrideCar: {dataSource: 'db'},
           }
-      );
+        );
         appdir.writeConfigFileSync('models/car.json', {name: 'overrideCar'});
 
         boot.compile(appdir.PATH, function(err, context) {
@@ -1853,10 +1853,10 @@ describe('compiler', function() {
         it('resolves module relative path in `mixinDirs` option',
           function(done) {
             verifyMixinIsFoundViaMixinDirs(
-            'node_modules/custom-mixins/other.js',
-            ['custom-mixins'],
-            done
-          );
+              'node_modules/custom-mixins/other.js',
+              ['custom-mixins'],
+              done
+            );
           });
       });
 
@@ -1915,10 +1915,10 @@ describe('compiler', function() {
         it('resolves module relative path in `mixinSources` option',
           function(done) {
             verifyMixinIsFoundViaMixinSources(
-            'node_modules/custom-mixins/time-stamps.js',
-            ['custom-mixins'],
-            done
-          );
+              'node_modules/custom-mixins/time-stamps.js',
+              ['custom-mixins'],
+              done
+            );
           });
 
         it('supports `mixins` option in `model-config.json`', function(done) {
@@ -2808,13 +2808,13 @@ describe('compiler', function() {
           var instructions = context.instructions;
 
           expect(instructions.middleware.middleware[0]).have.property(
-          'sourceFile',
-          pathWithoutIndex(require.resolve('loopback'))
-        );
+            'sourceFile',
+            pathWithoutIndex(require.resolve('loopback'))
+          );
           expect(instructions.middleware.middleware[0]).have.property(
-          'fragment',
-          'errorHandler'
-        );
+            'fragment',
+            'errorHandler'
+          );
           done();
         });
       });
@@ -2883,9 +2883,9 @@ describe('compiler', function() {
 
           expect(instructions.middleware.middleware).to.have.length(1);
           expect(instructions.middleware.middleware[0]).have.property(
-          'sourceFile',
-          moduleJS
-        );
+            'sourceFile',
+            moduleJS
+          );
           done();
         });
       });
@@ -2951,9 +2951,9 @@ describe('compiler', function() {
 
           expect(instructions.middleware.middleware).to.have.length(1);
           expect(instructions.middleware.middleware[0]).have.property(
-          'sourceFile',
-          coffee
-        );
+            'sourceFile',
+            coffee
+          );
           done();
         });
       });
@@ -2961,9 +2961,9 @@ describe('compiler', function() {
     it('prefers coffeescript over json for module relative middleware path',
       function(done) {
         var coffee = appdir.writeFileSync(
-        'node_modules/my-middleware.coffee',
-        ''
-      );
+          'node_modules/my-middleware.coffee',
+          ''
+        );
         appdir.writeFileSync('node_modules/my-middleware.json', '');
         appdir.writeConfigFileSync('middleware.json', {
           routes: {
@@ -2977,9 +2977,9 @@ describe('compiler', function() {
 
           expect(instructions.middleware.middleware).to.have.length(1);
           expect(instructions.middleware.middleware[0]).have.property(
-          'sourceFile',
-          coffee
-        );
+            'sourceFile',
+            coffee
+          );
           done();
         });
       });
@@ -3209,9 +3209,9 @@ describe('compiler', function() {
         appdir.writeConfigFileSync('./my-component/component.js', '');
 
         expectCompileToThrow(
-        'Cannot resolve path "my-component/component.js"',
-        done
-      );
+          'Cannot resolve path "my-component/component.js"',
+          done
+        );
       });
 
     it('prefers coffeescript over json for relative path component',

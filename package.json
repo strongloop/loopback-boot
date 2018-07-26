@@ -34,8 +34,8 @@
     "debug": "^2.2.0",
     "lodash": "^4.13.1",
     "semver": "^5.1.0",
-    "strong-globalize": "^3.1.0",
-    "toposort": "^1.0.0"
+    "strong-globalize": "^4.1.1",
+    "toposort": "^2.0.2"
   },
   "devDependencies": {
     "browserify": "^4.2.3",
@@ -43,11 +43,11 @@
     "coffeescript": "^2.3.1",
     "coffeeify": "^2.0.1",
     "dirty-chai": "^1.2.2",
-    "eslint": "^3.19.0",
-    "eslint-config-loopback": "^8.0.0",
+    "eslint": "^5.2.0",
+    "eslint-config-loopback": "^11.0.0",
     "fs-extra": "^3.0.1",
     "loopback": "^3.0.0",
-    "mocha": "^3.3.0",
+    "mocha": "^5.2.0",
     "supertest": "^3.0.0"
   }
 }

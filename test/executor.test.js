@@ -355,16 +355,16 @@ describe('executor', function() {
     });
 
     it('receives rejected promise as callback error',
-    function(done) {
-      simpleAppInstructions(function(err, context) {
-        if (err) return done(err);
-        boot.execute(app, context.instructions, function(err) {
-          expect(err).to.exist.and.be.an.instanceOf(Error)
-            .with.property('message', 'reject');
-          done();
+      function(done) {
+        simpleAppInstructions(function(err, context) {
+          if (err) return done(err);
+          boot.execute(app, context.instructions, function(err) {
+            expect(err).to.exist.and.be.an.instanceOf(Error)
+              .with.property('message', 'reject');
+            done();
+          });
         });
       });
-    });
   });
 
   describe('with boot script throwing an error', function() {
@@ -378,16 +378,16 @@ describe('executor', function() {
     });
 
     it('receives thrown error as callback errors',
-    function(done) {
-      simpleAppInstructions(function(err, context) {
-        if (err) return done(err);
-        boot.execute(app, context.instructions, function(err) {
-          expect(err).to.exist.and.be.an.instanceOf(Error)
-            .with.property('message', 'throw');
-          done();
+      function(done) {
+        simpleAppInstructions(function(err, context) {
+          if (err) return done(err);
+          boot.execute(app, context.instructions, function(err) {
+            expect(err).to.exist.and.be.an.instanceOf(Error)
+              .with.property('message', 'throw');
+            done();
+          });
         });
       });
-    });
   });
 
   describe('with boot script returning a promise and calling callback',
@@ -407,8 +407,7 @@ describe('executor', function() {
           boot.execute(app, context.instructions, done);
         });
       });
-    }
-  );
+    });
 
   describe('for mixins', function() {
     var options;
@@ -598,8 +597,7 @@ describe('executor', function() {
 
     it('should parse a simple config variable', function(done) {
       boot.execute(app, simpleMiddlewareConfig('routes',
-        {path: '${restApiRoot}'}
-      ), function(err) {
+        {path: '${restApiRoot}'}), function(err) {
         if (err) return done(err);
 
         supertest(app).get('/').end(function(err, res) {
@@ -613,8 +611,7 @@ describe('executor', function() {
     it('should parse simple config variable from env var', function(done) {
       process.env.restApiRoot = '/url-from-env-var';
       boot.execute(app, simpleMiddlewareConfig('routes',
-        {path: '${restApiRoot}'}
-      ), function(err) {
+        {path: '${restApiRoot}'}), function(err) {
         if (err) return done(err);
 
         supertest(app).get('/url-from-env-var').end(function(err, res) {
@@ -646,8 +643,7 @@ describe('executor', function() {
 
     it('should parse multiple config variables', function(done) {
       boot.execute(app, simpleMiddlewareConfig('routes',
-        {path: '${restApiRoot}', env: '${env}'}
-      ), function(err) {
+        {path: '${restApiRoot}', env: '${env}'}), function(err) {
         if (err) return done(err);
 
         supertest(app).get('/').end(function(err, res) {
@@ -661,8 +657,7 @@ describe('executor', function() {
 
     it('should parse config variables in an array', function(done) {
       boot.execute(app, simpleMiddlewareConfig('routes',
-        {paths: ['${restApiRoot}']}
-      ), function(err) {
+        {paths: ['${restApiRoot}']}), function(err) {
         if (err) return done(err);
 
         supertest(app).get('/').end(function(err, res) {
@@ -677,8 +672,7 @@ describe('executor', function() {
 
     it('should parse config variables in an object', function(done) {
       boot.execute(app, simpleMiddlewareConfig('routes',
-        {info: {path: '${restApiRoot}'}}
-      ), function(err) {
+        {info: {path: '${restApiRoot}'}}), function(err) {
         if (err) return done(err);
 
         supertest(app).get('/').end(function(err, res) {
@@ -693,8 +687,7 @@ describe('executor', function() {
 
     it('should parse config variables in a nested object', function(done) {
       boot.execute(app, simpleMiddlewareConfig('routes',
-        {nested: {info: {path: '${restApiRoot}'}}}
-      ), function(err) {
+        {nested: {info: {path: '${restApiRoot}'}}}), function(err) {
         if (err) return done(err);
 
         supertest(app).get('/').end(function(err, res) {
@@ -709,8 +702,7 @@ describe('executor', function() {
 
     it('should parse config variables with null values', function(done) {
       boot.execute(app, simpleMiddlewareConfig('routes',
-        {nested: {info: {path: '${restApiRoot}', some: null}}}
-      ), function(err) {
+        {nested: {info: {path: '${restApiRoot}', some: null}}}), function(err) {
         if (err) return done(err);
 
         supertest(app).get('/').end(function(err, res) {
@@ -769,7 +761,8 @@ describe('executor', function() {
         'routes',
         // IMPORTANT we need more than one item to trigger the original issue
         [/^\/foobar/, /^\/another/],
-        {});
+        {}
+      );
       boot.execute(app, config, function(err) {
         if (err) return done(err);
 
@@ -1036,7 +1029,8 @@ describe('executor', function() {
       if (err) return done(err);
 
       expect(Object.keys(require.cache)).to.include(
-        appdir.resolve('components/test-component/index.js'));
+        appdir.resolve('components/test-component/index.js')
+      );
 
       expect(app.componentOptions).to.eql({option: 'value'});
       done();
@@ -1056,32 +1050,34 @@ describe('executor', function() {
       if (err) return done(err);
 
       expect(Object.keys(require.cache)).to.not.include(
-        appdir.resolve('components/test-component/index.js'));
+        appdir.resolve('components/test-component/index.js')
+      );
       done();
     });
   });
 
   it('disables component if overrided by production configuration',
-  function(done) {
-    appdir.writeConfigFileSync('component-config.json', {
-      './components/test-component': {},
-    });
-    appdir.writeConfigFileSync('component-config.production.json', {
-      './components/test-component': null,
-    });
+    function(done) {
+      appdir.writeConfigFileSync('component-config.json', {
+        './components/test-component': {},
+      });
+      appdir.writeConfigFileSync('component-config.production.json', {
+        './components/test-component': null,
+      });
 
-    appdir.writeFileSync('components/test-component/index.js',
-      'module.exports = ' +
+      appdir.writeFileSync('components/test-component/index.js',
+        'module.exports = ' +
       'function(app, options) { app.componentOptions = options; }');
 
-    boot(app, {appRootDir: appdir.PATH, env: 'production'}, function(err) {
-      if (err) return done(err);
+      boot(app, {appRootDir: appdir.PATH, env: 'production'}, function(err) {
+        if (err) return done(err);
 
-      expect(Object.keys(require.cache)).to.not.include(
-        appdir.resolve('components/test-component/index.js'));
-      done();
+        expect(Object.keys(require.cache)).to.not.include(
+          appdir.resolve('components/test-component/index.js')
+        );
+        done();
+      });
     });
-  });
 
   it('configures middleware (that requires `this`)', function(done) {
     var passportPath = require.resolve('./fixtures/passport');
@@ -1219,7 +1215,8 @@ describe('executor', function() {
       boot.execute(app, someInstructions(bootInstructions), function() {
         expect(app.get('DYNAMIC_HOST')).to.equal('127.0.0.4');
         expect(app.datasources.mydb.settings.host).to.equal(
-          '127.0.0.4');
+          '127.0.0.4'
+        );
         done();
       });
     });

@@ -200,7 +200,8 @@ exports.PluginBase = PluginBase;
 
 exports.execute = function(app, instructions, done) {
   var bootstrapper = new Bootstrapper(
-    {phases: ['starting', 'start', 'started']});
+    {phases: ['starting', 'start', 'started']}
+  );
   var context = {
     app: app,
     instructions: instructions,

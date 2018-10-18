@@ -1,10 +1,19 @@
 # LoopBack Boot
 
+**This module is in Active LTS mode, new features are no longer accepted.**
+<br/>(See [Module Long Term Support Policy](#module-long-term-support-policy)
+below.)
+
+LoopBack 3 users looking for new features are encouraged to upgrade
+to LoopBack 4. Refer to
+[loopback-next#1849](https://github.com/strongloop/loopback-next/issues/1849)
+for more information on how to upgrade.
+
+## Overview
+
 A convention-based bootstrapper for LoopBack applications.
 
 For full documentation, see the official StrongLoop documentation: [Defining boot scripts](https://loopback.io/doc/en/lb2/Defining-boot-scripts) and [Creating a LoopBack application](https://loopback.io/doc/en/lb2/Creating-an-application).
-
-## Overview
 
 The loopback-boot module initializes (bootstraps) a LoopBack application.  Specifically, it:
  - Configures data-sources.
@@ -45,6 +54,19 @@ app.listen();
 
 See [API docs](http://apidocs.strongloop.com/loopback-boot/) for
 complete API reference.
+
+## Module Long Term Support Policy
+
+This module adopts the [
+Module Long Term Support (LTS)](http://github.com/CloudNativeJS/ModuleLTS) policy,
+with the following End Of Life (EOL) dates:
+
+| Version | Status          | Published | EOL      |
+| ------- | --------------- | --------- | -------- |
+| 3.x     | Active LTS      | May 2017  | Dec 2019 |
+| 2.x     | Maintenance LTS | Jul 2014  | Apr 2019 |
+
+Learn more about our LTS plan in [docs](https://loopback.io/doc/en/contrib/Long-term-support.html).
 
 ## License
 

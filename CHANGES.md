@@ -1,3 +1,11 @@
+2018-10-18, Version 3.2.0
+=========================
+
+ * README: update LTS status (Miroslav Bajtoš)
+
+ * Add support for es6 modules for boot scripts (Walker)
+
+
 2018-07-26, Version 3.1.1
 =========================
 

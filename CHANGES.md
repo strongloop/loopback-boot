@@ -1,3 +1,11 @@
+2019-03-22, Version 3.2.1
+=========================
+
+ * fix: set `app.booting` flag immediately (Miroslav Bajtoš)
+
+ * fix: update lodash (jannyHou)
+
+
 2018-10-18, Version 3.2.0
 =========================
 

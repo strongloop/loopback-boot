@@ -237,7 +237,7 @@ describe('executor', function() {
   it('skips definition of already defined LoopBack models', function() {
     var builtinModel = {
       name: 'User',
-      definition: fs.readJsonFileSync(
+      definition: fs.readJson(
         require.resolve('loopback/common/models/user.json')
       ),
       config: { dataSource: 'db' },

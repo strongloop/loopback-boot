@@ -1,3 +1,9 @@
+2019-03-26, Version 2.28.0
+==========================
+
+ * chore: upgrade deps to fix npm audit complaints (Raymond Feng)
+
+
 2018-02-26, Version 2.27.1
 ==========================
 

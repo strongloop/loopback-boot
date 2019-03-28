@@ -1,3 +1,9 @@
+2019-03-28, Version 3.3.0
+=========================
+
+ * chore: upgrade deps to avoid npm audit warnings (Raymond Feng)
+
+
 2019-03-22, Version 3.2.1
 =========================
 

@@ -63,8 +63,8 @@ with the following End Of Life (EOL) dates:
 
 | Version | Status          | Published | EOL      |
 | ------- | --------------- | --------- | -------- |
-| 3.x     | Active LTS      | May 2017  | Dec 2019 |
-| 2.x     | Maintenance LTS | Jul 2014  | Apr 2019 |
+| 3.x     | Active LTS      | May 2017  | Dec 2020 |
+| 2.x     | End-of-Life     | Jul 2014  | Apr 2019 |
 
 Learn more about our LTS plan in [docs](https://loopback.io/doc/en/contrib/Long-term-support.html).
 

@@ -1,3 +1,11 @@
+2019-06-24, Version 3.3.1
+=========================
+
+ * chore: update LTS status (Diana Lau)
+
+ * chore: update copyrights years (Agnes Lin)
+
+
 2019-03-28, Version 3.3.0
 =========================
 

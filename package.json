@@ -1,6 +1,9 @@
 {
   "name": "loopback-boot",
   "version": "2.28.0",
+  "publishConfig": {
+    "tag": "lts"
+  },
   "description": "Convention-based bootstrapper for LoopBack applications",
   "keywords": [
     "StrongLoop",

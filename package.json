@@ -13,7 +13,7 @@
     "url": "https://github.com/strongloop/loopback-boot"
   },
   "engines": {
-    "node": ">=6"
+    "node": ">=8"
   },
   "main": "index.js",
   "browser": "browser.js",

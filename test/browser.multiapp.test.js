@@ -8,6 +8,7 @@
 var boot = require('../');
 var async = require('async');
 var exportBrowserifyToFile = require('./helpers/browserify').exportToSandbox;
+var packageFilter = require('./helpers/browserify').packageFilter;
 var fs = require('fs');
 var path = require('path');
 var expect = require('chai').expect;
@@ -66,6 +67,7 @@ function browserifyTestApps(apps, next) {
   var b = browserify({
     debug: true,
     basedir: path.resolve(__dirname, './fixtures'),
+    packageFilter,
   });
 
   var bundles = [];

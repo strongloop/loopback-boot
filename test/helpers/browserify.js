@@ -21,3 +21,16 @@ function exportToSandbox(b, fileName, callback) {
   });
 }
 exports.exportToSandbox = exportToSandbox;
+
+exports.packageFilter = function packageFilter(pkg, dir) {
+  // async@3 (used e.g. by loopback-connector) is specifying custom
+  // browserify config, in particular it wants to apply transformation
+  // `babelify`. We don't have `babelify` installed because we are
+  // testing using latest Chrome and thus don't need any transpilation.
+  // Let's remove the browserify config from the package and force
+  // browserify to use our config instead.
+  if (pkg.name === 'async') {
+    delete pkg.browserify;
+  }
+  return pkg;
+};

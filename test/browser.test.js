@@ -7,6 +7,7 @@
 
 var boot = require('../');
 var exportBrowserifyToFile = require('./helpers/browserify').exportToSandbox;
+var packageFilter = require('./helpers/browserify').packageFilter;
 var fs = require('fs');
 var path = require('path');
 var expect = require('chai').expect;
@@ -21,6 +22,7 @@ var compileStrategies = {
     var b = browserify({
       basedir: appDir,
       debug: true,
+      packageFilter,
     });
     b.require('./app.js', {expose: 'browser-app'});
     return b;
@@ -31,6 +33,7 @@ var compileStrategies = {
       basedir: appDir,
       extensions: ['.coffee'],
       debug: true,
+      packageFilter,
     });
     b.transform('coffeeify');
 

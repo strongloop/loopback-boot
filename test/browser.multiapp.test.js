@@ -5,18 +5,18 @@
 
 'use strict';
 
-var boot = require('../');
-var async = require('async');
-var exportBrowserifyToFile = require('./helpers/browserify').exportToSandbox;
-var packageFilter = require('./helpers/browserify').packageFilter;
-var fs = require('fs');
-var path = require('path');
-var expect = require('chai').expect;
-var browserify = require('browserify');
-var sandbox = require('./helpers/sandbox');
-var vm = require('vm');
-var createBrowserLikeContext = require('./helpers/browser').createContext;
-var printContextLogs = require('./helpers/browser').printContextLogs;
+const boot = require('../');
+const async = require('async');
+const exportBrowserifyToFile = require('./helpers/browserify').exportToSandbox;
+const packageFilter = require('./helpers/browserify').packageFilter;
+const fs = require('fs');
+const path = require('path');
+const expect = require('chai').expect;
+const browserify = require('browserify');
+const sandbox = require('./helpers/sandbox');
+const vm = require('vm');
+const createBrowserLikeContext = require('./helpers/browser').createContext;
+const printContextLogs = require('./helpers/browser').printContextLogs;
 
 describe('browser support for multiple apps', function() {
   this.timeout(60000); // 60s to give browserify enough time to finish
@@ -24,10 +24,10 @@ describe('browser support for multiple apps', function() {
   beforeEach(sandbox.reset);
 
   it('has API for bundling and booting multiple apps', function(done) {
-    var app1Dir = path.resolve(__dirname, './fixtures/browser-app');
-    var app2Dir = path.resolve(__dirname, './fixtures/browser-app-2');
+    const app1Dir = path.resolve(__dirname, './fixtures/browser-app');
+    const app2Dir = path.resolve(__dirname, './fixtures/browser-app-2');
 
-    var apps = [
+    const apps = [
       {
         appDir: app1Dir,
         appFile: './app.js',
@@ -44,9 +44,9 @@ describe('browser support for multiple apps', function() {
     browserifyTestApps(apps, function(err, bundlePath) {
       if (err) return done(err);
 
-      var bundledApps = executeBundledApps(bundlePath, apps, function(err) {
-        var app1 = bundledApps.defaultApp;
-        var app2 = bundledApps.browserApp2;
+      const bundledApps = executeBundledApps(bundlePath, apps, function(err) {
+        const app1 = bundledApps.defaultApp;
+        const app2 = bundledApps.browserApp2;
 
         expect(app1.settings).to.have.property('custom-key', 'custom-value');
         expect(Object.keys(app1.models)).to.include('Customer');
@@ -64,23 +64,23 @@ describe('browser support for multiple apps', function() {
 });
 
 function browserifyTestApps(apps, next) {
-  var b = browserify({
+  const b = browserify({
     debug: true,
     basedir: path.resolve(__dirname, './fixtures'),
     packageFilter,
   });
 
-  var bundles = [];
-  for (var i in apps) {
-    var appDir = apps[i].appDir;
-    var appFile = apps[i].appFile;
-    var moduleName = apps[i].moduleName;
-    var appId = apps[i].appId;
+  const bundles = [];
+  for (const i in apps) {
+    const appDir = apps[i].appDir;
+    let appFile = apps[i].appFile;
+    const moduleName = apps[i].moduleName;
+    const appId = apps[i].appId;
 
     appFile = path.join(appDir, appFile);
     b.require(appFile, {expose: moduleName});
 
-    var opts = appDir;
+    let opts = appDir;
     if (appId) {
       opts = {
         appId: appId,
@@ -97,21 +97,21 @@ function browserifyTestApps(apps, next) {
 }
 
 function executeBundledApps(bundlePath, apps, done) {
-  var code = fs.readFileSync(bundlePath);
-  var context = createBrowserLikeContext();
+  const code = fs.readFileSync(bundlePath);
+  const context = createBrowserLikeContext();
   vm.runInContext(code, context, bundlePath);
 
-  var ids = [];
-  var script = 'var apps = {};\n';
-  for (var i in apps) {
-    var moduleName = apps[i].moduleName;
-    var id = apps[i].appId || 'defaultApp';
+  const ids = [];
+  let script = 'var apps = {};\n';
+  for (const i in apps) {
+    const moduleName = apps[i].moduleName;
+    const id = apps[i].appId || 'defaultApp';
     ids.push(id);
     script += 'apps.' + id + ' = require("' + moduleName + '");\n';
   }
   script += 'apps;\n';
 
-  var appsInContext = vm.runInContext(script, context);
+  const appsInContext = vm.runInContext(script, context);
   async.each(ids, function(id, done) {
     appsInContext[id].once('booted', function() {
       done();

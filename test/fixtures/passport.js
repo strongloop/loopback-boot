@@ -5,7 +5,7 @@
 
 'use strict';
 
-var framework = {
+const framework = {
   initialize: function(passport) {
     return function(req, res, next) {
       req._passport = passport;
@@ -15,7 +15,7 @@ var framework = {
   },
 };
 
-var Passport = function() {
+const Passport = function() {
   this._framework = framework;
 };
 

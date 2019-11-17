@@ -5,10 +5,10 @@
 
 'use strict';
 
-var loopback = require('loopback');
-var boot = require('../../../');
+const loopback = require('loopback');
+const boot = require('../../../');
 
-var app = module.exports = loopback();
+const app = module.exports = loopback();
 boot(app, {
   appId: 'browserApp2',
   appRootDir: __dirname,

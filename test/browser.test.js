@@ -5,21 +5,21 @@
 
 'use strict';
 
-var boot = require('../');
-var exportBrowserifyToFile = require('./helpers/browserify').exportToSandbox;
-var packageFilter = require('./helpers/browserify').packageFilter;
-var fs = require('fs');
-var path = require('path');
-var expect = require('chai').expect;
-var browserify = require('browserify');
-var sandbox = require('./helpers/sandbox');
-var vm = require('vm');
-var createBrowserLikeContext = require('./helpers/browser').createContext;
-var printContextLogs = require('./helpers/browser').printContextLogs;
+const boot = require('../');
+const exportBrowserifyToFile = require('./helpers/browserify').exportToSandbox;
+const packageFilter = require('./helpers/browserify').packageFilter;
+const fs = require('fs');
+const path = require('path');
+const expect = require('chai').expect;
+const browserify = require('browserify');
+const sandbox = require('./helpers/sandbox');
+const vm = require('vm');
+const createBrowserLikeContext = require('./helpers/browser').createContext;
+const printContextLogs = require('./helpers/browser').printContextLogs;
 
-var compileStrategies = {
+const compileStrategies = {
   default: function(appDir) {
-    var b = browserify({
+    const b = browserify({
       basedir: appDir,
       debug: true,
       packageFilter,
@@ -29,7 +29,7 @@ var compileStrategies = {
   },
 
   coffee: function(appDir) {
-    var b = browserify({
+    const b = browserify({
       basedir: appDir,
       extensions: ['.coffee'],
       debug: true,
@@ -48,19 +48,19 @@ describe('browser support', function() {
   beforeEach(sandbox.reset);
 
   it('has API for bundling and executing boot instructions', function(done) {
-    var appDir = path.resolve(__dirname, './fixtures/browser-app');
+    const appDir = path.resolve(__dirname, './fixtures/browser-app');
 
     browserifyTestApp(appDir, function(err, bundlePath) {
       if (err) return done(err);
 
-      var app = executeBundledApp(bundlePath, function(err) {
+      const app = executeBundledApp(bundlePath, function(err) {
         if (err) return done(err);
         // configured in fixtures/browser-app/boot/configure.js
         expect(app.settings).to.have.property('custom-key', 'custom-value');
         expect(Object.keys(app.models)).to.include('Customer');
         expect(app.models.Customer.settings).to.have.property(
           '_customized',
-          'Customer'
+          'Customer',
         );
 
         // configured in fixtures/browser-app/component-config.json
@@ -72,17 +72,17 @@ describe('browser support', function() {
   });
 
   it('loads mixins', function(done) {
-    var appDir = path.resolve(__dirname, './fixtures/browser-app');
-    var options = {
+    const appDir = path.resolve(__dirname, './fixtures/browser-app');
+    const options = {
       appRootDir: appDir,
     };
 
     browserifyTestApp(options, function(err, bundlePath) {
       if (err) return done(err);
 
-      var app = executeBundledApp(bundlePath, function(err) {
-        var modelBuilder = app.registry.modelBuilder;
-        var registry = modelBuilder.mixins.mixins;
+      const app = executeBundledApp(bundlePath, function(err) {
+        const modelBuilder = app.registry.modelBuilder;
+        const registry = modelBuilder.mixins.mixins;
         expect(Object.keys(registry)).to.eql(['TimeStamps']);
         expect(app.models.Customer.timeStampsMixin).to.eql(true);
 
@@ -95,18 +95,18 @@ describe('browser support', function() {
     // add coffee-script to require.extensions
     require('coffeescript/register');
 
-    var appDir = path.resolve(__dirname, './fixtures/coffee-app');
+    const appDir = path.resolve(__dirname, './fixtures/coffee-app');
 
     browserifyTestApp(appDir, 'coffee', function(err, bundlePath) {
       if (err) return done(err);
 
-      var app = executeBundledApp(bundlePath, function(err) {
+      const app = executeBundledApp(bundlePath, function(err) {
         // configured in fixtures/browser-app/boot/configure.coffee
         expect(app.settings).to.have.property('custom-key', 'custom-value');
         expect(Object.keys(app.models)).to.include('Customer');
         expect(app.models.Customer.settings).to.have.property(
           '_customized',
-          'Customer'
+          'Customer',
         );
         done();
       });
@@ -122,8 +122,8 @@ function browserifyTestApp(options, strategy, next) {
   }
   if (!strategy) strategy = 'default';
 
-  var appDir = typeof options === 'object' ? options.appRootDir : options;
-  var b = compileStrategies[strategy](appDir);
+  const appDir = typeof options === 'object' ? options.appRootDir : options;
+  const b = compileStrategies[strategy](appDir);
 
   boot.compileToBrowserify(options, b, function(err) {
     exportBrowserifyToFile(b, 'browser-app-bundle.js', next);
@@ -131,10 +131,10 @@ function browserifyTestApp(options, strategy, next) {
 }
 
 function executeBundledApp(bundlePath, done) {
-  var code = fs.readFileSync(bundlePath);
-  var context = createBrowserLikeContext();
+  const code = fs.readFileSync(bundlePath);
+  const context = createBrowserLikeContext();
   vm.runInContext(code, context, bundlePath);
-  var app = vm.runInContext('require("browser-app")', context);
+  const app = vm.runInContext('require("browser-app")', context);
   app.once('booted', function(err) {
     printContextLogs(context);
     done(err, app);

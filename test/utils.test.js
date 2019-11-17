@@ -5,10 +5,10 @@
 
 'use strict';
 
-var utils = require('../lib/utils');
-var expect = require('chai').expect;
-var sandbox = require('./helpers/sandbox');
-var appdir = require('./helpers/appdir');
+const utils = require('../lib/utils');
+const expect = require('chai').expect;
+const sandbox = require('./helpers/sandbox');
+const appdir = require('./helpers/appdir');
 
 describe('utils', function() {
   beforeEach(sandbox.reset);
@@ -17,13 +17,13 @@ describe('utils', function() {
   });
   describe('fileExistsSync', function() {
     it('returns false when a file does not exist', function() {
-      var doesNotExist = sandbox.resolve('does-not-exist.json');
+      const doesNotExist = sandbox.resolve('does-not-exist.json');
       expect(utils.fileExistsSync(doesNotExist))
         .to.equal(false);
     });
 
     it('returns true when a file does exist', function() {
-      var doesExist = appdir.writeConfigFileSync('does-exist.json', {
+      const doesExist = appdir.writeConfigFileSync('does-exist.json', {
         exists: true,
       });
       expect(utils.fileExistsSync(doesExist))

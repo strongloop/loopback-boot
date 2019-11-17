@@ -5,12 +5,12 @@
 
 'use strict';
 
-var fs = require('fs');
-var sandbox = require('./sandbox');
+const fs = require('fs');
+const sandbox = require('./sandbox');
 
 function exportToSandbox(b, fileName, callback) {
-  var bundlePath = sandbox.resolve(fileName);
-  var out = fs.createWriteStream(bundlePath);
+  const bundlePath = sandbox.resolve(fileName);
+  const out = fs.createWriteStream(bundlePath);
   b.bundle().pipe(out);
 
   out.on('error', function(err) {

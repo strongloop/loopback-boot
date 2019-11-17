@@ -5,39 +5,39 @@
 
 'use strict';
 
-var path = require('path');
-var loopback = require('loopback');
+const path = require('path');
+const loopback = require('loopback');
 
-var chai = require('chai');
-var dirtyChai = require('dirty-chai');
-var expect = chai.expect;
+const chai = require('chai');
+const dirtyChai = require('dirty-chai');
+const expect = chai.expect;
 chai.use(dirtyChai);
 
-var Bootstrapper = require('../lib/bootstrapper');
+const Bootstrapper = require('../lib/bootstrapper');
 
 describe('Bootstrapper', function() {
-  var app;
+  let app;
   beforeEach(function() {
     app = loopback();
     process.bootFlags = [];
   });
 
   it('should honor options.phases', function(done) {
-    var options = {
+    const options = {
       app: app,
       appRootDir: path.join(__dirname, './fixtures/simple-app'),
       phases: ['load'],
     };
 
-    var bootstrapper = new Bootstrapper(options);
+    const bootstrapper = new Bootstrapper(options);
 
-    var context = {
+    const context = {
       app: app,
     };
 
     bootstrapper.run(context, function(err) {
       if (err) return done(err);
-      var configs = context.configurations;
+      const configs = context.configurations;
       expect(configs.application, 'application').to.be.an('object');
       expect(configs.bootScripts, 'bootScripts').to.be.an('array');
       expect(configs.middleware, 'middleware').to.be.an('object');
@@ -50,22 +50,22 @@ describe('Bootstrapper', function() {
   });
 
   it('should honor options.plugins', function(done) {
-    var options = {
+    const options = {
       app: app,
       appRootDir: path.join(__dirname, './fixtures/simple-app'),
       plugins: ['application', 'boot-script'],
     };
 
-    var bootstrapper = new Bootstrapper(options);
+    const bootstrapper = new Bootstrapper(options);
 
-    var context = {
+    const context = {
       app: app,
     };
 
     bootstrapper.run(context, function(err) {
       if (err) return done(err);
-      var configs = context.configurations;
-      var instructions = context.instructions;
+      const configs = context.configurations;
+      const instructions = context.instructions;
       expect(configs.application, 'application').to.be.an('object');
       expect(configs.middleware, 'middleware').to.be.undefined();
       expect(configs.models, 'models').to.be.undefined();
@@ -94,15 +94,15 @@ describe('Bootstrapper', function() {
 
   it('searches boot file extensions specified in options.scriptExtensions',
     function(done) {
-      var options = {
+      const options = {
         app: app,
         appRootDir: path.join(__dirname, './fixtures/simple-app'),
         scriptExtensions: ['.customjs', '.customjs2'],
       };
 
-      var bootstrapper = new Bootstrapper(options);
+      const bootstrapper = new Bootstrapper(options);
 
-      var context = {
+      const context = {
         app: app,
       };
 

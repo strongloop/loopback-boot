@@ -5,7 +5,7 @@
 
 'use strict';
 
-var Bootstrapper = require('./lib/bootstrapper');
+const Bootstrapper = require('./lib/bootstrapper');
 
 /**
  * The browser version of `bootLoopBackApp`.
@@ -26,18 +26,18 @@ var Bootstrapper = require('./lib/bootstrapper');
 exports = module.exports = function bootBrowserApp(app, options, callback) {
   // Only using options.id to identify the browserified bundle to load for
   // this application. If no Id was provided, load the default bundle.
-  var moduleName = 'loopback-boot#instructions';
-  var appId = options && typeof options === 'object' && options.appId;
+  let moduleName = 'loopback-boot#instructions';
+  const appId = options && typeof options === 'object' && options.appId;
   if (appId)
     moduleName += '-' + appId;
 
   // The name of the module containing instructions
   // is hard-coded in lib/bundler
-  var instructions = require(moduleName);
+  const instructions = require(moduleName);
 
-  var bootstrapper = new Bootstrapper(options);
+  const bootstrapper = new Bootstrapper(options);
   bootstrapper.phases = ['starting', 'start', 'started'];
-  var context = {
+  const context = {
     app: app,
     instructions: instructions,
   };

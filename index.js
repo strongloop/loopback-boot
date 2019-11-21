@@ -6,11 +6,11 @@
 'use strict';
 
 // Strong globalize
-var g = require('./lib/globalize');
+const g = require('./lib/globalize');
 
-var PluginBase = require('./lib/plugin-base');
-var Bootstrapper = require('./lib/bootstrapper');
-var addInstructionsToBrowserify = require('./lib/bundler');
+const PluginBase = require('./lib/plugin-base');
+const Bootstrapper = require('./lib/bootstrapper');
+const addInstructionsToBrowserify = require('./lib/bundler');
 
 /**
  * Initialize an application from an options object or
@@ -158,9 +158,9 @@ exports = module.exports = function bootLoopBackApp(app, options, callback) {
   // backwards compatibility with loopback's app.boot
   options.env = options.env || app.get('env');
 
-  var bootstrapper = new Bootstrapper(options);
+  const bootstrapper = new Bootstrapper(options);
 
-  var context = {
+  const context = {
     bootstrapper: bootstrapper,
     app: app,
   };
@@ -169,9 +169,9 @@ exports = module.exports = function bootLoopBackApp(app, options, callback) {
 };
 
 exports.compile = function(options, done) {
-  var bootstrapper = new Bootstrapper(options);
+  const bootstrapper = new Bootstrapper(options);
   bootstrapper.phases = ['load', 'compile'];
-  var context = {};
+  const context = {};
   return bootstrapper.run(context, done);
 };
 
@@ -199,10 +199,10 @@ exports.Bootstrapper = Bootstrapper;
 exports.PluginBase = PluginBase;
 
 exports.execute = function(app, instructions, done) {
-  var bootstrapper = new Bootstrapper(
-    {phases: ['starting', 'start', 'started']}
+  const bootstrapper = new Bootstrapper(
+    {phases: ['starting', 'start', 'started']},
   );
-  var context = {
+  const context = {
     app: app,
     instructions: instructions,
   };

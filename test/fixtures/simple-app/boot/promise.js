@@ -5,7 +5,7 @@
 
 'use strict';
 
-var Promise = require('bluebird');
+const Promise = require('bluebird');
 
 process.bootFlags.push('promiseLoaded');
 module.exports = function(app) {

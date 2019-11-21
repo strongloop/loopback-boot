@@ -5,14 +5,14 @@
 
 'use strict';
 
-var path = require('path');
-var fs = require('fs-extra');
-var extend = require('util')._extend;
-var sandbox = require('./sandbox');
+const path = require('path');
+const fs = require('fs-extra');
+const extend = require('util')._extend;
+const sandbox = require('./sandbox');
 
-var appdir = exports;
+const appdir = exports;
 
-var PATH = appdir.PATH = null;
+let PATH = appdir.PATH = null;
 
 appdir.init = function(cb) {
   // Node's module loader has a very aggressive caching, therefore
@@ -20,7 +20,7 @@ appdir.init = function(cb) {
   // The code here is used to generate a random string
   require('crypto').randomBytes(5, function(err, buf) {
     if (err) return cb(err);
-    var randomStr = buf.toString('hex');
+    const randomStr = buf.toString('hex');
     PATH = appdir.PATH = sandbox.resolve(randomStr);
     cb(null, appdir.PATH);
   });
@@ -49,7 +49,7 @@ appdir.writeConfigFileSync = function(name, json) {
 };
 
 appdir.writeFileSync = function(name, content) {
-  var filePath = this.resolve(name);
+  const filePath = this.resolve(name);
   fs.mkdirsSync(path.dirname(filePath));
   fs.writeFileSync(filePath, content, 'utf-8');
   return filePath;

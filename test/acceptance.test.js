@@ -5,18 +5,18 @@
 
 'use strict';
 
-var path = require('path');
-var loopback = require('loopback');
+const path = require('path');
+const loopback = require('loopback');
 
-var chai = require('chai');
-var dirtyChai = require('dirty-chai');
-var expect = chai.expect;
+const chai = require('chai');
+const dirtyChai = require('dirty-chai');
+const expect = chai.expect;
 chai.use(dirtyChai);
 
 const bootLoopBackApp = require('..');
 
 describe('bootLoopBackApp', function() {
-  var app;
+  let app;
   beforeEach(function() {
     app = loopback();
   });

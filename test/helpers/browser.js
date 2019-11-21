@@ -5,10 +5,10 @@
 
 'use strict';
 
-var vm = require('vm');
+const vm = require('vm');
 
 function createContext() {
-  var context = {
+  const context = {
     // required by browserify
     XMLHttpRequest: function() {},
     clearTimeout: function() {},
@@ -33,7 +33,7 @@ function createContext() {
     DataView: DataView,
     crypto: {
       getRandomValues: function(typedArray) {
-        var randomBuffer = require('crypto').randomBytes(typedArray.length);
+        const randomBuffer = require('crypto').randomBytes(typedArray.length);
         // This implementation is not secure: we take random 8bit values
         // and assign them to 8/16/32bit values, leaving high-order bits
         // filled with zeroes.
@@ -73,9 +73,9 @@ function createContext() {
 exports.createContext = createContext;
 
 function printContextLogs(context) {
-  var k, ix; // see https://github.com/eslint/eslint/issues/5744
+  let k, ix; // see https://github.com/eslint/eslint/issues/5744
   for (k in context.console._logs) {
-    var items = context.console._logs[k];
+    const items = context.console._logs[k];
     for (ix in items) {
       console[k].apply(console, items[ix]);
     }

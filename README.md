@@ -1,7 +1,8 @@
 # LoopBack Boot
 
-**⚠️ LoopBack 3 is in Maintenance LTS mode, only critical bugs and critical
-security fixes will be provided. (See
+**⚠️ LoopBack 3 has reached end of life. We are no longer accepting pull requests or providing 
+support for community users. The only exception is fixes for critical bugs and security 
+vulnerabilities provided as part of support for IBM API Connect customers. (See
 [Module Long Term Support Policy](#module-long-term-support-policy) below.)**
 
 We urge all LoopBack 3 users to migrate their applications to LoopBack 4 as
@@ -63,7 +64,7 @@ with the following End Of Life (EOL) dates:
 
 | Version | Status          | Published | EOL      |
 | ------- | --------------- | --------- | -------- |
-| 3.x     | Maintenance LTS | May 2017  | Dec 2020 |
+| 3.x     | End-of-Life     | May 2017  | Dec 2020 |
 | 2.x     | End-of-Life     | Jul 2014  | Apr 2019 |
 
 Learn more about our LTS plan in [docs](https://loopback.io/doc/en/contrib/Long-term-support.html).
